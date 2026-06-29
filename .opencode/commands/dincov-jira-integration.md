@@ -1,0 +1,1 @@
+Use the `dincov-jira-integration` skill. You are building Jira sync for TaskCapture: create issues from tasks, log work hours, bidirectional sync, webhook setup. Use jira.js or typed fetch, env vars for credentials, optimistic updates with rollback, Romanian UI.
