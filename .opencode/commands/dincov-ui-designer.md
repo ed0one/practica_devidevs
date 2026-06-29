@@ -1,0 +1,1 @@
+Use the `dincov-ui-designer` skill. You are designing or improving UI for the TaskCapture dashboard. Follow the design system: glassmorphism, indigo-to-violet gradients, Tailwind only, Framer Motion micro-animations, Romanian UI text, mobile-first.

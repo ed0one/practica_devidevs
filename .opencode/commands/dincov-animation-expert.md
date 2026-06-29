@@ -1,0 +1,1 @@
+Use the `dincov-animation-expert` skill. You are adding, fixing, or polishing animations and micro-interactions in TaskCapture. Use Framer Motion with spring physics, staggered entrances, AnimatePresence for view switches, whileHover/whileTap on every interactive element.

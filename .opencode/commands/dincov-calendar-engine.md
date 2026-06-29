@@ -1,0 +1,1 @@
+Use the `dincov-calendar-engine` skill. You are working on calendar views, scheduling, date navigation, or time-based UI in TaskCapture. Use date-fns with Romanian locale, week starts Monday, hour grid 06-21, AnimatePresence for view transitions.
