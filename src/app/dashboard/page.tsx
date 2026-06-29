@@ -21,14 +21,7 @@ export default function DashboardPage() {
     try {
       const res = await fetch("/api/tasks");
       if (res.status === 401) {
-        // Auth not implemented yet — load demo data
-        const today = new Date().toISOString().split("T")[0];
-        setTasks([
-          { id: "1", user_id: "demo", title: "Sună la doctor", deadline: new Date().toISOString(), priority: "high", category: "Sănătate", status: "pending", raw_input: null, created_at: new Date().toISOString(), scheduled_date: today, scheduled_start: `${today}T09:00:00`, scheduled_end: `${today}T09:30:00` },
-          { id: "2", user_id: "demo", title: "Cumpără pâine", deadline: new Date(Date.now() + 86400000 * 2).toISOString(), priority: "low", category: "Cumpărături", status: "pending", raw_input: null, created_at: new Date().toISOString(), scheduled_date: null, scheduled_start: null, scheduled_end: null },
-          { id: "3", user_id: "demo", title: "Trimite raportul", deadline: new Date(Date.now() + 86400000 * 5).toISOString(), priority: "medium", category: "Muncă", status: "done", raw_input: null, created_at: new Date().toISOString(), scheduled_date: null, scheduled_start: null, scheduled_end: null },
-          { id: "4", user_id: "demo", title: "Review PR-uri", deadline: new Date(Date.now() + 86400000).toISOString(), priority: "high", category: "Muncă", status: "pending", raw_input: null, created_at: new Date().toISOString(), scheduled_date: today, scheduled_start: `${today}T10:00:00`, scheduled_end: `${today}T11:00:00` },
-        ]);
+        window.location.href = "/login";
         return;
       }
       if (!res.ok) throw new Error("Eroare la încărcarea task-urilor");
