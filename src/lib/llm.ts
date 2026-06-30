@@ -98,22 +98,22 @@ function getNextDay(): string {
 export async function parseTasks(userText: string): Promise<ParsedTask[]> {
   const response = await client.chat.completions.create({
     model: MODEL,
-    messages: [
-      { role: 'user', content: buildPrompt(userText) },
-    ],
-    temperature: 0.1, // deterministism maxim pentru output structurat
+    messages: [{ role: 'user', content: buildPrompt(userText) }],
+    temperature: 0.2,
     max_tokens: 1024,
+    response_format: { type: 'json_object' },
   })
 
   const raw = response.choices[0]?.message?.content ?? ''
 
-  // extragem JSON-ul chiar dacă modelul pune text în jur
-  const jsonMatch = raw.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) {
-    throw new Error(`Modelul nu a returnat JSON valid. Răspuns brut: ${raw}`)
+  const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim()
+  const start = cleaned.indexOf('{')
+  const end = cleaned.lastIndexOf('}')
+  if (start === -1 || end === -1) {
+    throw new Error(`Modelul nu a returnat JSON valid. Răspuns: ${raw}`)
   }
 
-  const parsed = JSON.parse(jsonMatch[0])
+  const parsed = JSON.parse(cleaned.slice(start, end + 1))
   const validated = ParsedTasksResponseSchema.parse(parsed)
   return validated.tasks
 }
