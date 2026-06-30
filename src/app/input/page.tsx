@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Sparkles, ArrowLeft, Loader2 } from "lucide-react";
+import MobileNav from "@/components/MobileNav";
 
 export default function InputPage() {
   const [text, setText] = useState("");
@@ -29,20 +31,24 @@ export default function InputPage() {
       if (!res.ok) throw new Error(data.error ?? "Eroare la procesare");
 
       if (data.tasks?.length === 0) {
-        setError("Nu am găsit task-uri în text. Încearcă să fii mai specific (ex: 'trebuie să sun la doctor mâine').");
+        toast.error("Nu am găsit task-uri. Încearcă să fii mai specific.");
         return;
       }
 
+      toast.success(`${data.tasks.length} task${data.tasks.length === 1 ? "" : "-uri"} adăugate!`);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Eroare necunoscută");
+      const msg = err instanceof Error ? err.message : "Eroare necunoscută";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex flex-col pb-20 sm:pb-0">
+      <MobileNav />
       <header className="mx-auto w-full max-w-2xl px-4 py-6 flex items-center gap-3">
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -69,10 +75,28 @@ export default function InputPage() {
           className="w-full max-w-2xl"
         >
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Ce ai de făcut?</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Ce ai de făcut?</h2>
             <p className="mt-2 text-gray-500">
               Scrie în limbaj natural — AI-ul extrage task-urile automat
             </p>
+          </div>
+
+          {/* Exemple rapide */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {[
+              "Trebuie să sun la doctor mâine",
+              "Trimite raportul până vineri urgent",
+              "Cumpără pâine și lapte azi seară",
+            ].map((ex) => (
+              <button
+                key={ex}
+                type="button"
+                onClick={() => setText((t) => t ? t + "\n" + ex : ex)}
+                className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 rounded-lg px-3 py-1.5 transition-colors"
+              >
+                + {ex}
+              </button>
+            ))}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

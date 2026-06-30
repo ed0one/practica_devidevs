@@ -3,10 +3,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 import { Task, Status } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
 import StatsHeader from "@/components/StatsHeader";
+import MobileNav from "@/components/MobileNav";
 import { Plus, Sparkles, LogOut } from "lucide-react";
 
 export default function DashboardPage() {
@@ -44,7 +46,12 @@ export default function DashboardPage() {
     const prev = tasks
     setTasks((t) => t.filter((task) => task.id !== id))
     const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
-    if (!res.ok) setTasks(prev)
+    if (!res.ok) {
+      setTasks(prev)
+      toast.error("Nu s-a putut șterge task-ul.")
+    } else {
+      toast.success("Task șters.")
+    }
   }
 
   const handleToggleDone = async (id: string, newStatus: Status) => {
@@ -206,7 +213,8 @@ export default function DashboardPage() {
   const schedulingTask = tasks.find((t) => t.id === schedulingTaskId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 pb-20 sm:pb-0">
+      <MobileNav />
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <motion.header
           initial={{ opacity: 0, y: -20 }}
