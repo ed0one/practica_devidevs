@@ -25,9 +25,12 @@ export default function InputPage() {
         body: JSON.stringify({ text }),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Eroare la procesare");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Eroare la procesare");
+
+      if (data.tasks?.length === 0) {
+        setError("Nu am găsit task-uri în text. Încearcă să fii mai specific (ex: 'trebuie să sun la doctor mâine').");
+        return;
       }
 
       router.push("/dashboard");

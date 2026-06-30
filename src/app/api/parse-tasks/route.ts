@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { parseTasks } from '@/lib/llm'
+import { sendNewTasksEmail } from '@/lib/resend'
 
 export async function POST(request: NextRequest) {
   const { text } = await request.json()
@@ -48,6 +49,10 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase.from('tasks').insert(rows).select()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (user.email && data) {
+    sendNewTasksEmail(user.email, data as never).catch(() => {})
+  }
 
   return NextResponse.json({ tasks: data })
 }

@@ -30,6 +30,7 @@ const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
 interface CalendarViewProps {
   tasks: Task[];
   onToggleDone: (id: string, status: Status) => void;
+  onDelete: (id: string) => void;
   onSchedule: (id: string) => void;
 }
 
@@ -56,6 +57,7 @@ function getTasksForHour(tasks: Task[], date: Date, hour: number): Task[] {
 export default function CalendarView({
   tasks,
   onToggleDone,
+  onDelete,
   onSchedule,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -271,6 +273,7 @@ export default function CalendarView({
                         key={task.id}
                         task={task}
                         onToggleDone={onToggleDone}
+                        onDelete={onDelete}
                         compact
                       />
                     ))}
@@ -301,6 +304,7 @@ export default function CalendarView({
                 key={task.id}
                 task={task}
                 onToggleDone={onToggleDone}
+                onDelete={onDelete}
                 onSchedule={onSchedule}
                 index={i}
               />
@@ -326,6 +330,7 @@ export default function CalendarView({
                 key={task.id}
                 task={task}
                 onToggleDone={onToggleDone}
+                onDelete={onDelete}
                 onSchedule={onSchedule}
                 compact
                 index={i}

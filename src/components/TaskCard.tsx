@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   Calendar,
   Tag,
+  Trash2,
 } from "lucide-react";
 
 const priorityConfig: Record<
@@ -61,6 +62,7 @@ function isOverdue(deadline: string | null): boolean {
 interface TaskCardProps {
   task: Task;
   onToggleDone: (id: string, status: Status) => void;
+  onDelete?: (id: string) => void;
   onSchedule?: (id: string) => void;
   compact?: boolean;
   index?: number;
@@ -69,6 +71,7 @@ interface TaskCardProps {
 export default function TaskCard({
   task,
   onToggleDone,
+  onDelete,
   onSchedule,
   compact = false,
   index = 0,
@@ -88,7 +91,15 @@ export default function TaskCard({
         className={`group relative overflow-hidden rounded-lg border ${config.border} bg-white/80 backdrop-blur-sm p-2.5 transition-all hover:shadow-lg hover:shadow-gray-200/50 ${isDone ? "opacity-50" : ""} ${overdue ? "border-red-400 ring-1 ring-red-200" : ""}`}
       >
         <div className="flex items-center gap-2">
-          <span className="text-xs">{config.icon}</span>
+          <button
+            onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")}
+            className="flex-shrink-0 transition-transform hover:scale-110"
+          >
+            {isDone
+              ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              : <Circle className="w-4 h-4 text-gray-300 hover:text-blue-400 transition-colors" />
+            }
+          </button>
           <span
             className={`text-sm font-medium truncate flex-1 ${isDone ? "line-through text-gray-400" : "text-gray-800"}`}
           >
@@ -99,6 +110,14 @@ export default function TaskCard({
               <Clock className="w-2.5 h-2.5" />
               {formatTime(task.scheduled_start)}
             </span>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(task.id)}
+              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           )}
         </div>
       </motion.div>
@@ -207,6 +226,17 @@ export default function TaskCard({
                 title="Programează"
               >
                 <Clock className="w-4 h-4" />
+              </motion.button>
+            )}
+            {onDelete && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onDelete(task.id)}
+                className="rounded-lg bg-red-50 p-1.5 text-red-400 hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100"
+                title="Șterge"
+              >
+                <Trash2 className="w-4 h-4" />
               </motion.button>
             )}
           </div>

@@ -39,6 +39,11 @@ export default function DashboardPage() {
     fetchTasks();
   }, [fetchTasks]);
 
+  const handleDelete = async (id: string) => {
+    setTasks((t) => t.filter((task) => task.id !== id))
+    await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+  }
+
   const handleToggleDone = async (id: string, newStatus: Status) => {
     const prev = tasks;
     setTasks((t) =>
@@ -262,6 +267,7 @@ export default function DashboardPage() {
           <CalendarView
             tasks={tasks}
             onToggleDone={handleToggleDone}
+            onDelete={handleDelete}
             onSchedule={handleSchedule}
           />
         </motion.div>
