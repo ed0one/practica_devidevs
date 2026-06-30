@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Plus, LogOut, Sparkles, Calendar } from "lucide-react";
+import { LayoutDashboard, Plus, LogOut, Sparkles, Calendar, UserCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/input", icon: Plus, label: "Adaugă task-uri", primary: true },
+  { href: "/profile", icon: UserCircle, label: "Profil" },
 ];
 
 interface SidebarProps {

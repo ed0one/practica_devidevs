@@ -1,0 +1,336 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import { createClient } from "@/lib/supabase/client";
+import Sidebar from "@/components/Sidebar";
+import MobileNav from "@/components/MobileNav";
+import { Task } from "@/types/task";
+import {
+  User,
+  Mail,
+  Lock,
+  CheckCircle2,
+  Clock,
+  Flame,
+  Tag,
+  Save,
+  LogOut,
+  Sparkles,
+  Plus,
+} from "lucide-react";
+
+export default function ProfilePage() {
+  const [user, setUser] = useState<{
+    email: string;
+    full_name: string;
+    created_at: string;
+    provider: string;
+  } | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [displayName, setDisplayName] = useState("");
+  const [savingName, setSavingName] = useState(false);
+  const [sendingReset, setSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user;
+      if (!u) { window.location.href = "/login"; return; }
+      const name = (u.user_metadata?.full_name as string) ?? u.email?.split("@")[0] ?? "";
+      setUser({
+        email: u.email ?? "",
+        full_name: name,
+        created_at: u.created_at,
+        provider: u.app_metadata?.provider as string ?? "email",
+      });
+      setDisplayName(name);
+    });
+    fetch("/api/tasks").then(r => r.json()).then(d => setTasks(d.tasks ?? []));
+  }, []);
+
+  const handleSaveName = async () => {
+    if (!displayName.trim()) return;
+    setSavingName(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: displayName.trim() },
+      });
+      if (error) throw error;
+      setUser(u => u ? { ...u, full_name: displayName.trim() } : u);
+      toast.success("Nume actualizat.");
+    } catch {
+      toast.error("Nu s-a putut salva.");
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!user?.email) return;
+    setSendingReset(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+        redirectTo: `${window.location.origin}/dashboard`,
+      });
+      if (error) throw error;
+      setResetSent(true);
+      toast.success("Email trimis! Verifică inbox-ul.");
+    } catch {
+      toast.error("Eroare la trimiterea emailului.");
+    } finally {
+      setSendingReset(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
+
+  // Stats
+  const total = tasks.length;
+  const done = tasks.filter(t => t.status === "done").length;
+  const urgent = tasks.filter(t => t.priority === "high" && t.status === "pending").length;
+  const categories = [...new Set(tasks.map(t => t.category).filter(Boolean))].length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  const joinDate = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })
+    : "—";
+
+  const initials = (user?.full_name || user?.email || "?")
+    .split(/[\s@]/)
+    .slice(0, 2)
+    .map(s => s[0]?.toUpperCase() ?? "")
+    .join("");
+
+  const stats = [
+    { icon: CheckCircle2, label: "Finalizate", value: done, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+    { icon: Clock,        label: "În așteptare", value: total - done, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100" },
+    { icon: Flame,        label: "Urgente active", value: urgent, color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
+    { icon: Tag,          label: "Categorii", value: categories, color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#f8f8fb] flex">
+      <Sidebar userEmail={user?.email} />
+
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile header */}
+        <header className="lg:hidden sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-gray-100 px-4 flex items-center justify-between h-14">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-bold text-gray-900 text-sm">Profil</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold">
+              <Plus className="w-3.5 h-3.5" /> Adaugă
+            </a>
+          </div>
+        </header>
+
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8 max-w-3xl w-full mx-auto">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Profilul meu</h1>
+            <p className="text-sm text-gray-400 mt-0.5">Gestionează contul și preferințele tale</p>
+          </motion.div>
+
+          <div className="space-y-5">
+            {/* Avatar + identitate */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden"
+            >
+              <div className="h-24 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600" />
+              <div className="px-6 pb-6">
+                <div className="flex items-end gap-4 -mt-10 mb-5">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-2xl font-black shadow-lg border-4 border-white">
+                    {initials}
+                  </div>
+                  <div className="pb-1">
+                    <h2 className="text-lg font-bold text-gray-900">{user?.full_name || "—"}</h2>
+                    <p className="text-sm text-gray-400 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" />
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-500">
+                    <User className="w-3 h-3" /> Activ din {joinDate}
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1.5 text-indigo-600 font-medium capitalize">
+                    {user?.provider === "email" ? "🔑 Email & parolă" : `🔗 ${user?.provider}`}
+                  </span>
+                  <span className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-1.5 text-emerald-600 font-medium">
+                    {pct}% completat
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+            >
+              {stats.map(({ icon: Icon, label, value, color, bg, border }) => (
+                <div key={label} className={`bg-white rounded-2xl border ${border} shadow-sm p-4 flex flex-col gap-2`}>
+                  <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center`}>
+                    <Icon className={`w-4 h-4 ${color}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-gray-900">{value}</p>
+                    <p className="text-xs text-gray-400 font-medium mt-0.5">{label}</p>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Progress bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.13 }}
+              className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-gray-700">Progres general</span>
+                <span className="text-sm font-bold text-indigo-600">{done}/{total} task-uri</span>
+              </div>
+              <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+                  className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-2">{pct}% din task-uri finalizate</p>
+            </motion.div>
+
+            {/* Editare nume */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.16 }}
+              className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5"
+            >
+              <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <User className="w-4 h-4 text-indigo-500" />
+                Informații cont
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                    Nume afișat
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      value={displayName}
+                      onChange={e => setDisplayName(e.target.value)}
+                      onKeyDown={e => e.key === "Enter" && handleSaveName()}
+                      placeholder="Numele tău"
+                      className="flex-1 h-10 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      disabled={savingName || displayName.trim() === user?.full_name}
+                      className="h-10 px-4 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1.5"
+                    >
+                      {savingName ? (
+                        <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                      ) : (
+                        <Save className="w-4 h-4" />
+                      )}
+                      Salvează
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                    Email
+                  </label>
+                  <div className="h-10 rounded-xl border border-gray-100 bg-gray-50 px-3 flex items-center text-sm text-gray-400 select-none">
+                    {user?.email}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Securitate */}
+            {user?.provider === "email" && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.19 }}
+                className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5"
+              >
+                <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-indigo-500" />
+                  Securitate
+                </h3>
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Schimbă parola</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Vei primi un link de resetare pe email</p>
+                  </div>
+                  {resetSent ? (
+                    <span className="flex items-center gap-1.5 text-emerald-600 text-sm font-semibold">
+                      <CheckCircle2 className="w-4 h-4" /> Email trimis
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handlePasswordReset}
+                      disabled={sendingReset}
+                      className="h-9 px-4 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition"
+                    >
+                      {sendingReset ? "Se trimite..." : "Resetează parola"}
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Logout */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22 }}
+              className="bg-white rounded-2xl border border-red-100 shadow-sm p-5"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-bold text-gray-900">Deconectare</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Ieși din cont pe acest dispozitiv</p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="h-9 px-4 rounded-xl border border-red-200 text-sm font-semibold text-red-600 hover:bg-red-50 transition flex items-center gap-1.5"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Deconectare
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </main>
+      </div>
+
+      <MobileNav />
+    </div>
+  );
+}
