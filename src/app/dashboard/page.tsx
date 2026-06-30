@@ -2,23 +2,24 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Task, Status } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
 import StatsHeader from "@/components/StatsHeader";
 import MobileNav from "@/components/MobileNav";
-import { Plus, Sparkles, LogOut } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
+import { Plus, Sparkles, LogOut, Menu, X } from "lucide-react";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
-  const [schedulingTaskId, setSchedulingTaskId] = useState<string | null>(
-    null
-  );
+  const [schedulingTaskId, setSchedulingTaskId] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -38,35 +39,36 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTasks();
+    createClient().auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null);
+    });
   }, [fetchTasks]);
 
   const handleDelete = async (id: string) => {
-    const prev = tasks
-    setTasks((t) => t.filter((task) => task.id !== id))
-    const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    const prev = tasks;
+    setTasks((t) => t.filter((task) => task.id !== id));
+    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      setTasks(prev)
-      toast.error("Nu s-a putut șterge task-ul.")
+      setTasks(prev);
+      toast.error("Nu s-a putut șterge task-ul.");
     } else {
-      toast.success("Task șters.")
+      toast.success("Task șters.");
     }
-  }
+  };
 
   const handleToggleDone = async (id: string, newStatus: Status) => {
     const prev = tasks;
     setTasks((t) =>
       t.map((task) => (task.id === id ? { ...task, status: newStatus } : task))
     );
-
     try {
       const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (!res.ok) throw new Error("Eroare la actualizare");
+      if (!res.ok) throw new Error();
     } catch {
       setTasks(prev);
     }
@@ -83,209 +85,183 @@ export default function DashboardPage() {
     scheduled_end: string;
   }) => {
     if (!schedulingTaskId) return;
-
     const prev = tasks;
     setTasks((t) =>
       t.map((task) =>
         task.id === schedulingTaskId ? { ...task, ...data } : task
       )
     );
-
     try {
       const res = await fetch(`/api/tasks/${schedulingTaskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Eroare la planificare");
+      if (!res.ok) throw new Error();
     } catch {
       setTasks(prev);
     }
-
     setSchedulingTaskId(null);
   };
+
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Bună dimineața";
+    if (h < 18) return "Bună ziua";
+    return "Bună seara";
+  };
+
+  const todayStr = new Date().toLocaleDateString("ro-RO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f8f8fb]">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center"
-        >
-          <div className="relative mx-auto w-16 h-16">
+        <div className="text-center">
+          <div className="relative mx-auto w-14 h-14 mb-4">
+            <div className="absolute inset-0 rounded-full border-4 border-gray-100" />
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full border-4 border-gray-200"
-            />
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "linear",
-              }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               className="absolute inset-0 rounded-full border-4 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent"
             />
           </div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-4 text-sm text-gray-500 font-medium"
-          >
-            Se încarcă task-urile...
-          </motion.p>
-        </motion.div>
+          <p className="text-sm text-gray-400 font-medium">Se încarcă...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-red-50/30 p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-sm rounded-2xl border border-red-200 bg-white/90 backdrop-blur-sm p-6 text-center shadow-xl"
-        >
-          <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
-            <span className="text-2xl">⚠️</span>
-          </div>
-          <p className="text-red-600 font-semibold">{error}</p>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+      <div className="flex min-h-screen items-center justify-center bg-[#f8f8fb] p-4">
+        <div className="w-full max-w-sm rounded-2xl border border-red-100 bg-white p-6 text-center shadow-xl">
+          <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-2xl">⚠️</div>
+          <p className="text-red-600 font-semibold text-sm">{error}</p>
+          <button
             onClick={fetchTasks}
-            className="mt-4 w-full rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-200/50"
+            className="mt-4 w-full h-10 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors"
           >
             Reîncearcă
-          </motion.button>
-        </motion.div>
+          </button>
+        </div>
       </div>
     );
   }
 
-  if (tasks.length === 0) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8f8fb] p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 200 }}
-          className="text-center"
-        >
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-            className="mx-auto mb-6 w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center"
-          >
-            <Sparkles className="w-10 h-10 text-indigo-400" />
-          </motion.div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Nu ai task-uri încă
-          </h2>
-          <p className="mt-2 text-gray-500 max-w-sm">
-            Mergi la{" "}
-            <a
-              href="/input"
-              className="text-indigo-600 font-semibold hover:underline"
-            >
-              Input
-            </a>{" "}
-            și scrie ce ai de făcut — AI-ul va crea task-uri pentru tine
-          </p>
-          <motion.a
-            href="/input"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200/50"
-          >
-            <Plus className="w-4 h-4" />
-            Adaugă primul task
-          </motion.a>
-        </motion.div>
-      </div>
-    );
-  }
-
+  const pending = tasks.filter((t) => t.status === "pending");
   const schedulingTask = tasks.find((t) => t.id === schedulingTaskId);
 
   return (
-    <div className="min-h-screen bg-[#f8f8fb] pb-20 sm:pb-0">
-      <MobileNav />
-      {/* Sticky header */}
-      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-gray-100">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#f8f8fb] flex">
+      {/* Sidebar desktop */}
+      <Sidebar userEmail={userEmail} />
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile top bar */}
+        <header className="lg:hidden sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-gray-100 px-4 flex items-center justify-between h-14">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-bold text-gray-900 text-sm">TaskCapture</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href="/input"
+              className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Adaugă
+            </a>
+            <button
+              onClick={async () => {
+                const supabase = createClient();
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              }}
+              className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 max-w-5xl w-full mx-auto">
+          {/* Greeting */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="h-14 flex items-center justify-between"
+            className="mb-6"
           >
-            <div className="flex items-center gap-2">
-              <motion.div
-                whileHover={{ rotate: 15 }}
-                className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-200/50"
-              >
-                <Sparkles className="w-4 h-4 text-white" />
-              </motion.div>
-              <h1 className="text-base font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
-                TaskCapture
-              </h1>
-            </div>
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+              {greeting()}{userEmail ? `, ${userEmail.split("@")[0]}` : ""}! 👋
+            </h2>
+            <p className="text-sm text-gray-400 mt-0.5 capitalize">{todayStr}</p>
+          </motion.div>
 
-            <div className="flex items-center gap-2">
+          {/* Empty state */}
+          {tasks.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center py-20 text-center"
+            >
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center mb-5"
+              >
+                <Sparkles className="w-10 h-10 text-indigo-400" />
+              </motion.div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Nu ai task-uri încă</h3>
+              <p className="text-gray-400 text-sm max-w-xs mb-6">
+                Scrie ce ai de făcut în limbaj natural și AI-ul extrage task-urile automat.
+              </p>
               <motion.a
                 href="/input"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-200/50"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200"
               >
                 <Plus className="w-4 h-4" />
-                Adaugă
+                Adaugă primul task
               </motion.a>
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                className="w-9 h-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
-                title="Deconectare"
-                onClick={async () => {
-                  const supabase = createClient()
-                  await supabase.auth.signOut()
-                  window.location.href = '/login'
-                }}
+            </motion.div>
+          ) : (
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="mb-6"
               >
-                <LogOut className="w-4 h-4" />
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
-      </header>
+                <StatsHeader tasks={tasks} />
+              </motion.div>
 
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <StatsHeader tasks={tasks} />
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-6"
-        >
-          <CalendarView
-            tasks={tasks}
-            onToggleDone={handleToggleDone}
-            onDelete={handleDelete}
-            onSchedule={handleSchedule}
-          />
-        </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+              >
+                <CalendarView
+                  tasks={tasks}
+                  onToggleDone={handleToggleDone}
+                  onDelete={handleDelete}
+                  onSchedule={handleSchedule}
+                />
+              </motion.div>
+            </>
+          )}
+        </main>
       </div>
+
+      <MobileNav />
 
       <ScheduleModal
         isOpen={scheduleModalOpen}

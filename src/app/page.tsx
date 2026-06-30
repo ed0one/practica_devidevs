@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
@@ -14,7 +13,6 @@ export default async function Home() {
     { cookies: { getAll() { return cookieStore.getAll() }, setAll() {} } }
   )
   const { data: { user } } = await supabase.auth.getUser()
-  if (user) redirect('/dashboard')
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
@@ -28,28 +26,43 @@ export default async function Home() {
             TaskCapture
           </span>
         </div>
+
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5">
-            Autentificare
-          </Link>
-          <Link href="/register" className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-1.5 rounded-lg transition-all shadow-lg shadow-indigo-500/20">
-            Începe gratuit
-          </Link>
+          {user ? (
+            <>
+              <span className="text-sm text-gray-400 hidden sm:block">{user.email?.split('@')[0]}</span>
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-1.5 rounded-lg transition-all shadow-lg shadow-indigo-500/20"
+              >
+                Dashboard <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5">
+                Autentificare
+              </Link>
+              <Link href="/register" className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-1.5 rounded-lg transition-all shadow-lg shadow-indigo-500/20">
+                Începe gratuit
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
       {/* Hero */}
       <section className="relative pt-32 pb-20 px-6 text-center">
         <div
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-25"
           style={{ backgroundImage: `url('${HERO_IMAGE}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/0 via-[#0a0a0f]/40 to-[#0a0a0f]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/10 via-[#0a0a0f]/50 to-[#0a0a0f]" />
 
         <div className="relative max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 text-sm text-indigo-300 mb-6">
             <Zap className="w-3.5 h-3.5" />
-            Powered by NVIDIA NIM AI
+            Powered by NVIDIA NIM &middot; Llama 3.1
           </div>
 
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6">
@@ -65,17 +78,27 @@ export default async function Home() {
             le prioritizează și le organizează în calendarul tău.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30 hover:-translate-y-0.5">
-              Începe gratuit
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-4 rounded-2xl text-base transition-all">
-              Intră în cont
-            </Link>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
+            {user ? (
+              <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30 hover:-translate-y-0.5">
+                Mergi la dashboard
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <>
+                <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30 hover:-translate-y-0.5">
+                  Începe gratuit
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-4 rounded-2xl text-base transition-all">
+                  Intră în cont
+                </Link>
+              </>
+            )}
           </div>
 
-          <div className="mt-10 inline-flex items-start gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-left max-w-md mx-auto">
+          {/* Demo chip */}
+          <div className="inline-flex items-start gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-left max-w-md mx-auto">
             <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
               <Sparkles className="w-4 h-4 text-violet-400" />
             </div>
@@ -83,9 +106,25 @@ export default async function Home() {
               <p className="text-sm text-gray-300 italic leading-relaxed">
                 &ldquo;Trebuie să sun la doctor mâine, să trimit raportul până vineri și să cumpăr pâine azi seară&rdquo;
               </p>
-              <p className="text-xs text-indigo-400 mt-2 font-medium">→ 3 task-uri extrase automat</p>
+              <p className="text-xs text-indigo-400 mt-2 font-medium">→ 3 task-uri extrase automat în 2 secunde</p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Stats banner */}
+      <section className="py-10 px-6 border-y border-white/5">
+        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-6 text-center">
+          {[
+            { value: "< 2s", label: "timp de extragere" },
+            { value: "AI", label: "prioritizare automată" },
+            { value: "100%", label: "gratuit" },
+          ].map((s) => (
+            <div key={s.label}>
+              <p className="text-3xl font-black bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">{s.value}</p>
+              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -103,7 +142,7 @@ export default async function Home() {
               { icon: Calendar, color: "from-violet-500 to-purple-500", bg: "bg-violet-500/10", border: "border-violet-500/20", title: "Calendar inteligent", desc: "Vizualizare săptămânală, zilnică și listă. Programează ore de start și sfârșit pentru fiecare task." },
               { icon: Bell, color: "from-purple-500 to-pink-500", bg: "bg-purple-500/10", border: "border-purple-500/20", title: "Reminder zilnic pe email", desc: "Primești automat la 09:00 o listă cu task-urile scadente azi. Și confirmare la fiecare adăugare." },
               { icon: CheckCircle2, color: "from-emerald-500 to-teal-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", title: "Progres vizual", desc: "Statistici live: total, finalizate, urgente, scadente. Bară de progres animată." },
-              { icon: Shield, color: "from-blue-500 to-indigo-500", bg: "bg-blue-500/10", border: "border-blue-500/20", title: "Cont securizat", desc: "Autentificare cu email/parolă sau OAuth Google și GitHub. Datele tale sunt private." },
+              { icon: Shield, color: "from-blue-500 to-indigo-500", bg: "bg-blue-500/10", border: "border-blue-500/20", title: "Cont securizat", desc: "Autentificare cu email/parolă sau OAuth Google și GitHub. Datele tale sunt private prin RLS." },
               { icon: Clock, color: "from-amber-500 to-orange-500", bg: "bg-amber-500/10", border: "border-amber-500/20", title: "Prioritizare automată", desc: "AI-ul decide prioritatea (ridicată/medie/scăzută) și categoria fiecărui task din context." },
             ].map((f) => (
               <div key={f.title} className={`${f.bg} border ${f.border} rounded-2xl p-6 hover:scale-[1.02] transition-transform`}>
@@ -118,16 +157,43 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* How it works */}
+      <section className="py-20 px-6 bg-white/2">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-14">Cum funcționează</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {[
+              { step: "1", title: "Scrie în română", desc: "Introduci orice text — fraze, liste, gânduri. Nu trebuie format special." },
+              { step: "2", title: "AI procesează", desc: "Llama 3.1 extrage task-uri, detectează deadline-uri relative și setează prioritatea." },
+              { step: "3", title: "Organizezi", desc: "Task-urile apar în dashboard cu calendar, filtre și reminder zilnic pe email." },
+            ].map((s) => (
+              <div key={s.step} className="flex flex-col items-center">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-lg mb-4 shadow-lg shadow-indigo-500/30">
+                  {s.step}
+                </div>
+                <h3 className="font-bold text-white mb-2">{s.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="py-20 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <div className="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-indigo-500/20 rounded-3xl p-10">
             <h2 className="text-3xl sm:text-4xl font-black mb-4">Gata să fii mai productiv?</h2>
             <p className="text-gray-400 mb-8">Crează-ți cont în 30 de secunde. Fără card de credit.</p>
-            <Link href="/register" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30">
-              Creează cont gratuit
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            {user ? (
+              <Link href="/dashboard" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30">
+                Mergi la dashboard <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <Link href="/register" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30">
+                Creează cont gratuit <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
           </div>
         </div>
       </section>
