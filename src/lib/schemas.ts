@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const ParsedTaskSchema = z.object({
   title: z.string().min(1),
-  deadline: z.string().datetime({ offset: true }).nullable(),
+  deadline: z.string().nullable(),
   priority: z.enum(['low', 'medium', 'high']),
   category: z.string().nullable(),
 })
