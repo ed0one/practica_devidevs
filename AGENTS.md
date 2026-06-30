@@ -4,8 +4,9 @@
 ```
 D:\Code\practica 2026\
 ├── taskcapture/           # Main Next.js 15 app (production)
-├── taskcapture-testing/   # Copy for UI testing (no auth/backend needed)
-├── .agents/skills/        # BMAD skills (agents, workflows)
+├── taskcapture-testing/   # Copy for UI testing (no auth/backend
+├── .agents/skills/        # BMAD skills (installed globally)
+├── .opencode/commands/    # OpenCode commands (installed globally)
 └── README.md
 ```
 
@@ -27,11 +28,13 @@ npm run build              # production build (includes typecheck)
 
 ```bash
 cd taskcapture-testing
+npm install                # install deps (first time only)
 npm run dev                # http://localhost:3001
 ```
 - `TESTING_MODE=true` in middleware + dashboard bypasses Supabase auth
 - 6 mock tasks loaded (WEB-25 through WEB-28 + extras)
 - All features work: drag-drop, worklogs, weekly summary, keyboard shortcuts
+- Has its own `AGENTS.md` with testing-specific notes
 
 ## Environment Variables (`.env.local` — never commit)
 
@@ -53,6 +56,10 @@ JIRA_EMAIL=racovelcristian8@gmail.com
 JIRA_API_TOKEN=...
 JIRA_PROJECT_KEY=TC
 ```
+
+## Git Notes
+- `.gitignore` excludes: `.agents/skills/`, `.opencode/commands/`, `_bmad-output/`, `_bmad/`, `taskcapture-testing/`
+- These are installed globally or are local copies — don't commit
 
 ## Architecture Notes
 
@@ -111,6 +118,8 @@ Task {
 - Tailwind v4: `@import "tailwindcss"` in globals.css (no `@tailwind` directives)
 
 ## Jira Sync (Manual CLI)
+Jira sync agent lives in `~/.jira-agent/` (separate Node.js project):
+
 ```bash
 cd ~/.jira-agent
 npx tsx src/cli.ts status          # show assigned issues
