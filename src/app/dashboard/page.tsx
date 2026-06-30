@@ -107,7 +107,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+      <div className="flex min-h-screen items-center justify-center bg-[#f8f8fb]">
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -169,7 +169,7 @@ export default function DashboardPage() {
 
   if (tasks.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#f8f8fb] p-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -213,54 +213,57 @@ export default function DashboardPage() {
   const schedulingTask = tasks.find((t) => t.id === schedulingTaskId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 pb-20 sm:pb-0">
+    <div className="min-h-screen bg-[#f8f8fb] pb-20 sm:pb-0">
       <MobileNav />
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3">
+      {/* Sticky header */}
+      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-gray-100">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="h-14 flex items-center justify-between"
+          >
             <div className="flex items-center gap-2">
               <motion.div
                 whileHover={{ rotate: 15 }}
-                className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-200/50"
+                className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-200/50"
               >
-                <Sparkles className="w-5 h-5 text-white" />
+                <Sparkles className="w-4 h-4 text-white" />
               </motion.div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              <h1 className="text-base font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                 TaskCapture
               </h1>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <motion.a
-              href="/input"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-200/50"
-            >
-              <Plus className="w-4 h-4" />
-              Adaugă
-            </motion.a>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
-              title="Deconectare"
-              onClick={async () => {
-                const supabase = createClient()
-                await supabase.auth.signOut()
-                window.location.href = '/login'
-              }}
-            >
-              <LogOut className="w-4 h-4" />
-            </motion.button>
-          </div>
-        </motion.header>
+            <div className="flex items-center gap-2">
+              <motion.a
+                href="/input"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-200/50"
+              >
+                <Plus className="w-4 h-4" />
+                Adaugă
+              </motion.a>
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="w-9 h-9 rounded-xl border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+                title="Deconectare"
+                onClick={async () => {
+                  const supabase = createClient()
+                  await supabase.auth.signOut()
+                  window.location.href = '/login'
+                }}
+              >
+                <LogOut className="w-4 h-4" />
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+      </header>
 
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
