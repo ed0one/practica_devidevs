@@ -255,6 +255,34 @@ export default function CalendarView({
             transition={{ duration: 0.2 }}
             className="rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-sm overflow-hidden"
           >
+            {/* All-day band: tasks for this day without a scheduled hour */}
+            {(() => {
+              const allDayTasks = getTasksForDay(tasks, currentDate).filter(
+                (t) => !t.scheduled_start
+              );
+              if (allDayTasks.length === 0) return null;
+              return (
+                <div className="flex border-b border-gray-200 bg-indigo-50/40">
+                  <div className="w-16 flex-shrink-0 px-3 py-2 text-[10px] font-semibold text-indigo-400 uppercase tracking-wider border-r border-gray-200 flex items-center">
+                    Toată ziua
+                  </div>
+                  <div className="flex-1 p-2 flex flex-col gap-1">
+                    {allDayTasks.map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onToggleDone={onToggleDone}
+                        onDelete={onDelete}
+                        onSchedule={onSchedule}
+                        onEdit={onEdit}
+                        compact
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
             {HOURS.map((hour) => {
               const hourTasks = getTasksForHour(tasks, currentDate, hour);
               const isNow =
@@ -281,6 +309,8 @@ export default function CalendarView({
                         task={task}
                         onToggleDone={onToggleDone}
                         onDelete={onDelete}
+                        onSchedule={onSchedule}
+                        onEdit={onEdit}
                         compact
                       />
                     ))}
