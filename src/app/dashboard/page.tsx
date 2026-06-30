@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Status } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
@@ -233,6 +234,11 @@ export default function DashboardPage() {
               whileTap={{ scale: 0.95 }}
               className="rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
               title="Deconectare"
+              onClick={async () => {
+                const supabase = createClient()
+                await supabase.auth.signOut()
+                window.location.href = '/login'
+              }}
             >
               <LogOut className="w-4 h-4" />
             </motion.button>
