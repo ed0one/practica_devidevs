@@ -2,62 +2,29 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Priority, Status } from "@/types/task";
-import {
-  CheckCircle2,
-  Circle,
-  Clock,
-  AlertTriangle,
-  Calendar,
-  Tag,
-  Trash2,
-  Pencil,
-} from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, Tag, Trash2, Pencil } from "lucide-react";
 
-const priorityConfig: Record<
-  Priority,
-  { bg: string; border: string; glow: string; label: string; icon: string }
-> = {
-  high: {
-    bg: "bg-gradient-to-r from-red-500 to-rose-500",
-    border: "border-red-400/30",
-    glow: "shadow-red-500/20",
-    label: "Ridicată",
-    icon: "🔴",
-  },
-  medium: {
-    bg: "bg-gradient-to-r from-amber-400 to-orange-400",
-    border: "border-amber-400/30",
-    glow: "shadow-amber-400/20",
-    label: "Medie",
-    icon: "🟡",
-  },
-  low: {
-    bg: "bg-gradient-to-r from-emerald-500 to-green-500",
-    border: "border-emerald-400/30",
-    glow: "shadow-emerald-500/20",
-    label: "Scăzută",
-    icon: "🟢",
-  },
+const priorityConfig: Record<Priority, { border: string; dot: string; label: string; badgeBg: string; badgeText: string }> = {
+  high:   { border: "border-l-red-500",    dot: "bg-red-500",    label: "Urgent",  badgeBg: "bg-red-50",    badgeText: "text-red-600" },
+  medium: { border: "border-l-amber-400",  dot: "bg-amber-400",  label: "Mediu",   badgeBg: "bg-amber-50",  badgeText: "text-amber-700" },
+  low:    { border: "border-l-emerald-500",dot: "bg-emerald-500",label: "Scăzut", badgeBg: "bg-emerald-50",badgeText: "text-emerald-700" },
 };
 
 function formatTime(iso: string | null): string {
   if (!iso) return "";
-  const d = new Date(iso);
-  return d.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
+  return iso.substring(11, 16);
 }
 
 function formatDateShort(iso: string | null): string {
   if (!iso) return "Fără deadline";
-  const d = new Date(iso);
-  return d.toLocaleDateString("ro-RO", {
-    day: "numeric",
-    month: "short",
-  });
+  const [y, m, d] = iso.substring(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("ro-RO", { day: "numeric", month: "short" });
 }
 
 function isOverdue(deadline: string | null): boolean {
   if (!deadline) return false;
-  return new Date(deadline) < new Date();
+  const [y, m, d] = deadline.substring(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d) < new Date(new Date().setHours(0, 0, 0, 0));
 }
 
 interface TaskCardProps {
@@ -70,59 +37,41 @@ interface TaskCardProps {
   index?: number;
 }
 
-export default function TaskCard({
-  task,
-  onToggleDone,
-  onDelete,
-  onSchedule,
-  onEdit,
-  compact = false,
-  index = 0,
-}: TaskCardProps) {
+export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onEdit, compact = false, index = 0 }: TaskCardProps) {
   const overdue = task.status === "pending" && isOverdue(task.deadline);
-  const config = priorityConfig[task.priority];
+  const cfg = priorityConfig[task.priority];
   const isDone = task.status === "done";
 
   if (compact) {
     return (
       <motion.div
         layout
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.8, y: -10 }}
-        transition={{ duration: 0.2, delay: index * 0.02 }}
-        className={`group relative overflow-hidden rounded-lg border ${config.border} bg-white/80 backdrop-blur-sm p-2.5 transition-all hover:shadow-lg hover:shadow-gray-200/50 ${isDone ? "opacity-50" : ""} ${overdue ? "border-red-400 ring-1 ring-red-200" : ""}`}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={{ duration: 0.15, delay: index * 0.02 }}
+        className={`group flex items-center gap-2 px-2.5 py-2 rounded-lg border-l-2 ${cfg.border} bg-white hover:bg-gray-50 transition-colors ${isDone ? "opacity-50" : ""} ${overdue ? "bg-red-50/50" : ""}`}
       >
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")}
-            className="flex-shrink-0 transition-transform hover:scale-110"
-          >
-            {isDone
-              ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              : <Circle className="w-4 h-4 text-gray-300 hover:text-blue-400 transition-colors" />
-            }
-          </button>
-          <span
-            className={`text-sm font-medium truncate flex-1 ${isDone ? "line-through text-gray-400" : "text-gray-800"}`}
-          >
-            {task.title}
+        <button onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")} className="shrink-0">
+          {isDone
+            ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            : <Circle className="w-3.5 h-3.5 text-gray-300 hover:text-indigo-400 transition-colors" />
+          }
+        </button>
+        <span className={`text-xs font-medium flex-1 truncate ${isDone ? "line-through text-gray-400" : "text-gray-800"}`}>
+          {task.title}
+        </span>
+        {task.scheduled_start && (
+          <span className="text-[10px] text-gray-400 flex items-center gap-0.5 shrink-0">
+            <Clock className="w-2.5 h-2.5" />
+            {formatTime(task.scheduled_start)}
           </span>
-          {task.scheduled_start && (
-            <span className="text-[10px] text-gray-500 flex items-center gap-0.5">
-              <Clock className="w-2.5 h-2.5" />
-              {formatTime(task.scheduled_start)}
-            </span>
-          )}
-          {onDelete && (
-            <button
-              onClick={() => onDelete(task.id)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-red-400"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+        )}
+        {onDelete && (
+          <button onClick={() => onDelete(task.id)} className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <Trash2 className="w-3 h-3 text-gray-300 hover:text-red-400 transition-colors" />
+          </button>
+        )}
       </motion.div>
     );
   }
@@ -130,87 +79,54 @@ export default function TaskCard({
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 30,
-        delay: index * 0.04,
-      }}
-      whileHover={{ y: -2 }}
-      className={`group relative overflow-hidden rounded-xl border ${config.border} bg-white/90 backdrop-blur-md transition-all hover:shadow-xl ${config.glow} ${isDone ? "opacity-60 grayscale" : ""} ${overdue ? "border-red-400 ring-2 ring-red-200" : ""}`}
+      exit={{ opacity: 0, y: -8, scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 300, damping: 28, delay: index * 0.04 }}
+      whileHover={{ y: -1 }}
+      className={`group relative bg-white rounded-2xl border border-gray-200/70 border-l-4 ${cfg.border} shadow-sm hover:shadow-md transition-all ${isDone ? "opacity-55" : ""} ${overdue ? "border-red-300 bg-red-50/30" : ""}`}
     >
-      <div
-        className={`absolute left-0 top-0 bottom-0 w-1 ${config.bg} rounded-l-xl`}
-      />
-
-      <div className="p-4 pl-4">
+      <div className="p-4">
         <div className="flex items-start gap-3">
           <button
-            onClick={() =>
-              onToggleDone(task.id, isDone ? "pending" : "done")
-            }
-            className="mt-0.5 flex-shrink-0 transition-transform hover:scale-110"
+            onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")}
+            className="mt-0.5 shrink-0 transition-transform hover:scale-110"
           >
             <AnimatePresence mode="wait">
               {isDone ? (
-                <motion.div
-                  key="done"
-                  initial={{ scale: 0, rotate: -90 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0, rotate: 90 }}
-                  transition={{ type: "spring", stiffness: 400 }}
-                >
+                <motion.div key="done" initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} transition={{ type: "spring", stiffness: 400 }}>
                   <CheckCircle2 className="w-5 h-5 text-emerald-500" />
                 </motion.div>
               ) : (
-                <motion.div
-                  key="pending"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  <Circle className="w-5 h-5 text-gray-300 hover:text-blue-400 transition-colors" />
+                <motion.div key="pending" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+                  <Circle className="w-5 h-5 text-gray-300 hover:text-indigo-400 transition-colors" />
                 </motion.div>
               )}
             </AnimatePresence>
           </button>
 
           <div className="flex-1 min-w-0">
-            <h3
-              className={`font-semibold text-[15px] leading-snug ${isDone ? "line-through text-gray-400" : "text-gray-900"}`}
-            >
+            <h3 className={`font-semibold text-[15px] leading-snug tracking-tight ${isDone ? "line-through text-gray-400" : "text-gray-900"}`}>
               {task.title}
             </h3>
-
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold text-white ${config.bg}`}
-              >
-                {config.label}
+              <span className={`inline-flex items-center gap-1.5 rounded-lg px-2 py-0.5 text-[11px] font-semibold ${cfg.badgeBg} ${cfg.badgeText}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+                {cfg.label}
               </span>
-
               {task.category && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] text-gray-600">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 text-indigo-600 px-2 py-0.5 text-[11px] font-medium">
                   <Tag className="w-2.5 h-2.5" />
                   {task.category}
                 </span>
               )}
-
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] ${overdue ? "bg-red-100 text-red-600 font-semibold" : "bg-gray-50 text-gray-500"}`}
-              >
+              <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-medium ${overdue ? "bg-red-100 text-red-600" : "bg-gray-50 text-gray-500"}`}>
                 <Calendar className="w-2.5 h-2.5" />
                 {formatDateShort(task.deadline)}
-                {overdue && (
-                  <AlertTriangle className="w-2.5 h-2.5 ml-0.5" />
-                )}
+                {overdue && <AlertTriangle className="w-2.5 h-2.5 ml-0.5" />}
               </span>
-
               {task.scheduled_start && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] text-indigo-600">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-violet-50 text-violet-600 px-2 py-0.5 text-[11px] font-medium">
                   <Clock className="w-2.5 h-2.5" />
                   {formatTime(task.scheduled_start)}
                   {task.scheduled_end && `–${formatTime(task.scheduled_end)}`}
@@ -219,38 +135,35 @@ export default function TaskCard({
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
             {onSchedule && !isDone && (
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onSchedule(task.id)}
-                className="rounded-lg bg-indigo-50 p-1.5 text-indigo-500 hover:bg-indigo-100 transition-colors"
+                className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-indigo-50 text-gray-400 hover:text-indigo-500 flex items-center justify-center transition-all"
                 title="Programează"
               >
-                <Clock className="w-4 h-4" />
+                <Clock className="w-3.5 h-3.5" />
               </motion.button>
             )}
             {onEdit && !isDone && (
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onEdit(task)}
-                className="rounded-lg bg-violet-50 p-1.5 text-violet-500 hover:bg-violet-100 transition-colors opacity-0 group-hover:opacity-100"
+                className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-violet-50 text-gray-400 hover:text-violet-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
                 title="Editează"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-3.5 h-3.5" />
               </motion.button>
             )}
             {onDelete && (
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onDelete(task.id)}
-                className="rounded-lg bg-red-50 p-1.5 text-red-400 hover:bg-red-100 transition-colors opacity-0 group-hover:opacity-100"
+                className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
                 title="Șterge"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
               </motion.button>
             )}
           </div>

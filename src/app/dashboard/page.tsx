@@ -174,7 +174,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8f8fb]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7]">
         <div className="text-center">
           <div className="relative mx-auto w-14 h-14 mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-gray-100" />
@@ -192,7 +192,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f8f8fb] p-4">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] p-4">
         <div className="w-full max-w-sm rounded-2xl border border-red-100 bg-white p-6 text-center shadow-xl">
           <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-2xl">⚠️</div>
           <p className="text-red-600 font-semibold text-sm">{error}</p>
@@ -207,25 +207,25 @@ export default function DashboardPage() {
   const schedulingTask = tasks.find((t) => t.id === schedulingTaskId);
 
   return (
-    <div className="min-h-screen bg-[#f8f8fb] flex">
+    <div className="min-h-screen bg-[#f5f5f7] flex">
       <Sidebar userEmail={userEmail} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
-        <header className="lg:hidden sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-gray-100 px-4 flex items-center justify-between h-14">
+        <header className="lg:hidden sticky top-0 z-20 bg-[#0c0c14]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 flex items-center justify-between h-14">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/20">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-sm">TaskCapture</span>
+            <span className="font-bold text-white text-sm tracking-tight">TaskCapture</span>
           </div>
           <div className="flex items-center gap-2">
-            <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold">
+            <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold shadow-md shadow-indigo-500/20">
               <Plus className="w-3.5 h-3.5" /> Adaugă
             </a>
             <button
               onClick={async () => { const s = createClient(); await s.auth.signOut(); window.location.href = "/"; }}
-              className="w-8 h-8 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500"
+              className="w-8 h-8 rounded-xl border border-white/10 flex items-center justify-center text-white/50 hover:text-white/80 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -281,13 +281,13 @@ export default function DashboardPage() {
                 className="flex items-center gap-2 mb-4"
               >
                 <div className="relative flex-1 max-w-xs">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Caută task-uri..."
-                    className="w-full h-9 pl-9 pr-8 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-400 transition-all"
+                    className="w-full h-10 pl-9 pr-9 rounded-xl border border-gray-200 bg-white shadow-sm text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all"
                   />
                   <AnimatePresence>
                     {search && (
