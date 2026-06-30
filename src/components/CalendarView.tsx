@@ -101,38 +101,44 @@ export default function CalendarView({
       ? format(currentDate, "d MMMM yyyy", { locale: ro })
       : `${format(weekStart, "d MMM", { locale: ro })} – ${format(addDays(weekStart, 6), "d MMM yyyy", { locale: ro })}`;
 
+  const hasDateNav = viewMode === "week" || viewMode === "day";
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={prev}
-            className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={next}
-            className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={goToday}
-            className="rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-100 transition-colors"
-          >
-            Astăzi
-          </motion.button>
+          {hasDateNav && (
+            <>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={prev}
+                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={next}
+                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={goToday}
+                className="rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-100 transition-colors"
+              >
+                Astăzi
+              </motion.button>
+            </>
+          )}
         </div>
 
         <h2 className="text-lg font-bold text-gray-800 capitalize">
-          {headerLabel}
+          {hasDateNav ? headerLabel : ""}
         </h2>
 
         <div className="flex items-center rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-0.5 shadow-sm">
