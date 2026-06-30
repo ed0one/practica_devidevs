@@ -324,7 +324,7 @@ export default function DashboardPage() {
                 </button>
               </motion.div>
 
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+              <motion.div id="calendar-section" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
                 <CalendarView
                   tasks={filteredTasks}
                   onToggleDone={handleToggleDone}

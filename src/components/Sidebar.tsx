@@ -65,17 +65,13 @@ export default function Sidebar({ userEmail }: SidebarProps) {
           <div className="h-px bg-gray-100 mx-1" />
         </div>
 
-        <Link
-          href="/dashboard"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-            pathname === "/dashboard" && false /* calendar tab future */
-              ? "bg-indigo-50 text-indigo-700"
-              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-          }`}
+        <a
+          href="/dashboard#calendar-section"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-gray-600 hover:bg-gray-50 hover:text-gray-900"
         >
           <Calendar className="w-4 h-4 shrink-0" />
           Calendar
-        </Link>
+        </a>
       </nav>
 
       {/* User */}
