@@ -17,8 +17,6 @@ import {
   Tag,
   Save,
   LogOut,
-  Sparkles,
-  Plus,
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -118,22 +116,17 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f8f8fb] flex">
+    <div className="min-h-screen bg-[#f5f5f7] flex">
       <Sidebar userEmail={user?.email} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile header */}
-        <header className="lg:hidden sticky top-0 z-20 bg-white/95 backdrop-blur-xl border-b border-gray-100 px-4 flex items-center justify-between h-14">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-bold text-gray-900 text-sm">Profil</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold">
-              <Plus className="w-3.5 h-3.5" /> Adaugă
+        <header className="lg:hidden sticky top-0 z-20 bg-[#0c0c14]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 flex items-center justify-between h-14">
+          <div className="flex items-center gap-3">
+            <a href="/dashboard" className="w-8 h-8 rounded-xl border border-white/10 flex items-center justify-center text-white/60 hover:text-white transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
             </a>
+            <span className="font-bold text-white text-sm">Profil</span>
           </div>
         </header>
 

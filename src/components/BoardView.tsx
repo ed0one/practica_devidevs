@@ -30,16 +30,15 @@ import {
 const COLUMNS: {
   id: string;
   label: string;
-  emoji: string;
-  bg: string;
-  border: string;
-  header: string;
+  dot: string;
   ring: string;
+  countBg: string;
+  countText: string;
 }[] = [
-  { id: "high",   label: "Urgent",     emoji: "🔴", bg: "bg-red-50/60",     border: "border-red-200",    header: "bg-red-500",     ring: "ring-red-400" },
-  { id: "medium", label: "Normal",     emoji: "🟡", bg: "bg-amber-50/60",   border: "border-amber-200",  header: "bg-amber-400",   ring: "ring-amber-400" },
-  { id: "low",    label: "Scăzut",    emoji: "🟢", bg: "bg-emerald-50/60", border: "border-emerald-200", header: "bg-emerald-500", ring: "ring-emerald-400" },
-  { id: "done",   label: "Finalizate", emoji: "✅", bg: "bg-gray-50/60",    border: "border-gray-200",   header: "bg-gray-400",    ring: "ring-gray-400" },
+  { id: "high",   label: "Urgent",     dot: "bg-red-500",     ring: "ring-red-300",     countBg: "bg-red-100",     countText: "text-red-600" },
+  { id: "medium", label: "Normal",     dot: "bg-amber-400",   ring: "ring-amber-300",   countBg: "bg-amber-100",   countText: "text-amber-700" },
+  { id: "low",    label: "Scăzut",    dot: "bg-emerald-500", ring: "ring-emerald-300", countBg: "bg-emerald-100", countText: "text-emerald-700" },
+  { id: "done",   label: "Finalizate", dot: "bg-gray-400",    ring: "ring-gray-300",    countBg: "bg-gray-100",    countText: "text-gray-600" },
 ];
 
 function formatDateShort(iso: string | null): string {
@@ -174,7 +173,7 @@ function DroppableColumn({
   onDelete,
   onEdit,
 }: {
-  col: typeof COLUMNS[number];
+  col: (typeof COLUMNS)[number];
   tasks: Task[];
   activeId: string | null;
   onToggleDone: (id: string, status: Status) => void;
@@ -187,17 +186,17 @@ function DroppableColumn({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border ${col.border} ${col.bg} overflow-hidden transition-all duration-150
-        ${isOver ? `ring-2 ${col.ring} shadow-lg scale-[1.01]` : ""}
+      className={`rounded-2xl border border-gray-200/70 bg-white/60 overflow-hidden transition-all duration-150
+        ${isOver ? `ring-2 ${col.ring} shadow-md scale-[1.01]` : "hover:shadow-sm"}
       `}
     >
       {/* Header */}
-      <div className={`${col.header} px-4 py-2.5 flex items-center justify-between`}>
-        <div className="flex items-center gap-2">
-          <span className="text-sm">{col.emoji}</span>
-          <span className="text-sm font-bold text-white">{col.label}</span>
+      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200/60 bg-white/80">
+        <div className="flex items-center gap-2.5">
+          <span className={`w-2.5 h-2.5 rounded-full ${col.dot} shrink-0`} />
+          <span className="text-sm font-semibold text-gray-800">{col.label}</span>
         </div>
-        <span className="text-xs font-bold text-white/80 bg-white/20 rounded-full px-2 py-0.5">
+        <span className={`text-xs font-bold ${col.countBg} ${col.countText} rounded-full px-2 py-0.5 min-w-[20px] text-center`}>
           {tasks.length}
         </span>
       </div>
@@ -205,7 +204,7 @@ function DroppableColumn({
       {/* Cards */}
       <div
         ref={setNodeRef}
-        className={`p-3 space-y-2.5 min-h-[120px] transition-colors duration-150 ${isOver ? "bg-white/40" : ""}`}
+        className={`p-3 space-y-2 min-h-[120px] transition-colors duration-150 ${isOver ? "bg-indigo-50/20" : ""}`}
       >
         <AnimatePresence mode="popLayout">
           {tasks.length === 0 && !isOver && (

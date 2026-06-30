@@ -222,9 +222,9 @@ export default function CalendarView({
                   <div className="space-y-1">
                     {dayTasks.map((task) => {
                       const config = {
-                        high: "border-l-red-500 bg-red-50/50",
-                        medium: "border-l-amber-400 bg-amber-50/50",
-                        low: "border-l-emerald-500 bg-emerald-50/50",
+                        high: "border-l-red-500 bg-white",
+                        medium: "border-l-amber-400 bg-white",
+                        low: "border-l-emerald-500 bg-white",
                       }[task.priority];
 
                       return (
@@ -375,11 +375,11 @@ export default function CalendarView({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-6 rounded-xl border border-dashed border-gray-300 bg-gray-50/50 p-4"
+          className="mt-6 rounded-2xl border border-gray-200/70 bg-white shadow-sm p-4"
         >
           <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
             <CalendarIcon className="w-4 h-4" />
-            Nescheduleate ({unscheduled.length})
+            Neprogramate ({unscheduled.length})
           </h3>
           <div className="space-y-1.5">
             {unscheduled.map((task, i) => (

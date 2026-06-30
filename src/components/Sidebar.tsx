@@ -65,7 +65,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
               className={`relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 active
                   ? "bg-white/10 text-white"
-                  : "text-white/40 hover:text-white/70 hover:bg-white/[0.05]"
+                  : "text-white/55 hover:text-white/80 hover:bg-white/[0.06]"
               }`}
             >
               {active && (
@@ -83,7 +83,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
 
         <a
           href="/dashboard#calendar-section"
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:text-white/70 hover:bg-white/[0.05] transition-all"
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium text-white/55 hover:text-white/80 hover:bg-white/[0.06] transition-all"
         >
           <Calendar className="w-4 h-4 shrink-0" />
           Calendar
@@ -96,11 +96,11 @@ export default function Sidebar({ userEmail }: SidebarProps) {
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600/40 to-violet-600/40 border border-white/10 flex items-center justify-center text-xs font-bold text-white/70 shrink-0">
             {initials}
           </div>
-          <p className="text-xs text-white/40 truncate">{userEmail}</p>
+          <p className="text-xs text-white/50 truncate">{userEmail}</p>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all"
+          className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white/45 hover:text-red-400 hover:bg-red-500/10 transition-all"
         >
           <LogOut className="w-4 h-4 shrink-0" />
           Deconectare

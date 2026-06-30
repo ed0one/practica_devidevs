@@ -223,12 +223,6 @@ export default function DashboardPage() {
             <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold shadow-md shadow-indigo-500/20">
               <Plus className="w-3.5 h-3.5" /> Adaugă
             </a>
-            <button
-              onClick={async () => { const s = createClient(); await s.auth.signOut(); window.location.href = "/"; }}
-              className="w-8 h-8 rounded-xl border border-white/10 flex items-center justify-center text-white/50 hover:text-white/80 transition-colors"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
           </div>
         </header>
 
@@ -236,7 +230,7 @@ export default function DashboardPage() {
           {/* Greeting */}
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
             <h2 className="text-2xl font-black text-gray-900 tracking-tight">
-              {greeting()}{userEmail ? `, ${userEmail.split("@")[0]}` : ""}! 👋
+              {greeting()}{userEmail ? `, ${userEmail.split("@")[0]}` : ""}
             </h2>
             <p className="text-sm text-gray-400 mt-0.5 capitalize">{todayStr}</p>
           </motion.div>
@@ -280,7 +274,7 @@ export default function DashboardPage() {
                 transition={{ delay: 0.12 }}
                 className="flex items-center gap-2 mb-4"
               >
-                <div className="relative flex-1 max-w-xs">
+                <div className="relative flex-1 max-w-sm">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   <input
                     type="text"
