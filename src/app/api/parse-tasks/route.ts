@@ -32,18 +32,26 @@ export async function POST(request: NextRequest) {
   const tasks = await parseTasks(text)
   if (tasks.length === 0) return NextResponse.json({ tasks: [] })
 
-  const rows = tasks.map((t) => ({
-    user_id: user.id,
-    title: t.title,
-    deadline: t.deadline,
-    priority: t.priority,
-    category: t.category,
-    status: 'pending' as const,
-    raw_input: text,
-    scheduled_date: null,
-    scheduled_start: null,
-    scheduled_end: null,
-  }))
+  const rows = tasks.map((t) => {
+    // Build scheduled_* from AI-extracted start_time/end_time + deadline date
+    const dateStr = t.deadline ?? new Date().toISOString().substring(0, 10)
+    const scheduled_date = (t.start_time || t.end_time) ? dateStr : null
+    const scheduled_start = t.start_time ? `${dateStr}T${t.start_time}:00` : null
+    const scheduled_end = t.end_time ? `${dateStr}T${t.end_time}:00` : null
+
+    return {
+      user_id: user.id,
+      title: t.title,
+      deadline: t.deadline,
+      priority: t.priority,
+      category: t.category,
+      status: 'pending' as const,
+      raw_input: text,
+      scheduled_date,
+      scheduled_start,
+      scheduled_end,
+    }
+  })
 
   if (rows.length === 0) return NextResponse.json({ tasks: [] })
 

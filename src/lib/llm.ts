@@ -22,9 +22,11 @@ Formatul răspunsului:
   "tasks": [
     {
       "title": "titlu scurt și clar al task-ului",
-      "deadline": "YYYY-MM-DDTHH:mm:ssZ sau null dacă nu e menționat",
+      "deadline": "YYYY-MM-DD sau null dacă nu e menționat",
       "priority": "low | medium | high",
-      "category": "categorie scurtă (ex: sănătate, muncă, personal) sau null"
+      "category": "categorie scurtă (ex: sănătate, muncă, personal) sau null",
+      "start_time": "HH:MM sau null dacă nu e menționată ora de start",
+      "end_time": "HH:MM sau null dacă nu e menționată ora de sfârșit"
     }
   ]
 }
@@ -33,11 +35,29 @@ Reguli:
 - Extrage TOATE task-urile distincte din text, chiar dacă sunt mai multe
 - Deadline-urile relative ("vineri", "săptămâna asta", "mâine") calculează-le față de data de azi (${today})
 - "Săptămâna asta" = ultima zi a săptămânii curente (duminică)
-- Dacă nu e menționată ora, pune T23:59:59+03:00
+- deadline este doar data: "YYYY-MM-DD" (fără ore)
+- start_time și end_time sunt doar ora: "HH:MM" în format 24h (ex: "09:00", "15:00")
+- Dacă se menționează "de la X la Y", "între X și Y", "de la ora X până la Y" → extrage start_time și end_time
+- "dimineața" fără oră exactă → start_time: "09:00"; "după-amiaza" → "13:00"; "seara" → "19:00"
 - Prioritatea: high dacă e urgent/important/trebuie neapărat, low dacă e opțional/când am timp, altfel medium
 - Titlul să fie un verb la infinitiv: "Suna la doctor", "Trimite CV-ul"
 
 Exemple:
+
+Input: "am muncă de la 9 dimineața până la 3 după-amiaza"
+Output:
+{
+  "tasks": [
+    {
+      "title": "Muncă",
+      "deadline": "${today}",
+      "priority": "medium",
+      "category": "muncă",
+      "start_time": "09:00",
+      "end_time": "15:00"
+    }
+  ]
+}
 
 Input: "trebuie să sun la doctor săptămâna asta și să trimit CV-ul până vineri"
 Output:
@@ -45,28 +65,19 @@ Output:
   "tasks": [
     {
       "title": "Suna la doctor",
-      "deadline": "2024-01-07T23:59:59+03:00",
+      "deadline": "2024-01-07",
       "priority": "medium",
-      "category": "sănătate"
+      "category": "sănătate",
+      "start_time": null,
+      "end_time": null
     },
     {
       "title": "Trimite CV-ul",
-      "deadline": "2024-01-05T23:59:59+03:00",
+      "deadline": "2024-01-05",
       "priority": "high",
-      "category": "muncă"
-    }
-  ]
-}
-
-Input: "vreau să citesc cartea aia când am timp"
-Output:
-{
-  "tasks": [
-    {
-      "title": "Citește cartea",
-      "deadline": null,
-      "priority": "low",
-      "category": "personal"
+      "category": "muncă",
+      "start_time": null,
+      "end_time": null
     }
   ]
 }
@@ -77,9 +88,26 @@ Output:
   "tasks": [
     {
       "title": "Plătește factura la curent",
-      "deadline": "${getNextDay()}T09:00:00+03:00",
+      "deadline": "${getNextDay()}",
       "priority": "high",
-      "category": "personal"
+      "category": "personal",
+      "start_time": "09:00",
+      "end_time": null
+    }
+  ]
+}
+
+Input: "meeting cu echipa azi de la 14:00 la 15:30"
+Output:
+{
+  "tasks": [
+    {
+      "title": "Meeting cu echipa",
+      "deadline": "${today}",
+      "priority": "medium",
+      "category": "muncă",
+      "start_time": "14:00",
+      "end_time": "15:30"
     }
   ]
 }

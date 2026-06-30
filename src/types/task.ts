@@ -23,4 +23,6 @@ export interface ParsedTask {
   deadline: string | null
   priority: Priority
   category: string | null
+  start_time?: string | null
+  end_time?: string | null
 }
