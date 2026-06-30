@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { Task, Priority, Status } from "@/types/task";
+import { Task, Priority, Status, WorklogEntry } from "@/types/task";
+import WorklogPanel from "./WorklogPanel";
 import {
   CheckCircle2,
   Circle,
@@ -11,7 +11,6 @@ import {
   Calendar,
   Tag,
 } from "lucide-react";
-import JiraSyncStatus from "./JiraSyncStatus";
 
 const priorityConfig: Record<
   Priority,
@@ -64,38 +63,26 @@ interface TaskCardProps {
   task: Task;
   onToggleDone: (id: string, status: Status) => void;
   onSchedule?: (id: string) => void;
+  onAddWorklog?: (taskId: string, data: { time_spent: number; description: string; date: string }) => void;
+  onDeleteWorklog?: (worklogId: string) => void;
   compact?: boolean;
   index?: number;
+  showWorklog?: boolean;
 }
 
 export default function TaskCard({
   task,
   onToggleDone,
   onSchedule,
+  onAddWorklog,
+  onDeleteWorklog,
   compact = false,
   index = 0,
+  showWorklog = false,
 }: TaskCardProps) {
   const overdue = task.status === "pending" && isOverdue(task.deadline);
   const config = priorityConfig[task.priority];
   const isDone = task.status === "done";
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const handleSync = async () => {
-    setIsSyncing(true);
-    try {
-      const res = await fetch("/api/jira/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId: task.id }),
-      });
-      if (!res.ok) throw new Error("Sync failed");
-      // Refresh would be handled by parent component
-    } catch (error) {
-      console.error("Jira sync failed:", error);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
 
   if (compact) {
     return (
@@ -218,7 +205,6 @@ export default function TaskCard({
           </div>
 
           <div className="flex flex-col items-end gap-2">
-            <JiraSyncStatus task={task} onSync={handleSync} isSyncing={isSyncing} />
             {onSchedule && !isDone && (
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -233,6 +219,18 @@ export default function TaskCard({
           </div>
         </div>
       </div>
+
+      {showWorklog && (onAddWorklog || (task.worklogs && task.worklogs.length > 0)) && (
+        <div className="px-4 pb-4 pt-2 border-t border-gray-100">
+          <WorklogPanel
+            taskId={task.id}
+            worklogs={task.worklogs || []}
+            totalTimeSpent={task.total_time_spent || 0}
+            onAddWorklog={onAddWorklog!}
+            onDeleteWorklog={onDeleteWorklog}
+          />
+        </div>
+      )}
     </motion.div>
   );
 }

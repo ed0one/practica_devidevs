@@ -6,16 +6,17 @@ import { Task, Status } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
 import StatsHeader from "@/components/StatsHeader";
-import { Plus, Sparkles, LogOut, CheckCircle2 } from "lucide-react";
+import { Plus, Sparkles, LogOut, CheckCircle2, HelpCircle } from "lucide-react";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { ShortcutsHelp } from "@/components/ShortcutsHelp";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
-  const [schedulingTaskId, setSchedulingTaskId] = useState<string | null>(
-    null
-  );
+  const [schedulingTaskId, setSchedulingTaskId] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -49,6 +50,51 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error("Eroare la actualizare");
     } catch {
       setTasks(prev);
+    }
+  };
+
+  const handleAddWorklog = async (
+    taskId: string,
+    data: { time_spent: number; description: string; date: string }
+  ) => {
+    try {
+      const res = await fetch("/api/worklogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ task_id: taskId, ...data }),
+      });
+      if (!res.ok) throw new Error("Eroare la salvarea worklog-ului");
+      const { worklog } = await res.json();
+
+      setTasks((t) =>
+        t.map((task) => {
+          if (task.id !== taskId) return task;
+          const newWorklogs = [...(task.worklogs || []), worklog];
+          const totalTime = newWorklogs.reduce((sum, w) => sum + w.time_spent, 0);
+          return { ...task, worklogs: newWorklogs, total_time_spent: totalTime };
+        })
+      );
+    } catch (err) {
+      console.error("Failed to add worklog:", err);
+    }
+  };
+
+  const handleDeleteWorklog = async (worklogId: string) => {
+    try {
+      const res = await fetch(`/api/worklogs?id=${worklogId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Eroare la ștergerea worklog-ului");
+
+      setTasks((t) =>
+        t.map((task) => {
+          const newWorklogs = (task.worklogs || []).filter((w) => w.id !== worklogId);
+          const totalTime = newWorklogs.reduce((sum, w) => sum + w.time_spent, 0);
+          return { ...task, worklogs: newWorklogs, total_time_spent: totalTime };
+        })
+      );
+    } catch (err) {
+      console.error("Failed to delete worklog:", err);
     }
   };
 
@@ -126,6 +172,31 @@ export default function DashboardPage() {
 
     setSchedulingTaskId(null);
   };
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onNewTask: () => (window.location.href = "/input"),
+    onSearch: () => console.log("Search triggered"),
+    onToggleHelp: () => setHelpOpen(!helpOpen),
+    onNavigateWeek: (direction) => {
+      // The CalendarView handles this internally via its own state
+    },
+    onNavigateDay: (direction) => {
+      // The CalendarView handles this internally via its own state
+    },
+    onScheduleSelected: () => {
+      // Could open schedule modal for selected task
+    },
+    onToggleSelected: () => {
+      const firstPending = tasks.find((t) => t.status === "pending");
+      if (firstPending) handleToggleDone(firstPending.id, "done");
+    },
+    onCompleteSelected: () => {
+      const firstPending = tasks.find((t) => t.status === "pending");
+      if (firstPending) handleToggleDone(firstPending.id, "done");
+    },
+    onRefresh: fetchTasks,
+  });
 
   if (loading) {
     return (
@@ -280,6 +351,15 @@ export default function DashboardPage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => setHelpOpen(true)}
+              className="rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
+              title="Shortcuts (?)"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               className="rounded-xl border border-gray-200 bg-white/80 backdrop-blur-sm px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors shadow-sm"
               title="Deconectare"
             >
@@ -306,6 +386,8 @@ export default function DashboardPage() {
             tasks={tasks}
             onToggleDone={handleToggleDone}
             onSchedule={handleSchedule}
+            onAddWorklog={handleAddWorklog}
+            onDeleteWorklog={handleDeleteWorklog}
           />
         </motion.div>
       </div>
@@ -319,6 +401,8 @@ export default function DashboardPage() {
         onSave={handleScheduleSave}
         taskTitle={schedulingTask?.title}
       />
+
+      <ShortcutsHelp isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }

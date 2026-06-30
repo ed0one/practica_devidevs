@@ -10,9 +10,7 @@ CREATE TABLE IF NOT EXISTS public.tasks (
   created_at timestamptz NOT NULL DEFAULT now(),
   scheduled_date date,
   scheduled_start timestamptz,
-  scheduled_end timestamptz,
-  jira_issue_key text,
-  jira_sync_error text
+  scheduled_end timestamptz
 );
 
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;

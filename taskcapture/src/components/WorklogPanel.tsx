@@ -2,260 +2,222 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Task } from "@/types/task";
-import { Clock, Play, Pause, Check, X, Plus, Trash2 } from "lucide-react";
+import { WorklogEntry } from "@/types/task";
+import {
+  Clock,
+  ChevronDown,
+  Plus,
+  Trash2,
+  Timer,
+} from "lucide-react";
 
-interface WorklogEntry {
-  id: string;
+interface WorklogPanelProps {
   taskId: string;
-  startTime: Date;
-  endTime?: Date;
-  duration: number;
-  description: string;
+  worklogs: WorklogEntry[];
+  totalTimeSpent: number;
+  onAddWorklog: (taskId: string, data: { time_spent: number; description: string; date: string }) => void;
+  onDeleteWorklog?: (worklogId: string) => void;
 }
 
-export default function WorklogPanel({ task }: { task: Task }) {
-  const [worklogs, setWorklogs] = useState<WorklogEntry[]>(() => {
-    const saved = localStorage.getItem(`worklogs_${task.id}`);
-    if (!saved) return [];
-    try {
-      const parsed = JSON.parse(saved);
-      return parsed.map((w: any) => ({
-        ...w,
-        startTime: new Date(w.startTime),
-        endTime: w.endTime ? new Date(w.endTime) : undefined,
-      }));
-    } catch {
-      return [];
-    }
+function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function formatDateRO(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("ro-RO", {
+    day: "numeric",
+    month: "short",
   });
-  const [activeLog, setActiveLog] = useState<WorklogEntry | null>(null);
+}
+
+export default function WorklogPanel({
+  taskId,
+  worklogs,
+  totalTimeSpent,
+  onAddWorklog,
+  onDeleteWorklog,
+}: WorklogPanelProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [hours, setHours] = useState(1);
+  const [minutes, setMinutes] = useState(0);
   const [description, setDescription] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [manualHours, setManualHours] = useState(0);
-  const [manualMinutes, setManualMinutes] = useState(0);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
-  const formatDuration = (ms: number) => {
-    const h = Math.floor(ms / 3600000);
-    const m = Math.floor((ms % 3600000) / 60000);
-    return h > 0 ? `${h}h ${m}m` : `${m}m`;
-  };
+  const handleSubmit = () => {
+    const totalMinutes = hours * 60 + minutes;
+    if (totalMinutes <= 0) return;
 
-  const startTimer = () => {
-    const newLog: WorklogEntry = {
-      id: crypto.randomUUID(),
-      taskId: task.id,
-      startTime: new Date(),
-      duration: 0,
+    onAddWorklog(taskId, {
+      time_spent: totalMinutes,
       description,
-    };
-    setActiveLog(newLog);
-    setShowForm(false);
-  };
+      date,
+    });
 
-  const stopTimer = () => {
-    if (!activeLog) return;
-    const endTime = new Date();
-    const duration = endTime.getTime() - activeLog.startTime.getTime();
-    const completed = { ...activeLog, endTime, duration };
-    setWorklogs((prev) => [completed, ...prev]);
-    setActiveLog(null);
-    localStorage.setItem(`worklogs_${task.id}`, JSON.stringify([completed, ...worklogs]));
+    setHours(1);
+    setMinutes(0);
+    setDescription("");
+    setDate(new Date().toISOString().split("T")[0]);
+    setIsAdding(false);
   };
-
-  const addManualLog = (hours: number, minutes: number, desc: string) => {
-    const now = new Date();
-    const start = new Date(now.getTime() - (hours * 3600000 + minutes * 60000));
-    const newLog: WorklogEntry = {
-      id: crypto.randomUUID(),
-      taskId: task.id,
-      startTime: start,
-      endTime: now,
-      duration: hours * 3600000 + minutes * 60000,
-      description: desc,
-    };
-    setWorklogs((prev) => [newLog, ...prev]);
-    localStorage.setItem(`worklogs_${task.id}`, JSON.stringify([newLog, ...worklogs]));
-  };
-
-  const deleteLog = (id: string) => {
-    const updated = worklogs.filter((w) => w.id !== id);
-    setWorklogs(updated);
-    localStorage.setItem(`worklogs_${task.id}`, JSON.stringify(updated));
-  };
-
-  const totalTime = worklogs.reduce((sum, w) => sum + w.duration, 0) +
-    (activeLog ? Date.now() - activeLog.startTime.getTime() : 0);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: "auto" }}
-      className="mt-4 rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-sm overflow-hidden"
-    >
-      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-indigo-500" />
-          Timp Lucrat
-        </h3>
-        <span className="text-sm font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
-          {formatDuration(totalTime)}
-        </span>
-      </div>
+    <div className="mt-2">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-1.5 text-[11px] text-indigo-500 hover:text-indigo-600 font-medium transition-colors"
+      >
+        <Timer className="w-3 h-3" />
+        <span>{formatMinutes(totalTimeSpent)}</span>
+        <ChevronDown
+          className={`w-3 h-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
 
-      <div className="p-4 space-y-3">
-        {activeLog && (
+      <AnimatePresence>
+        {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-lg bg-indigo-50 border border-indigo-200 p-3 space-y-2"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-indigo-700">
-                {description || "Înregistrez..."}
-              </span>
-              <motion.div
-                animate={{ opacity: [1, 0.5, 1] }}
-                transition={{ duration: 1, repeat: Infinity }}
-                className="text-2xl font-mono text-indigo-600"
-              >
-                {((Date.now() - activeLog.startTime.getTime()) / 1000).toFixed(0)}s
-              </motion.div>
-            </div>
-            <div className="flex gap-2">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={stopTimer}
-                className="flex-1 rounded-lg bg-red-500 text-white py-2 font-medium flex items-center justify-center gap-1.5"
-              >
-                <Pause className="w-4 h-4" />
-                Oprește
-              </motion.button>
+            <div className="mt-2 space-y-1.5 pl-2 border-l-2 border-indigo-200">
+              {worklogs.length === 0 && !isAdding && (
+                <p className="text-[11px] text-gray-400 py-1">
+                  Nicio oră înregistrată
+                </p>
+              )}
+
+              {worklogs.map((entry) => (
+                <motion.div
+                  key={entry.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  className="flex items-center justify-between gap-2 rounded-lg bg-gray-50/80 px-2.5 py-1.5"
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Clock className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+                    <span className="text-[11px] font-semibold text-gray-700">
+                      {formatMinutes(entry.time_spent)}
+                    </span>
+                    {entry.description && (
+                      <span className="text-[11px] text-gray-500 truncate">
+                        {entry.description}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <span className="text-[10px] text-gray-400">
+                      {formatDateRO(entry.date)}
+                    </span>
+                    {onDeleteWorklog && (
+                      <button
+                        onClick={() => onDeleteWorklog(entry.id)}
+                        className="text-gray-300 hover:text-red-400 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+
+              {isAdding ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-lg bg-indigo-50/50 border border-indigo-100 p-3 space-y-2.5"
+                >
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-semibold text-gray-600 w-12">
+                      Timp
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={0}
+                        max={24}
+                        value={hours}
+                        onChange={(e) => setHours(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-14 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-center focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-100"
+                      />
+                      <span className="text-[11px] text-gray-500">h</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={59}
+                        step={15}
+                        value={minutes}
+                        onChange={(e) => setMinutes(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                        className="w-14 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-center focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-100"
+                      />
+                      <span className="text-[11px] text-gray-500">m</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-semibold text-gray-600 w-12">
+                      Data
+                    </label>
+                    <input
+                      type="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="flex-1 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-100"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] font-semibold text-gray-600 w-12">
+                      Detalii
+                    </label>
+                    <input
+                      type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Ce ai lucrat?"
+                      className="flex-1 rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-100"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => setIsAdding(false)}
+                      className="flex-1 rounded-lg border border-gray-200 bg-white px-2 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      Anulează
+                    </button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSubmit}
+                      className="flex-1 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-2 py-1 text-[11px] font-semibold text-white"
+                    >
+                      Salvează
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsAdding(true)}
+                  className="flex items-center gap-1.5 rounded-lg border border-dashed border-indigo-200 bg-indigo-50/30 px-2.5 py-1.5 text-[11px] font-medium text-indigo-500 hover:bg-indigo-50/60 transition-colors w-full"
+                >
+                  <Plus className="w-3 h-3" />
+                  Adaugă ore
+                </motion.button>
+              )}
             </div>
           </motion.div>
         )}
-
-        {!activeLog && (
-          <div className="space-y-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setShowForm(true)}
-              className="w-full rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-2.5 font-medium flex items-center justify-center gap-2 shadow-lg shadow-indigo-200/50"
-            >
-              <Play className="w-4 h-4" />
-              Pornește Timer
-            </motion.button>
-
-            <AnimatePresence>
-              {showForm && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-3 p-3 rounded-lg bg-gray-50 border border-gray-200"
-                >
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      max="23"
-                      placeholder="Ore"
-                      value={manualHours}
-                      onChange={(e) => setManualHours(parseInt(e.target.value) || 0)}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      placeholder="Minute"
-                      value={manualMinutes}
-                      onChange={(e) => setManualMinutes(parseInt(e.target.value) || 0)}
-                      className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Pe ce ai lucrat?"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
-                  />
-                  <div className="flex gap-2">
-                    <motion.button
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        addManualLog(manualHours, manualMinutes, description);
-                        setManualHours(0);
-                        setManualMinutes(0);
-                        setDescription("");
-                        setShowForm(false);
-                      }}
-                      className="flex-1 rounded-lg bg-indigo-600 text-white py-2 font-medium"
-                    >
-                      Adaugă
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setShowForm(false);
-                        setManualHours(0);
-                        setManualMinutes(0);
-                        setDescription("");
-                      }}
-                      className="flex-1 rounded-lg border border-gray-300 bg-white text-gray-700 py-2 font-medium"
-                    >
-                      Anulează
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-
-        {worklogs.length > 0 && (
-          <div className="pt-3 border-t border-gray-200">
-            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-              Recent Entries
-            </h4>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {worklogs.slice(0, 10).map((log) => (
-                <motion.div
-                  key={log.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  layout
-                  className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">
-                      {log.description || "Work session"}
-                    </p>
-                    <p className="text-xs text-gray-500 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatDuration(log.duration)} •{" "}
-                      {log.startTime.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" })}
-                      –{" "}
-                      {log.endTime?.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" }) || "now"}
-                    </p>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => deleteLog(log.id)}
-                    className="text-gray-400 hover:text-red-500 p-1"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </motion.button>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }

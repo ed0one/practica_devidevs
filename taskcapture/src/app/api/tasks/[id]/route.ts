@@ -21,8 +21,6 @@ export async function PATCH(
     "scheduled_date",
     "scheduled_start",
     "scheduled_end",
-    "jira_issue_key",
-    "jira_sync_error",
   ];
   const updates: Record<string, unknown> = {};
   for (const key of allowed) {
