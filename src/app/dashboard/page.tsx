@@ -12,6 +12,7 @@ import StatsHeader from "@/components/StatsHeader";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
 import { Plus, Sparkles, LogOut, Search, Download, X } from "lucide-react";
+import { Priority } from "@/types/task";
 
 function exportCSV(tasks: Task[]) {
   const header = ["Titlu", "Prioritate", "Status", "Deadline", "Categorie", "Creat la"];
@@ -99,6 +100,34 @@ export default function DashboardPage() {
       throw new Error("Eroare la salvare");
     }
     toast.success("Task actualizat.");
+  };
+
+  const handleMoveTask = async (taskId: string, targetCol: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    const updates: { status?: Status; priority?: Priority } = {};
+    if (targetCol === "done") {
+      if (task.status === "done") return;
+      updates.status = "done";
+    } else {
+      updates.priority = targetCol as Priority;
+      if (task.status === "done") updates.status = "pending";
+    }
+
+    const prev = tasks;
+    setTasks((t) => t.map((task) => task.id === taskId ? { ...task, ...updates } : task));
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      setTasks(prev);
+      toast.error("Nu s-a putut muta task-ul.");
+    }
   };
 
   const handleSchedule = (id: string) => {
@@ -302,6 +331,7 @@ export default function DashboardPage() {
                   onDelete={handleDelete}
                   onSchedule={handleSchedule}
                   onEdit={setEditingTask}
+                  onMoveTask={handleMoveTask}
                 />
               </motion.div>
             </>

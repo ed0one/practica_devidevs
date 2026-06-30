@@ -34,6 +34,7 @@ interface CalendarViewProps {
   onDelete: (id: string) => void;
   onSchedule: (id: string) => void;
   onEdit?: (task: Task) => void;
+  onMoveTask?: (taskId: string, targetCol: string) => void;
 }
 
 const DEFAULT_MOBILE_VIEW: ViewMode = "list";
@@ -69,6 +70,7 @@ export default function CalendarView({
   onDelete,
   onSchedule,
   onEdit,
+  onMoveTask,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>(
@@ -326,6 +328,7 @@ export default function CalendarView({
               onToggleDone={onToggleDone}
               onDelete={onDelete}
               onEdit={onEdit ?? (() => {})}
+              onMoveTask={onMoveTask ?? (() => {})}
             />
           </motion.div>
         )}
