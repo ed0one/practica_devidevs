@@ -1,6 +1,6 @@
 export type Priority = 'low' | 'medium' | 'high'
 export type Status = 'pending' | 'done'
-export type ViewMode = 'week' | 'day' | 'list'
+export type ViewMode = 'week' | 'day' | 'list' | 'board'
 
 export interface Task {
   id: string

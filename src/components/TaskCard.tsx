@@ -10,6 +10,7 @@ import {
   Calendar,
   Tag,
   Trash2,
+  Pencil,
 } from "lucide-react";
 
 const priorityConfig: Record<
@@ -64,6 +65,7 @@ interface TaskCardProps {
   onToggleDone: (id: string, status: Status) => void;
   onDelete?: (id: string) => void;
   onSchedule?: (id: string) => void;
+  onEdit?: (task: Task) => void;
   compact?: boolean;
   index?: number;
 }
@@ -73,6 +75,7 @@ export default function TaskCard({
   onToggleDone,
   onDelete,
   onSchedule,
+  onEdit,
   compact = false,
   index = 0,
 }: TaskCardProps) {
@@ -226,6 +229,17 @@ export default function TaskCard({
                 title="Programează"
               >
                 <Clock className="w-4 h-4" />
+              </motion.button>
+            )}
+            {onEdit && !isDone && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onEdit(task)}
+                className="rounded-lg bg-violet-50 p-1.5 text-violet-500 hover:bg-violet-100 transition-colors opacity-0 group-hover:opacity-100"
+                title="Editează"
+              >
+                <Pencil className="w-4 h-4" />
               </motion.button>
             )}
             {onDelete && (

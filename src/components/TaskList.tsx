@@ -35,6 +35,7 @@ interface TaskListProps {
   onToggleDone: (id: string, status: Status) => void;
   onDelete?: (id: string) => void;
   onSchedule?: (id: string) => void;
+  onEdit?: (task: Task) => void;
 }
 
 export default function TaskList({
@@ -42,6 +43,7 @@ export default function TaskList({
   onToggleDone,
   onDelete,
   onSchedule,
+  onEdit,
 }: TaskListProps) {
   const [sortKey, setSortKey] = useState<SortKey>("deadline");
   const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
@@ -96,6 +98,7 @@ export default function TaskList({
               onToggleDone={onToggleDone}
               onDelete={onDelete}
               onSchedule={onSchedule}
+              onEdit={onEdit}
               index={i}
             />
           ))}

@@ -46,7 +46,7 @@ export async function PATCH(
   const { id } = await params
   const body = await request.json()
 
-  const allowed = ['status', 'scheduled_date', 'scheduled_start', 'scheduled_end']
+  const allowed = ['status', 'scheduled_date', 'scheduled_start', 'scheduled_end', 'title', 'priority', 'deadline', 'category']
   const updates: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) updates[key] = body[key]
@@ -54,6 +54,12 @@ export async function PATCH(
 
   if (updates.status && !['pending', 'done'].includes(updates.status as string)) {
     return NextResponse.json({ error: 'Status invalid' }, { status: 400 })
+  }
+  if (updates.priority && !['low', 'medium', 'high'].includes(updates.priority as string)) {
+    return NextResponse.json({ error: 'Priority invalidă' }, { status: 400 })
+  }
+  if (updates.title && typeof updates.title === 'string' && updates.title.trim().length === 0) {
+    return NextResponse.json({ error: 'Titlul nu poate fi gol' }, { status: 400 })
   }
 
   const supabase = await getSupabase()

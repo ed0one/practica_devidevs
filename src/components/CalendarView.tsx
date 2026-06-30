@@ -22,7 +22,9 @@ import {
   List,
   Clock,
   LayoutGrid,
+  Kanban,
 } from "lucide-react";
+import BoardView from "./BoardView";
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
 
@@ -31,6 +33,7 @@ interface CalendarViewProps {
   onToggleDone: (id: string, status: Status) => void;
   onDelete: (id: string) => void;
   onSchedule: (id: string) => void;
+  onEdit?: (task: Task) => void;
 }
 
 const DEFAULT_MOBILE_VIEW: ViewMode = "list";
@@ -65,6 +68,7 @@ export default function CalendarView({
   onToggleDone,
   onDelete,
   onSchedule,
+  onEdit,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>(
@@ -135,6 +139,7 @@ export default function CalendarView({
               ["week", LayoutGrid, "Săptămână"],
               ["day", Clock, "Zi"],
               ["list", List, "Listă"],
+              ["board", Kanban, "Board"],
             ] as [ViewMode, typeof LayoutGrid, string][]
           ).map(([mode, Icon, label]) => (
             <button
@@ -303,6 +308,24 @@ export default function CalendarView({
               onToggleDone={onToggleDone}
               onDelete={onDelete}
               onSchedule={onSchedule}
+              onEdit={onEdit}
+            />
+          </motion.div>
+        )}
+
+        {viewMode === "board" && (
+          <motion.div
+            key="board"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <BoardView
+              tasks={tasks}
+              onToggleDone={onToggleDone}
+              onDelete={onDelete}
+              onEdit={onEdit ?? (() => {})}
             />
           </motion.div>
         )}
