@@ -26,12 +26,19 @@ export default function ScheduleModal({
   );
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
+  const [timeError, setTimeError] = useState<string | null>(null);
 
   const handleSave = () => {
+    if (endTime <= startTime) {
+      setTimeError("Ora de sfârșit trebuie să fie după ora de început.");
+      return;
+    }
+    const offset = new Date().toISOString().slice(19);
     const scheduled_date = date;
-    const scheduled_start = `${date}T${startTime}:00`;
-    const scheduled_end = `${date}T${endTime}:00`;
+    const scheduled_start = `${date}T${startTime}:00${offset}`;
+    const scheduled_end = `${date}T${endTime}:00${offset}`;
     onSave({ scheduled_date, scheduled_start, scheduled_end });
+    setTimeError(null);
     onClose();
   };
 
@@ -120,6 +127,10 @@ export default function ScheduleModal({
                   />
                 </div>
               </div>
+
+              {timeError && (
+                <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{timeError}</p>
+              )}
 
               <div className="flex gap-3 pt-2">
                 <motion.button

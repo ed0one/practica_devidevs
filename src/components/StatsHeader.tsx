@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Task, Priority } from "@/types/task";
-import { CheckCircle2, Clock, AlertTriangle, TrendingUp } from "lucide-react";
+import { Task } from "@/types/task";
+import { CheckCircle2, Clock, AlertTriangle, TrendingUp, Flame } from "lucide-react";
 
 interface StatsHeaderProps {
   tasks: Task[];
@@ -28,7 +28,6 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
       label: "Total",
       value: total,
       icon: TrendingUp,
-      color: "from-indigo-500 to-blue-500",
       bg: "bg-indigo-50",
       text: "text-indigo-600",
     },
@@ -36,23 +35,20 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
       label: "Finalizate",
       value: done,
       icon: CheckCircle2,
-      color: "from-emerald-500 to-green-500",
       bg: "bg-emerald-50",
       text: "text-emerald-600",
     },
     {
-      label: "În așteptare",
-      value: pending,
-      icon: Clock,
-      color: "from-amber-500 to-orange-500",
-      bg: "bg-amber-50",
-      text: "text-amber-600",
+      label: "Urgente",
+      value: highPriority,
+      icon: Flame,
+      bg: "bg-orange-50",
+      text: "text-orange-600",
     },
     {
       label: "Scadente",
       value: overdue,
       icon: AlertTriangle,
-      color: "from-red-500 to-rose-500",
       bg: "bg-red-50",
       text: "text-red-600",
     },
@@ -75,9 +71,6 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
             whileHover={{ y: -3 }}
             className="relative overflow-hidden rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-sm p-4 shadow-sm hover:shadow-lg transition-shadow"
           >
-            <div
-              className={`absolute top-0 right-0 w-20 h-20 rounded-full opacity-10 ${stat.bg} -translate-y-6 translate-x-6`}
-            />
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">

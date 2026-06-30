@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Priority, Status } from "@/types/task";
 import TaskCard from "./TaskCard";
-import { ArrowUpDown, Filter } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 
 type SortKey = "deadline" | "priority" | "created";
 
@@ -33,12 +33,14 @@ function sortTasks(tasks: Task[], key: SortKey): Task[] {
 interface TaskListProps {
   tasks: Task[];
   onToggleDone: (id: string, status: Status) => void;
+  onDelete?: (id: string) => void;
   onSchedule?: (id: string) => void;
 }
 
 export default function TaskList({
   tasks,
   onToggleDone,
+  onDelete,
   onSchedule,
 }: TaskListProps) {
   const [sortKey, setSortKey] = useState<SortKey>("deadline");
@@ -92,6 +94,7 @@ export default function TaskList({
               key={task.id}
               task={task}
               onToggleDone={onToggleDone}
+              onDelete={onDelete}
               onSchedule={onSchedule}
               index={i}
             />

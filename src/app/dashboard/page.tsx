@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Task, Status } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
@@ -36,12 +36,15 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTasks();
   }, [fetchTasks]);
 
   const handleDelete = async (id: string) => {
+    const prev = tasks
     setTasks((t) => t.filter((task) => task.id !== id))
-    await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' })
+    if (!res.ok) setTasks(prev)
   }
 
   const handleToggleDone = async (id: string, newStatus: Status) => {

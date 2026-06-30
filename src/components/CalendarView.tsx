@@ -12,8 +12,9 @@ import {
   startOfDay,
 } from "date-fns";
 import { ro } from "date-fns/locale";
-import { Task, Status, Priority, ViewMode } from "@/types/task";
+import { Task, Status, ViewMode } from "@/types/task";
 import TaskCard from "./TaskCard";
+import TaskList from "./TaskList";
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,8 +24,6 @@ import {
   LayoutGrid,
 } from "lucide-react";
 
-const priorityOrder: Record<Priority, number> = { high: 3, medium: 2, low: 1 };
-
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
 
 interface CalendarViewProps {
@@ -33,6 +32,8 @@ interface CalendarViewProps {
   onDelete: (id: string) => void;
   onSchedule: (id: string) => void;
 }
+
+const DEFAULT_MOBILE_VIEW: ViewMode = "list";
 
 function getTasksForDay(tasks: Task[], date: Date): Task[] {
   return tasks.filter((t) => {
@@ -61,7 +62,11 @@ export default function CalendarView({
   onSchedule,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<ViewMode>("week");
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    typeof window !== "undefined" && window.innerWidth < 640
+      ? DEFAULT_MOBILE_VIEW
+      : "week"
+  );
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) =>
@@ -77,16 +82,6 @@ export default function CalendarView({
       viewMode === "day" ? addDays(currentDate, 1) : addDays(currentDate, 7)
     );
   const goToday = () => setCurrentDate(new Date());
-
-  const sortedTaskList = [...tasks]
-    .filter((t) => t.status !== "done")
-    .sort((a, b) => {
-      const aHas = a.scheduled_start ? 1 : 0;
-      const bHas = b.scheduled_start ? 1 : 0;
-      if (aHas !== bHas) return bHas - aHas;
-      return priorityOrder[b.priority] - priorityOrder[a.priority];
-    })
-    .concat(tasks.filter((t) => t.status === "done"));
 
   const unscheduled = tasks.filter((t) => !t.scheduled_date && !t.deadline);
 
@@ -297,18 +292,13 @@ export default function CalendarView({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="space-y-2"
           >
-            {sortedTaskList.map((task, i) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onToggleDone={onToggleDone}
-                onDelete={onDelete}
-                onSchedule={onSchedule}
-                index={i}
-              />
-            ))}
+            <TaskList
+              tasks={tasks}
+              onToggleDone={onToggleDone}
+              onDelete={onDelete}
+              onSchedule={onSchedule}
+            />
           </motion.div>
         )}
       </AnimatePresence>
