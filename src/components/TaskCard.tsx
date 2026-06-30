@@ -10,7 +10,6 @@ import {
   Calendar,
   Tag,
 } from "lucide-react";
-import JiraSyncStatus from "./JiraSyncStatus";
 
 const priorityConfig: Record<
   Priority,

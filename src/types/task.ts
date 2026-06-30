@@ -15,7 +15,6 @@ export interface Task {
   scheduled_date: string | null
   scheduled_start: string | null
   scheduled_end: string | null
-  jira_issue_key?: string | null
 }
 
 // Ce trimite LLM-ul pentru un singur task (fără id/user_id/created_at)

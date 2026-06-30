@@ -9,7 +9,7 @@ export async function PATCH(
   const { id } = await params
   const body = await request.json()
 
-  const allowed = ['status', 'scheduled_date', 'scheduled_start', 'scheduled_end', 'jira_issue_key']
+  const allowed = ['status', 'scheduled_date', 'scheduled_start', 'scheduled_end']
   const updates: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in body) updates[key] = body[key]
