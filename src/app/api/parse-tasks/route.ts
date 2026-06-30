@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { parseTasks } from '@/lib/llm'
-import { ParsedTasksResponseSchema } from '@/lib/schemas'
 
 export async function POST(request: NextRequest) {
   const { text } = await request.json()
@@ -29,10 +28,10 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const raw = await parseTasks(text)
-  const parsed = ParsedTasksResponseSchema.parse(raw)
+  const tasks = await parseTasks(text)
+  if (tasks.length === 0) return NextResponse.json({ tasks: [] })
 
-  const rows = parsed.tasks.map((t) => ({
+  const rows = tasks.map((t) => ({
     user_id: user.id,
     title: t.title,
     deadline: t.deadline,
@@ -44,6 +43,8 @@ export async function POST(request: NextRequest) {
     scheduled_start: null,
     scheduled_end: null,
   }))
+
+  if (rows.length === 0) return NextResponse.json({ tasks: [] })
 
   const { data, error } = await supabase.from('tasks').insert(rows).select()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
