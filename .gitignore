@@ -1,0 +1,26 @@
+# BMAD Skills (installed globally, not per-repo)
+.agents/skills/
+
+# OpenCode commands (installed globally)
+.opencode/commands/
+
+# BMAD output
+_bmad-output/
+_bmad/
+
+# Testing copy (local only)
+taskcapture-testing/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

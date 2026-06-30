@@ -1,116 +1,116 @@
 # Practica DeviDevs
 
-Team project for summer practice 2026.
+Proiect de echipă pentru practica de vară 2026.
 
-## Branches
+## Branch-uri
 
-| Branch | Owner | Scope |
-|--------|-------|-------|
-| `feat/dincov-dashboard-calendar` | **Dincov** | Dashboard UI, Calendar, TaskCard, Worklog, Weekly Summary, Keyboard Shortcuts |
-| `GeorgeDinu22` | **Dinu** | Backend API, Supabase, LLM integration, parse-tasks |
-| `proiect-calin` | **Cîrlea** | Auth (login/register), middleware, input page |
-| `main` | — | Base repo |
+| Branch | Proprietar | Domeniu |
+|--------|------------|---------|
+| `feat/dincov-dashboard-calendar` | **Dincov** | Dashboard UI, Calendar, TaskCard, Worklog, Sumar Săptămânal, Scurtături Tastatură |
+| `GeorgeDinu22` | **Dinu** | Backend API, Supabase, integrare LLM, parse-tasks |
+| `proiect-calin` | **Cîrlea** | Auth (login/register), middleware, pagină input |
+| `main` | — | Repo de bază |
 
 ---
 
-## `feat/dincov-dashboard-calendar` — Dashboard & Calendar (My Work)
+## `feat/dincov-dashboard-calendar` — Dashboard & Calendar (Munca Mea)
 
-### Features Completed (WEB-25 through WEB-28)
+### Funcționalități Finalizate (WEB-25 până la WEB-28)
 
-| Issue | Feature | Description |
-|-------|---------|-------------|
-| **WEB-25** | Worklog Panel | Add/delete worklog entries on TaskCard with timer icon |
-| **WEB-26** | Drag-and-Drop Calendar | Schedule tasks by dragging onto week/day slots using `@dnd-kit` |
-| **WEB-28** | Weekly Summary | Stats + CSS charts (bar, donut) in "Sumar" tab |
-| **WEB-27** | Keyboard Shortcuts | 9 global shortcuts, press `?` for help modal |
+| Issue | Funcționalitate | Descriere |
+|-------|-----------------|-----------|
+| **WEB-25** | Panou Worklog | Adaugă/șterge worklog-uri pe TaskCard (iconiță timer) |
+| **WEB-26** | Drag-and-Drop Calendar | Programează task-uri tragând pe săptămână/zi cu `@dnd-kit` |
+| **WEB-28** | Sumar Săptămânal | Statistici + grafice CSS (bare, donut) în tab "Sumar" |
+| **WEB-27** | Scurtături Tastatură | 9 scurtături globale, apasă `?` pentru ajutor |
 
-### Components Owned
+### Componente Detinute
 
 ```
 src/components/
-├── CalendarView.tsx      # 4 views (week/day/list/sumar) + drag-drop
-├── TaskCard.tsx          # Task display + worklog panel integration
-├── WeeklySummary.tsx     # Stats, bar/donut charts (pure CSS)
-├── ShortcutsHelp.tsx     # Shortcuts modal (? key)
-├── WorklogPanel.tsx      # Add/delete worklogs inline
-├── ScheduleModal.tsx     # Date + time picker for scheduling
-├── StatsHeader.tsx       # Dashboard stats cards + progress bar
-├── TaskList.tsx          # List view component
-└── JiraSyncStatus.tsx    # (removed - moved to CLI agent)
+├── CalendarView.tsx      # 4 vizualizări (săptămână/zi/listă/sumar) + drag-drop
+├── TaskCard.tsx          # Afișare task + integrare panou worklog
+├── WeeklySummary.tsx     # Statistici, grafice bare/donut (CSS pur)
+├── ShortcutsHelp.tsx     # Modal scurtături (tasta `?`)
+├── WorklogPanel.tsx      # Adaugă/șterge worklog-uri inline
+├── ScheduleModal.tsx     # Picker dată + oră pentru programare
+├── StatsHeader.tsx       # Carduri statistici dashboard + bară progres
+├── TaskList.tsx          # Componentă vizualizare listă
+└── JiraSyncStatus.tsx    # (eliminat - mutat în CLI agent)
 ```
 
-### New Files Added
+### Fișiere Noi Adăugate
 
-- `src/hooks/useKeyboardShortcuts.ts` — Global keyboard hook
-- `src/components/ShortcutsHelp.tsx` — Shortcuts help modal
-- `src/components/WeeklySummary.tsx` — Weekly stats with animated charts
-- `src/app/api/worklogs/route.ts` — CRUD for worklogs
-- `supabase/migrations/002_worklogs.sql` — Worklogs table migration
-- `src/types/task.ts` — Added `sumar` to ViewMode, worklogs fields
+- `src/hooks/useKeyboardShortcuts.ts` — Hook global tastatură
+- `src/components/ShortcutsHelp.tsx` — Modal ajutor scurtături
+- `src/components/WeeklySummary.tsx` — Statistici săptămânale cu grafice animate
+- `src/app/api/worklogs/route.ts` — CRUD worklog-uri
+- `supabase/migrations/002_worklogs.sql` — Migrare tabel worklogs
+- `src/types/task.ts` — Adăugat `sumar` la ViewMode, câmpuri worklogs
 
-### UI/UX Details
+### Detalii UI/UX
 
-- **Language:** Romanian only
-- **Animations:** Framer Motion spring physics, staggered entrance
-- **Design:** Glassmorphism, indigo→violet gradients, `rounded-xl`
-- **Icons:** `lucide-react` only
-- **Calendar:** Mon-Sun, 06:00–21:00 grid, drop zones with visual feedback
+- **Limba:** Română exclusiv
+- **Animații:** Framer Motion fizică spring, intrare staggered
+- **Design:** Glassmorphism, gradient indigo→violet, `rounded-xl`
+- **Iconițe:** doar `lucide-react`
+- **Calendar:** Lun-Dum, grilă 06:00–21:00, zone drop cu feedback vizual
 
-### Keyboard Shortcuts (press `?`)
+### Scurtături Tastatură (apasă `?`)
 
-| Key | Action |
-|-----|--------|
-| `⌘/Ctrl+N` | New task → `/input` |
-| `⌘/Ctrl+K` | Search (stub) |
-| `?` | Show shortcuts |
-| `←/→` | Navigate calendar |
-| `Enter` | Toggle / schedule |
-| `Space` | Toggle done |
-| `D` | Mark done |
-| `S` | Schedule |
-| `R` | Refresh |
+| Tastă | Acțiune |
+|-------|---------|
+| `⌘/Ctrl+N` | Task nou → `/input` |
+| `⌘/Ctrl+K` | Cautare (stub) |
+| `?` | Afișează scurtăturile |
+| `←/→` | Navighează calendar |
+| `Enter` | Comută / programează |
+| `Space` | Comută finalizat |
+| `D` | Marchează finalizat |
+| `S` | Programează |
+| `R` | Reîmprospatează |
 
-### Testing (No Backend Required)
+### Testare (Fără Backend)
 
 ```bash
 cd taskcapture-testing
 npm run dev   # http://localhost:3001
 ```
-- `TESTING_MODE=true` bypasses Supabase auth
-- 6 mock tasks pre-loaded (WEB-25 through WEB-28)
-- All features functional: drag-drop, worklogs, summary, shortcuts
+- `TESTING_MODE=true` evită autentificarea Supabase
+- 6 task-uri mock preîncărcate (WEB-25 până la WEB-28)
+- Toate funcționalitățile funcționale: drag-drop, worklog-uri, sumar, scurtături
 
-### Jira Sync (Manual CLI)
+### Sincronizare Jira (CLI Manual)
 
 ```bash
 cd ~/.jira-agent
-npx tsx src/cli.ts status           # show assigned issues
-npx tsx src/cli.ts complete WEB-25  # move to Done
-npx tsx src/cli.ts log-work WEB-25 2h "Work description"
+npx tsx src/cli.ts status           # afișează issue-uri asignate
+npx tsx src/cli.ts complete WEB-25  # mută în Done
+npx tsx src/cli.ts log-work WEB-25 2h "Descriere lucru"
 ```
 
 ---
 
-## Quick Start (Production)
+## Start Rapid (Producție)
 
 ```bash
 cd taskcapture
 npm install
-cp .env.example .env.local  # add Supabase, NVIDIA, Resend keys
+cp .env.example .env.local  # adaugă chei Supabase, NVIDIA, Resend
 npm run dev                 # http://localhost:3000
 ```
 
-**Required env vars:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NVIDIA_NIM_API_KEY`, `RESEND_API_KEY`, `REMINDER_CRON_SECRET`
+**Variabile env necesare:** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NVIDIA_NIM_API_KEY`, `RESEND_API_KEY`, `REMINDER_CRON_SECRET`
 
 ---
 
-## Tech Stack
+## Tehnologii
 
 - **Next.js 15** App Router + TypeScript
 - **Tailwind CSS v4** (`@import "tailwindcss"`)
-- **Framer Motion** for animations
-- **Supabase** auth + database
-- **NVIDIA NIM** for LLM
-- **Resend** for email
-- **date-fns** (ro locale) for calendar
-- **@dnd-kit** for drag-and-drop
+- **Framer Motion** pentru animații
+- **Supabase** auth + bază de date
+- **NVIDIA NIM** pentru LLM
+- **Resend** pentru email
+- **date-fns** (locale ro) pentru calendar
+- **@dnd-kit** pentru drag-and-drop
