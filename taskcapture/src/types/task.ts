@@ -15,4 +15,6 @@ export interface Task {
   scheduled_date: string | null;
   scheduled_start: string | null;
   scheduled_end: string | null;
+  jira_issue_key?: string | null;
+  jira_sync_error?: string | null;
 }

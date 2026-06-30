@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, Calendar } from "lucide-react";
 
@@ -26,6 +26,15 @@ export default function ScheduleModal({
   );
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
+
+  // Reset form when modal opens or task changes
+  useEffect(() => {
+    if (isOpen) {
+      setDate(new Date().toISOString().split("T")[0]);
+      setStartTime("09:00");
+      setEndTime("10:00");
+    }
+  }, [isOpen, taskTitle]);
 
   const handleSave = () => {
     const scheduled_date = date;

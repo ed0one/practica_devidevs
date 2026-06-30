@@ -274,12 +274,15 @@ export default function CalendarView({
                         compact
                       />
                     ))}
-                    {hourTasks.length === 0 && (
-                      <div
-                        className="h-full min-h-[28px] rounded border border-dashed border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors cursor-pointer"
-                        onClick={() => onSchedule("new")}
-                      />
-                    )}
+{hourTasks.length === 0 && (
+                        <div
+                          className="h-full min-h-[28px] rounded border border-dashed border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors cursor-pointer"
+                          onClick={() => {
+                            const newTaskId = `new-${Date.now()}`;
+                            onSchedule(newTaskId);
+                          }}
+                        />
+                      )}
                   </div>
                 </div>
               );

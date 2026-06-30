@@ -6,8 +6,8 @@ import {
   reopenTaskInJira,
   logWorkOnTask,
   parseDuration,
-  searchMyIssues,
 } from "@/lib/jira/sync";
+import { searchMyIssues } from "@/lib/jira/client";
 
 const API_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(".supabase.co", "") || "http://localhost:3000";
 
@@ -129,9 +129,13 @@ Commands:
   process.exit(1);
 }
 
-try {
-  await commands[cmd]();
-} catch (e) {
-  console.error("❌", (e as Error).message);
-  process.exit(1);
+async function main() {
+  try {
+    await commands[cmd]();
+  } catch (e) {
+    console.error("❌", (e as Error).message);
+    process.exit(1);
+  }
 }
+
+main();

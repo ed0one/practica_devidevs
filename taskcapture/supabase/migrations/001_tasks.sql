@@ -7,7 +7,12 @@ CREATE TABLE IF NOT EXISTS public.tasks (
   category text,
   status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'done')),
   raw_input text,
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  scheduled_date date,
+  scheduled_start timestamptz,
+  scheduled_end timestamptz,
+  jira_issue_key text,
+  jira_sync_error text
 );
 
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;

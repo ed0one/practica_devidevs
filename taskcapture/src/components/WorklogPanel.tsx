@@ -17,11 +17,23 @@ interface WorklogEntry {
 export default function WorklogPanel({ task }: { task: Task }) {
   const [worklogs, setWorklogs] = useState<WorklogEntry[]>(() => {
     const saved = localStorage.getItem(`worklogs_${task.id}`);
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    try {
+      const parsed = JSON.parse(saved);
+      return parsed.map((w: any) => ({
+        ...w,
+        startTime: new Date(w.startTime),
+        endTime: w.endTime ? new Date(w.endTime) : undefined,
+      }));
+    } catch {
+      return [];
+    }
   });
   const [activeLog, setActiveLog] = useState<WorklogEntry | null>(null);
   const [description, setDescription] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [manualHours, setManualHours] = useState(0);
+  const [manualMinutes, setManualMinutes] = useState(0);
 
   const formatDuration = (ms: number) => {
     const h = Math.floor(ms / 3600000);
@@ -84,7 +96,7 @@ export default function WorklogPanel({ task }: { task: Task }) {
       <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
         <h3 className="font-semibold text-gray-800 flex items-center gap-2">
           <Clock className="w-4 h-4 text-indigo-500" />
-          Time Tracking
+          Timp Lucrat
         </h3>
         <span className="text-sm font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
           {formatDuration(totalTime)}
@@ -100,14 +112,14 @@ export default function WorklogPanel({ task }: { task: Task }) {
           >
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-indigo-700">
-                {description || "Tracking..."}
+                {description || "Înregistrez..."}
               </span>
               <motion.div
                 animate={{ opacity: [1, 0.5, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
                 className="text-2xl font-mono text-indigo-600"
               >
-                {(Date.now() - activeLog.startTime.getTime() / 1000).toFixed(0)}s
+                {((Date.now() - activeLog.startTime.getTime()) / 1000).toFixed(0)}s
               </motion.div>
             </div>
             <div className="flex gap-2">
@@ -118,7 +130,7 @@ export default function WorklogPanel({ task }: { task: Task }) {
                 className="flex-1 rounded-lg bg-red-500 text-white py-2 font-medium flex items-center justify-center gap-1.5"
               >
                 <Pause className="w-4 h-4" />
-                Stop
+                Oprește
               </motion.button>
             </div>
           </motion.div>
@@ -133,7 +145,7 @@ export default function WorklogPanel({ task }: { task: Task }) {
               className="w-full rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 text-white py-2.5 font-medium flex items-center justify-center gap-2 shadow-lg shadow-indigo-200/50"
             >
               <Play className="w-4 h-4" />
-              Start Timer
+              Pornește Timer
             </motion.button>
 
             <AnimatePresence>
@@ -149,20 +161,24 @@ export default function WorklogPanel({ task }: { task: Task }) {
                       type="number"
                       min="0"
                       max="23"
-                      placeholder="Hours"
+                      placeholder="Ore"
+                      value={manualHours}
+                      onChange={(e) => setManualHours(parseInt(e.target.value) || 0)}
                       className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                     />
                     <input
                       type="number"
                       min="0"
                       max="59"
-                      placeholder="Minutes"
+                      placeholder="Minute"
+                      value={manualMinutes}
+                      onChange={(e) => setManualMinutes(parseInt(e.target.value) || 0)}
                       className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                     />
                   </div>
                   <input
                     type="text"
-                    placeholder="What did you work on?"
+                    placeholder="Pe ce ai lucrat?"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
@@ -170,17 +186,28 @@ export default function WorklogPanel({ task }: { task: Task }) {
                   <div className="flex gap-2">
                     <motion.button
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => addManualLog(0, 0, description)}
+                      onClick={() => {
+                        addManualLog(manualHours, manualMinutes, description);
+                        setManualHours(0);
+                        setManualMinutes(0);
+                        setDescription("");
+                        setShowForm(false);
+                      }}
                       className="flex-1 rounded-lg bg-indigo-600 text-white py-2 font-medium"
                     >
-                      Add
+                      Adaugă
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => setShowForm(false)}
+                      onClick={() => {
+                        setShowForm(false);
+                        setManualHours(0);
+                        setManualMinutes(0);
+                        setDescription("");
+                      }}
                       className="flex-1 rounded-lg border border-gray-300 bg-white text-gray-700 py-2 font-medium"
                     >
-                      Cancel
+                      Anulează
                     </motion.button>
                   </div>
                 </motion.div>

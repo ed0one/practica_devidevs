@@ -6,7 +6,7 @@ import { Task, Status } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
 import StatsHeader from "@/components/StatsHeader";
-import { Plus, Sparkles, LogOut } from "lucide-react";
+import { Plus, Sparkles, LogOut, CheckCircle2 } from "lucide-react";
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -52,7 +52,49 @@ export default function DashboardPage() {
     }
   };
 
+  const handleCompleteAll = async () => {
+    const pendingTasks = tasks.filter((t) => t.status === "pending");
+    if (pendingTasks.length === 0) return;
+
+    const prev = tasks;
+    setTasks((t) =>
+      t.map((task) => (task.status === "pending" ? { ...task, status: "done" as Status } : task))
+    );
+
+    try {
+      await Promise.all(
+        pendingTasks.map((task) =>
+          fetch(`/api/tasks/${task.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "done" }),
+          })
+        )
+      );
+    } catch {
+      setTasks(prev);
+    }
+  };
+
   const handleSchedule = (id: string) => {
+    const isNewTask = id.startsWith("new-");
+    if (isNewTask) {
+      const tempTask: Task = {
+        id,
+        user_id: "mock",
+        title: "Task nou",
+        deadline: null,
+        priority: "medium",
+        category: null,
+        status: "pending",
+        raw_input: null,
+        created_at: new Date().toISOString(),
+        scheduled_date: null,
+        scheduled_start: null,
+        scheduled_end: null,
+      };
+      setTasks((t) => [...t, tempTask]);
+    }
     setSchedulingTaskId(id);
     setScheduleModalOpen(true);
   };
@@ -224,6 +266,17 @@ export default function DashboardPage() {
               <Plus className="w-4 h-4" />
               Adaugă
             </motion.a>
+            {tasks.some((t) => t.status === "pending") && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleCompleteAll}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-200/50"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Finalizează toate
+              </motion.button>
+            )}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

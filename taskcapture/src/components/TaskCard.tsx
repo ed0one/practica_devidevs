@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { Task, Priority, Status } from "@/types/task";
 import {
   CheckCircle2,
@@ -77,6 +78,24 @@ export default function TaskCard({
   const overdue = task.status === "pending" && isOverdue(task.deadline);
   const config = priorityConfig[task.priority];
   const isDone = task.status === "done";
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/api/jira/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId: task.id }),
+      });
+      if (!res.ok) throw new Error("Sync failed");
+      // Refresh would be handled by parent component
+    } catch (error) {
+      console.error("Jira sync failed:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   if (compact) {
     return (
@@ -199,6 +218,7 @@ export default function TaskCard({
           </div>
 
           <div className="flex flex-col items-end gap-2">
+            <JiraSyncStatus task={task} onSync={handleSync} isSyncing={isSyncing} />
             {onSchedule && !isDone && (
               <motion.button
                 whileHover={{ scale: 1.1 }}

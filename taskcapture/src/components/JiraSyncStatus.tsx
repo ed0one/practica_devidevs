@@ -52,7 +52,7 @@ export default function JiraSyncStatus({ task, onSync, isSyncing }: JiraSyncStat
           disabled={isSyncing}
           className="ml-1 p-0.5 rounded text-gray-400 hover:text-indigo-500 disabled:opacity-50"
         >
-          <RefreshCw className={`wName={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
         </motion.button>
       )}
     </motion.div>
