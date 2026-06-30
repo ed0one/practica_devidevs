@@ -33,10 +33,9 @@ export default function ScheduleModal({
       setTimeError("Ora de sfârșit trebuie să fie după ora de început.");
       return;
     }
-    const offset = new Date().toISOString().slice(19);
     const scheduled_date = date;
-    const scheduled_start = `${date}T${startTime}:00${offset}`;
-    const scheduled_end = `${date}T${endTime}:00${offset}`;
+    const scheduled_start = `${date}T${startTime}:00`;
+    const scheduled_end = `${date}T${endTime}:00`;
     onSave({ scheduled_date, scheduled_start, scheduled_end });
     setTimeError(null);
     onClose();

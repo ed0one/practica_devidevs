@@ -35,14 +35,16 @@ interface CalendarViewProps {
 
 const DEFAULT_MOBILE_VIEW: ViewMode = "list";
 
+function parseLocalDate(str: string): Date {
+  // Parse "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS..." as local date (avoid UTC midnight shift)
+  const [y, m, d] = str.substring(0, 10).split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function getTasksForDay(tasks: Task[], date: Date): Task[] {
   return tasks.filter((t) => {
-    if (t.scheduled_date) {
-      return isSameDay(new Date(t.scheduled_date), date);
-    }
-    if (t.deadline) {
-      return isSameDay(new Date(t.deadline), date);
-    }
+    if (t.scheduled_date) return isSameDay(parseLocalDate(t.scheduled_date), date);
+    if (t.deadline) return isSameDay(parseLocalDate(t.deadline), date);
     return false;
   });
 }
@@ -50,8 +52,11 @@ function getTasksForDay(tasks: Task[], date: Date): Task[] {
 function getTasksForHour(tasks: Task[], date: Date, hour: number): Task[] {
   return tasks.filter((t) => {
     if (!t.scheduled_start) return false;
-    const start = new Date(t.scheduled_start);
-    return isSameDay(start, date) && start.getHours() === hour;
+    // Parse date part directly from string to avoid timezone shifts
+    const datePart = t.scheduled_start.substring(0, 10); // "YYYY-MM-DD"
+    const hourPart = parseInt(t.scheduled_start.substring(11, 13), 10);
+    const taskDate = new Date(datePart + "T00:00:00");
+    return isSameDay(taskDate, date) && hourPart === hour;
   });
 }
 
