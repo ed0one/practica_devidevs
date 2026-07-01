@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { LayoutDashboard, Plus, Calendar, UserCircle, LogOut, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import ThemeToggle from "./ThemeToggle";
 
 interface SidebarProps {
   userEmail?: string | null;
@@ -96,7 +97,8 @@ export default function Sidebar({ userEmail }: SidebarProps) {
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600/40 to-violet-600/40 border border-white/10 flex items-center justify-center text-xs font-bold text-white/70 shrink-0">
             {initials}
           </div>
-          <p className="text-xs text-white/50 truncate">{userEmail}</p>
+          <p className="text-xs text-white/50 truncate flex-1">{userEmail}</p>
+          <ThemeToggle variant="sidebar" className="w-8 h-8 shrink-0" />
         </div>
         <button
           onClick={handleLogout}

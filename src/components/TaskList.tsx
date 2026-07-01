@@ -60,7 +60,7 @@ export default function TaskList({
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="rounded-lg border border-gray-200 bg-white/80 backdrop-blur-sm px-3 py-1.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="rounded-lg border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur-sm px-3 py-1.5 text-sm text-gray-900 dark:text-gray-200 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
           >
             <option value="deadline">Deadline</option>
             <option value="priority">Prioritate</option>
@@ -68,7 +68,7 @@ export default function TaskList({
           </select>
         </div>
 
-        <div className="flex items-center gap-1 rounded-lg bg-white/80 backdrop-blur-sm border border-gray-200 p-0.5">
+        <div className="flex items-center gap-1 rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur-sm border border-gray-200 dark:border-white/10 p-0.5">
           {(["all", "pending", "done"] as const).map((f) => (
             <button
               key={f}

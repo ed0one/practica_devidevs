@@ -113,7 +113,7 @@ export default function CalendarView({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={prev}
-                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur border border-gray-200 dark:border-white/10 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 aria-label={viewMode === "day" ? "Ziua anterioară" : "Săptămâna anterioară"}
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -122,7 +122,7 @@ export default function CalendarView({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={next}
-                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur border border-gray-200 dark:border-white/10 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 aria-label={viewMode === "day" ? "Ziua următoare" : "Săptămâna următoare"}
               >
                 <ChevronRight className="w-4 h-4" />
@@ -139,11 +139,11 @@ export default function CalendarView({
           )}
         </div>
 
-        <h2 className="text-lg font-bold text-gray-800 capitalize">
+        <h2 className="text-lg font-bold text-gray-800 dark:text-gray-200 capitalize">
           {hasDateNav ? headerLabel : ""}
         </h2>
 
-        <div className="flex items-center rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-0.5 shadow-sm">
+        <div className="flex items-center rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur border border-gray-200 dark:border-white/10 p-0.5 shadow-sm">
           {(
             [
               ["week", LayoutGrid, "Săptămână"],
@@ -204,8 +204,8 @@ export default function CalendarView({
                     today
                       ? "border-indigo-300 bg-indigo-50/50 shadow-md shadow-indigo-100/50"
                       : past
-                        ? "border-gray-100 bg-gray-50/50 opacity-60"
-                        : "border-gray-200/80 bg-white/80 backdrop-blur-sm hover:shadow-md"
+                        ? "border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] opacity-60"
+                        : "border-gray-200/80 dark:border-white/10 bg-white/80 dark:bg-[#16161f] backdrop-blur-sm hover:shadow-md"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1.5">
@@ -226,9 +226,9 @@ export default function CalendarView({
                   <div className="space-y-1">
                     {dayTasks.map((task) => {
                       const config = {
-                        high: "border-l-red-500 bg-white",
-                        medium: "border-l-amber-400 bg-white",
-                        low: "border-l-emerald-500 bg-white",
+                        high: "border-l-red-500 bg-white dark:bg-white/5",
+                        medium: "border-l-amber-400 bg-white dark:bg-white/5",
+                        low: "border-l-emerald-500 bg-white dark:bg-white/5",
                       }[task.priority];
 
                       return (
@@ -238,7 +238,7 @@ export default function CalendarView({
                           className={`border-l-2 rounded-r px-1.5 py-0.5 cursor-pointer ${config} ${task.status === "done" ? "opacity-40 line-through" : ""}`}
                           onClick={() => onSchedule(task.id)}
                         >
-                          <p className="text-[10px] font-medium text-gray-700 truncate">
+                          <p className="text-[10px] font-medium text-gray-700 dark:text-gray-300 truncate">
                             {task.title}
                           </p>
                           {task.scheduled_start && (
@@ -263,7 +263,7 @@ export default function CalendarView({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="rounded-xl border border-gray-200/80 bg-white/80 backdrop-blur-sm overflow-hidden"
+            className="rounded-xl border border-gray-200/80 dark:border-white/10 bg-white/80 dark:bg-[#16161f] backdrop-blur-sm overflow-hidden"
           >
             {/* All-day band: tasks for this day without a scheduled hour */}
             {(() => {
@@ -301,9 +301,9 @@ export default function CalendarView({
               return (
                 <div
                   key={hour}
-                  className={`flex border-b border-gray-100 last:border-b-0 ${isNow ? "bg-indigo-50/30" : ""}`}
+                  className={`flex border-b border-gray-100 dark:border-white/5 last:border-b-0 ${isNow ? "bg-indigo-50/30 dark:bg-indigo-500/10" : ""}`}
                 >
-                  <div className="w-16 flex-shrink-0 p-3 text-xs font-medium text-gray-400 border-r border-gray-100">
+                  <div className="w-16 flex-shrink-0 p-3 text-xs font-medium text-gray-400 border-r border-gray-100 dark:border-white/5">
                     {String(hour).padStart(2, "0")}:00
                   </div>
                   <div className="flex-1 p-2 min-h-[52px] space-y-1">
@@ -379,7 +379,7 @@ export default function CalendarView({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mt-6 rounded-2xl border border-gray-200/70 bg-white shadow-sm p-4"
+          className="mt-6 rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white dark:bg-[#16161f] shadow-sm p-4"
         >
           <h3 className="text-sm font-semibold text-gray-500 mb-3 flex items-center gap-2">
             <CalendarIcon className="w-4 h-4" />

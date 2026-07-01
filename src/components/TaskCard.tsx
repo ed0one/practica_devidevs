@@ -50,7 +50,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -4 }}
         transition={{ duration: 0.15, delay: index * 0.02 }}
-        className={`group flex items-center gap-2 px-2.5 py-2 rounded-lg border-l-2 ${cfg.border} bg-white hover:bg-gray-50 transition-colors ${isDone ? "opacity-50" : ""} ${overdue ? "bg-red-50/50" : ""}`}
+        className={`group flex items-center gap-2 px-2.5 py-2 rounded-lg border-l-2 ${cfg.border} bg-white dark:bg-[#16161f] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors ${isDone ? "opacity-50" : ""} ${overdue ? "bg-red-50/50 dark:bg-red-500/10" : ""}`}
       >
         <button
           onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")}
@@ -63,7 +63,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
             : <Circle className="w-3.5 h-3.5 text-gray-300 hover:text-indigo-400 transition-colors" />
           }
         </button>
-        <span className={`text-xs font-medium flex-1 truncate ${isDone ? "line-through text-gray-400" : "text-gray-800"}`}>
+        <span className={`text-xs font-medium flex-1 truncate ${isDone ? "line-through text-gray-400" : "text-gray-800 dark:text-gray-200"}`}>
           {task.title}
         </span>
         {task.scheduled_start && (
@@ -93,7 +93,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
       exit={{ opacity: 0, y: -8, scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 28, delay: index * 0.04 }}
       whileHover={{ y: -1 }}
-      className={`group relative bg-white rounded-2xl border border-gray-200/70 border-l-4 ${cfg.border} shadow-sm hover:shadow-md transition-all ${isDone ? "opacity-55" : ""} ${overdue ? "border-red-300 bg-red-50/30" : ""}`}
+      className={`group relative bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/70 dark:border-white/10 border-l-4 ${cfg.border} shadow-sm hover:shadow-md transition-all ${isDone ? "opacity-55" : ""} ${overdue ? "border-red-300 dark:border-red-500/40 bg-red-50/30 dark:bg-red-500/10" : ""}`}
     >
       <div className="p-4">
         <div className="flex items-start gap-3">
@@ -117,7 +117,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
           </button>
 
           <div className="flex-1 min-w-0">
-            <h3 className={`font-semibold text-[15px] leading-snug tracking-tight ${isDone ? "line-through text-gray-400" : "text-gray-900"}`}>
+            <h3 className={`font-semibold text-[15px] leading-snug tracking-tight ${isDone ? "line-through text-gray-400" : "text-gray-900 dark:text-gray-100"}`}>
               {task.title}
             </h3>
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -131,7 +131,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                   {task.category}
                 </span>
               )}
-              <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-medium ${overdue ? "bg-red-100 text-red-600" : "bg-gray-50 text-gray-500"}`}>
+              <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-medium ${overdue ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400" : "bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-gray-400"}`}>
                 <Calendar className="w-2.5 h-2.5" />
                 {formatDateShort(task.deadline)}
                 {overdue && <AlertTriangle className="w-2.5 h-2.5 ml-0.5" />}
@@ -151,7 +151,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onSchedule(task.id)}
-                className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-indigo-50 text-gray-400 hover:text-indigo-500 flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-500 flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 title="Programează"
                 aria-label="Programează task-ul"
               >
@@ -162,7 +162,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onEdit(task)}
-                className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-violet-50 text-gray-400 hover:text-violet-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-violet-50 text-gray-400 hover:text-violet-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                 title="Editează"
                 aria-label="Editează task-ul"
               >
@@ -173,7 +173,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onDelete(task.id)}
-                className="w-7 h-7 rounded-lg bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 title="Șterge"
                 aria-label="Șterge task-ul"
               >

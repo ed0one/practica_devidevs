@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
+import ThemeToggle from "@/components/ThemeToggle";
 import { Task } from "@/types/task";
 import {
   User,
@@ -116,7 +117,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] flex">
+    <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0a0a0f] flex">
       <Sidebar userEmail={user?.email} />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -128,11 +129,12 @@ export default function ProfilePage() {
             </a>
             <span className="font-bold text-white text-sm">Profil</span>
           </div>
+          <ThemeToggle variant="sidebar" className="w-8 h-8" />
         </header>
 
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8 max-w-3xl w-full mx-auto">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Profilul meu</h1>
+            <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Profilul meu</h1>
             <p className="text-sm text-gray-400 mt-0.5">Gestionează contul și preferințele tale</p>
           </motion.div>
 
@@ -142,7 +144,7 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 }}
-              className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden"
+              className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm overflow-hidden"
             >
               <div className="h-24 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600" />
               <div className="px-6 pb-6">
@@ -151,7 +153,7 @@ export default function ProfilePage() {
                     {initials}
                   </div>
                   <div className="pb-1">
-                    <h2 className="text-lg font-bold text-gray-900">{user?.full_name || "—"}</h2>
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{user?.full_name || "—"}</h2>
                     <p className="text-sm text-gray-400 flex items-center gap-1.5">
                       <Mail className="w-3.5 h-3.5" />
                       {user?.email}
@@ -180,12 +182,12 @@ export default function ProfilePage() {
               className="grid grid-cols-2 sm:grid-cols-4 gap-3"
             >
               {stats.map(({ icon: Icon, label, value, color, bg, border }) => (
-                <div key={label} className={`bg-white rounded-2xl border ${border} shadow-sm p-4 flex flex-col gap-2`}>
+                <div key={label} className={`bg-white dark:bg-[#16161f] rounded-2xl border ${border} dark:border-white/10 shadow-sm p-4 flex flex-col gap-2`}>
                   <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center`}>
                     <Icon className={`w-4 h-4 ${color}`} />
                   </div>
                   <div>
-                    <p className="text-2xl font-black text-gray-900">{value}</p>
+                    <p className="text-2xl font-black text-gray-900 dark:text-gray-100">{value}</p>
                     <p className="text-xs text-gray-400 font-medium mt-0.5">{label}</p>
                   </div>
                 </div>
@@ -197,7 +199,7 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.13 }}
-              className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5"
+              className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700">Progres general</span>
@@ -219,9 +221,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.16 }}
-              className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5"
+              className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
             >
-              <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                 <User className="w-4 h-4 text-indigo-500" />
                 Informații cont
               </h3>
@@ -236,7 +238,7 @@ export default function ProfilePage() {
                       onChange={e => setDisplayName(e.target.value)}
                       onKeyDown={e => e.key === "Enter" && handleSaveName()}
                       placeholder="Numele tău"
-                      className="flex-1 h-10 rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                     />
                     <button
                       onClick={handleSaveName}
@@ -257,7 +259,7 @@ export default function ProfilePage() {
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                     Email
                   </label>
-                  <div className="h-10 rounded-xl border border-gray-100 bg-gray-50 px-3 flex items-center text-sm text-gray-400 select-none">
+                  <div className="h-10 rounded-xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 flex items-center text-sm text-gray-400 select-none">
                     {user?.email}
                   </div>
                 </div>
@@ -270,9 +272,9 @@ export default function ProfilePage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.19 }}
-                className="bg-white rounded-2xl border border-gray-200/80 shadow-sm p-5"
+                className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
               >
-                <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                   <Lock className="w-4 h-4 text-indigo-500" />
                   Securitate
                 </h3>
@@ -289,7 +291,7 @@ export default function ProfilePage() {
                     <button
                       onClick={handlePasswordReset}
                       disabled={sendingReset}
-                      className="h-9 px-4 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-40 transition"
+                      className="h-9 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-40 transition"
                     >
                       {sendingReset ? "Se trimite..." : "Resetează parola"}
                     </button>
@@ -303,11 +305,11 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.22 }}
-              className="bg-white rounded-2xl border border-red-100 shadow-sm p-5"
+              className="bg-white dark:bg-[#16161f] rounded-2xl border border-red-100 dark:border-red-500/20 shadow-sm p-5"
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-bold text-gray-900">Deconectare</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Deconectare</p>
                   <p className="text-xs text-gray-400 mt-0.5">Ieși din cont pe acest dispozitiv</p>
                 </div>
                 <button
