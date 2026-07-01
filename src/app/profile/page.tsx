@@ -110,10 +110,10 @@ export default function ProfilePage() {
     .join("");
 
   const stats = [
-    { icon: CheckCircle2, label: "Finalizate", value: done, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-    { icon: Clock,        label: "În așteptare", value: total - done, color: "text-indigo-600", bg: "bg-indigo-50", border: "border-indigo-100" },
-    { icon: Flame,        label: "Urgente active", value: urgent, color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
-    { icon: Tag,          label: "Categorii", value: categories, color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-100" },
+    { icon: CheckCircle2, label: "Finalizate", value: done, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100" },
+    { icon: Clock,        label: "În așteptare", value: total - done, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10", border: "border-indigo-100" },
+    { icon: Flame,        label: "Urgente active", value: urgent, color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-500/10", border: "border-red-100" },
+    { icon: Tag,          label: "Categorii", value: categories, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-500/10", border: "border-violet-100" },
   ];
 
   return (
@@ -149,25 +149,25 @@ export default function ProfilePage() {
               <div className="h-24 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600" />
               <div className="px-6 pb-6">
                 <div className="flex items-end gap-4 -mt-10 mb-5">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-2xl font-black shadow-lg border-4 border-white">
+                  <div className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-2xl font-black shadow-lg border-4 border-white dark:border-[#16161f]">
                     {initials}
                   </div>
-                  <div className="pb-1">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">{user?.full_name || "—"}</h2>
-                    <p className="text-sm text-gray-400 flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5" />
-                      {user?.email}
+                  <div className="pb-1 min-w-0 flex-1">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{user?.full_name || "—"}</h2>
+                    <p className="text-sm text-gray-400 flex items-center gap-1.5 min-w-0">
+                      <Mail className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">{user?.email}</span>
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <span className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-500">
-                    <User className="w-3 h-3" /> Activ din {joinDate}
+                  <span className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-gray-500 dark:text-gray-400">
+                    <User className="w-3 h-3 shrink-0" /> Activ din {joinDate}
                   </span>
-                  <span className="flex items-center gap-1.5 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1.5 text-indigo-600 font-medium capitalize">
+                  <span className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-lg px-3 py-1.5 text-indigo-600 dark:text-indigo-400 font-medium capitalize">
                     {user?.provider === "email" ? "🔑 Email & parolă" : `🔗 ${user?.provider}`}
                   </span>
-                  <span className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-1.5 text-emerald-600 font-medium">
+                  <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-lg px-3 py-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
                     {pct}% completat
                   </span>
                 </div>
@@ -202,10 +202,10 @@ export default function ProfilePage() {
               className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-semibold text-gray-700">Progres general</span>
-                <span className="text-sm font-bold text-indigo-600">{done}/{total} task-uri</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Progres general</span>
+                <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{done}/{total} task-uri</span>
               </div>
-              <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-2.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
@@ -232,18 +232,18 @@ export default function ProfilePage() {
                   <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                     Nume afișat
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       value={displayName}
                       onChange={e => setDisplayName(e.target.value)}
                       onKeyDown={e => e.key === "Enter" && handleSaveName()}
                       placeholder="Numele tău"
-                      className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      className="flex-1 min-w-0 h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                     />
                     <button
                       onClick={handleSaveName}
                       disabled={savingName || displayName.trim() === user?.full_name}
-                      className="h-10 px-4 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1.5"
+                      className="h-10 px-4 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5 shrink-0"
                     >
                       {savingName ? (
                         <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
@@ -280,7 +280,7 @@ export default function ProfilePage() {
                 </h3>
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Schimbă parola</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Schimbă parola</p>
                     <p className="text-xs text-gray-400 mt-0.5">Vei primi un link de resetare pe email</p>
                   </div>
                   {resetSent ? (
@@ -291,7 +291,7 @@ export default function ProfilePage() {
                     <button
                       onClick={handlePasswordReset}
                       disabled={sendingReset}
-                      className="h-9 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-40 transition"
+                      className="h-9 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-40 transition shrink-0"
                     >
                       {sendingReset ? "Se trimite..." : "Resetează parola"}
                     </button>
@@ -314,7 +314,7 @@ export default function ProfilePage() {
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="h-9 px-4 rounded-xl border border-red-200 text-sm font-semibold text-red-600 hover:bg-red-50 transition flex items-center gap-1.5"
+                  className="h-9 px-4 rounded-xl border border-red-200 dark:border-red-500/30 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition flex items-center gap-1.5 shrink-0"
                 >
                   <LogOut className="w-4 h-4" />
                   Deconectare

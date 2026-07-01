@@ -7,9 +7,9 @@ import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, Tag, Trash2, Penc
 const RECURRENCE_LABEL: Record<string, string> = { daily: "Zilnic", weekly: "Săptămânal" };
 
 const priorityConfig: Record<Priority, { border: string; dot: string; label: string; badgeBg: string; badgeText: string }> = {
-  high:   { border: "border-l-red-500",    dot: "bg-red-500",    label: "Urgent",  badgeBg: "bg-red-50",    badgeText: "text-red-600" },
-  medium: { border: "border-l-amber-400",  dot: "bg-amber-400",  label: "Mediu",   badgeBg: "bg-amber-50",  badgeText: "text-amber-700" },
-  low:    { border: "border-l-emerald-500",dot: "bg-emerald-500",label: "Scăzut", badgeBg: "bg-emerald-50",badgeText: "text-emerald-700" },
+  high:   { border: "border-l-red-500",    dot: "bg-red-500",    label: "Urgent",  badgeBg: "bg-red-50 dark:bg-red-500/15",        badgeText: "text-red-600 dark:text-red-400" },
+  medium: { border: "border-l-amber-400",  dot: "bg-amber-400",  label: "Mediu",   badgeBg: "bg-amber-50 dark:bg-amber-500/15",    badgeText: "text-amber-700 dark:text-amber-400" },
+  low:    { border: "border-l-emerald-500",dot: "bg-emerald-500",label: "Scăzut", badgeBg: "bg-emerald-50 dark:bg-emerald-500/15",badgeText: "text-emerald-700 dark:text-emerald-400" },
 };
 
 function formatTime(iso: string | null): string {
@@ -77,7 +77,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
         {onDelete && (
           <button
             onClick={() => onDelete(task.id)}
-            className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+            className="lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
             aria-label={`Șterge task-ul: ${task.title}`}
           >
             <Trash2 className="w-3 h-3 text-gray-300 hover:text-red-400 transition-colors" />
@@ -128,7 +128,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                 {cfg.label}
               </span>
               {task.category && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 text-indigo-600 px-2 py-0.5 text-[11px] font-medium">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 text-[11px] font-medium">
                   <Tag className="w-2.5 h-2.5" />
                   {task.category}
                 </span>
@@ -139,7 +139,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                 {overdue && <AlertTriangle className="w-2.5 h-2.5 ml-0.5" />}
               </span>
               {task.scheduled_start && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-violet-50 text-violet-600 px-2 py-0.5 text-[11px] font-medium">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-violet-50 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 px-2 py-0.5 text-[11px] font-medium">
                   <Clock className="w-2.5 h-2.5" />
                   {formatTime(task.scheduled_start)}
                   {task.scheduled_end && `–${formatTime(task.scheduled_end)}`}
@@ -170,7 +170,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onEdit(task)}
-                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-violet-50 text-gray-400 hover:text-violet-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-violet-50 text-gray-400 hover:text-violet-500 flex items-center justify-center transition-all lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                 title="Editează"
                 aria-label="Editează task-ul"
               >
@@ -181,7 +181,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onDelete(task.id)}
-                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition-all lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 title="Șterge"
                 aria-label="Șterge task-ul"
               >

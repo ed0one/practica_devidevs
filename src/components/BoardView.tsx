@@ -144,7 +144,7 @@ function DraggableCard({
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center justify-end gap-1 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center justify-end gap-1 mt-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
         {!isDone && (
           <button
             onClick={() => onEdit(task)}
