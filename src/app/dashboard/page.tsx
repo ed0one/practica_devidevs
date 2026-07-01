@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -159,12 +159,15 @@ export default function DashboardPage() {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
-  const filteredTasks = search.trim()
-    ? tasks.filter((t) =>
-        t.title.toLowerCase().includes(search.toLowerCase()) ||
-        (t.category ?? "").toLowerCase().includes(search.toLowerCase())
-      )
-    : tasks;
+  const filteredTasks = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return tasks;
+    return tasks.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.category ?? "").toLowerCase().includes(q)
+    );
+  }, [tasks, search]);
 
   if (loading) {
     return (
@@ -274,6 +277,7 @@ export default function DashboardPage() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    aria-label="Caută task-uri"
                     placeholder="Caută task-uri..."
                     className="w-full h-10 pl-9 pr-9 rounded-xl border border-gray-200 bg-white shadow-sm text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all"
                   />
@@ -284,7 +288,8 @@ export default function DashboardPage() {
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => setSearch("")}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        aria-label="Șterge căutarea"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                       >
                         <X className="w-3.5 h-3.5" />
                       </motion.button>

@@ -113,7 +113,8 @@ export default function CalendarView({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={prev}
-                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow"
+                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                aria-label={viewMode === "day" ? "Ziua anterioară" : "Săptămâna anterioară"}
               >
                 <ChevronLeft className="w-4 h-4" />
               </motion.button>
@@ -121,7 +122,8 @@ export default function CalendarView({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={next}
-                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow"
+                className="rounded-lg bg-white/80 backdrop-blur border border-gray-200 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                aria-label={viewMode === "day" ? "Ziua următoare" : "Săptămâna următoare"}
               >
                 <ChevronRight className="w-4 h-4" />
               </motion.button>
@@ -153,7 +155,9 @@ export default function CalendarView({
             <button
               key={mode}
               onClick={() => setViewMode(mode)}
-              className={`relative rounded-md px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1 ${
+              aria-pressed={viewMode === mode}
+              aria-label={`Vizualizare ${label}`}
+              className={`relative rounded-md px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 viewMode === mode
                   ? "text-indigo-600"
                   : "text-gray-500 hover:text-gray-700"

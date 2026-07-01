@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, Calendar } from "lucide-react";
 
@@ -27,6 +27,15 @@ export default function ScheduleModal({
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
   const [timeError, setTimeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
 
   const handleSave = () => {
     if (endTime <= startTime) {
@@ -63,6 +72,9 @@ export default function ScheduleModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Programează task-ul"
             className="relative w-full max-w-md rounded-2xl bg-white/95 backdrop-blur-xl border border-gray-200/80 shadow-2xl overflow-hidden"
           >
             <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4">
@@ -79,7 +91,8 @@ export default function ScheduleModal({
                 </div>
                 <button
                   onClick={onClose}
-                  className="rounded-lg p-1.5 text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                  className="rounded-lg p-1.5 text-white/80 hover:text-white hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                  aria-label="Închide"
                 >
                   <X className="w-5 h-5" />
                 </button>
