@@ -2,10 +2,20 @@ import OpenAI from 'openai'
 import { ParsedTasksResponseSchema } from './schemas'
 import type { ParsedTask } from '@/types/task'
 
-const client = new OpenAI({
-  apiKey: process.env.NVIDIA_NIM_API_KEY,
-  baseURL: process.env.NVIDIA_NIM_BASE_URL,
-})
+// Lazy singleton — clientul se construiește la prima cerere, nu la import,
+// ca să nu rupem `next build` când cheia lipsește (preview/CI).
+let _client: OpenAI | null = null
+function getClient(): OpenAI {
+  const apiKey = process.env.NVIDIA_NIM_API_KEY
+  if (!apiKey) throw new Error('NVIDIA_NIM_API_KEY nu este configurat')
+  if (!_client) {
+    _client = new OpenAI({
+      apiKey,
+      baseURL: process.env.NVIDIA_NIM_BASE_URL,
+    })
+  }
+  return _client
+}
 
 const MODEL = process.env.NVIDIA_NIM_MODEL ?? 'meta/llama-3.1-8b-instruct'
 
@@ -124,7 +134,7 @@ function getNextDay(): string {
 }
 
 export async function parseTasks(userText: string): Promise<ParsedTask[]> {
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: MODEL,
     messages: [{ role: 'user', content: buildPrompt(userText) }],
     temperature: 0.2,

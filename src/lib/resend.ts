@@ -1,7 +1,16 @@
 import { Resend } from 'resend'
 import type { Task } from '@/types/task'
 
-const resend = new Resend(process.env.RESEND_API_KEY ?? 'placeholder')
+// Lazy singleton — construim clientul Resend abia la prima trimitere, nu la
+// import. Altfel `new Resend("")` (cheie lipsă/goală în build sau preview)
+// aruncă la load-time și rupe `next build`.
+let _resend: Resend | null = null
+function getResend(): Resend {
+  const key = process.env.RESEND_API_KEY
+  if (!key) throw new Error('RESEND_API_KEY nu este configurat')
+  if (!_resend) _resend = new Resend(key)
+  return _resend
+}
 
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'TaskCapture <onboarding@resend.dev>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.taskcapture.xyz'
@@ -108,7 +117,7 @@ export async function sendNewTasksEmail(to: string, tasks: Task[]) {
     `${APP_URL}/dashboard`
   )
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to,
     subject: `✨ ${count} task${count === 1 ? ' nou adăugat' : '-uri noi adăugate'} — TaskCapture`,
@@ -141,7 +150,7 @@ export async function sendReminderEmail(to: string, tasks: Task[]) {
     `${APP_URL}/dashboard`
   )
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to,
     subject: `📋 ${count} task${count === 1 ? '' : '-uri'} scadente azi${urgent.length > 0 ? ` · ${urgent.length} urgente` : ''} — TaskCapture`,
