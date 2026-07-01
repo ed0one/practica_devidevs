@@ -34,6 +34,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +49,20 @@ export default function LoginPage() {
     } else {
       window.location.href = "/dashboard";
     }
+  };
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+    });
+    setLoading(false);
+    if (error) setError(error.message);
+    else setResetSent(true);
   };
 
   const handleOAuth = async (provider: "github" | "google") => {
@@ -115,8 +131,14 @@ export default function LoginPage() {
 
           <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm p-8">
             <div className="mb-7">
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Intră în cont</h1>
-              <p className="mt-1.5 text-sm text-gray-400">Bun venit înapoi la TaskCapture</p>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+                {forgotMode ? "Resetează parola" : "Intră în cont"}
+              </h1>
+              <p className="mt-1.5 text-sm text-gray-400">
+                {forgotMode
+                  ? "Îți trimitem un link de resetare pe email"
+                  : "Bun venit înapoi la TaskCapture"}
+              </p>
             </div>
 
             {error && (
@@ -125,56 +147,102 @@ export default function LoginPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2.5 mb-5">
-              <button type="button" onClick={() => handleOAuth("github")} disabled={loading}
-                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
-                {GITHUB_SVG} GitHub
-              </button>
-              <button type="button" onClick={() => handleOAuth("google")} disabled={loading}
-                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
-                {GOOGLE_SVG} Google
-              </button>
-            </div>
-
-            <div className="relative mb-5">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100" /></div>
-              <div className="relative flex justify-center"><span className="px-3 bg-white text-xs text-gray-400">sau cu email</span></div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all"
-                    placeholder="tu@email.com" disabled={loading} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Parolă</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required
-                    value={password} onChange={e => setPassword(e.target.value)}
-                    className="w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all"
-                    placeholder="••••••••" disabled={loading} />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {!forgotMode && (
+              <>
+                <div className="grid grid-cols-2 gap-2.5 mb-5">
+                  <button type="button" onClick={() => handleOAuth("github")} disabled={loading}
+                    className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                    {GITHUB_SVG} GitHub
+                  </button>
+                  <button type="button" onClick={() => handleOAuth("google")} disabled={loading}
+                    className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                    {GOOGLE_SVG} Google
                   </button>
                 </div>
-              </div>
-              <button type="submit" disabled={loading || !email || !password}
-                className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200/60 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all mt-1">
-                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Se conectează...</> : "Intră în cont"}
-              </button>
-            </form>
 
-            <p className="mt-5 text-center text-sm text-gray-500">
-              Nu ai cont?{" "}
-              <Link href="/register" className="text-indigo-600 font-semibold hover:underline">Creează unul gratuit</Link>
-            </p>
+                <div className="relative mb-5">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100" /></div>
+                  <div className="relative flex justify-center"><span className="px-3 bg-white text-xs text-gray-400">sau cu email</span></div>
+                </div>
+              </>
+            )}
+
+            {forgotMode && resetSent ? (
+              <div className="text-center py-4">
+                <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                </div>
+                <p className="text-sm font-semibold text-gray-900 mb-1">Email trimis!</p>
+                <p className="text-sm text-gray-400 mb-5">
+                  Verifică inbox-ul la <span className="font-medium text-gray-600">{email}</span> și urmează linkul de resetare.
+                </p>
+                <button
+                  onClick={() => { setForgotMode(false); setResetSent(false); setError(null); }}
+                  className="text-sm text-indigo-600 font-semibold hover:underline"
+                >
+                  Înapoi la login
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={forgotMode ? handleForgot : handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)}
+                      className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all"
+                      placeholder="tu@email.com" disabled={loading} />
+                  </div>
+                </div>
+                {!forgotMode && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Parolă</label>
+                      <button
+                        type="button"
+                        onClick={() => { setForgotMode(true); setError(null); }}
+                        className="text-xs text-indigo-600 font-semibold hover:underline"
+                      >
+                        Ai uitat parola?
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required
+                        value={password} onChange={e => setPassword(e.target.value)}
+                        className="w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all"
+                        placeholder="••••••••" disabled={loading} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <button type="submit" disabled={loading || !email || (!forgotMode && !password)}
+                  className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200/60 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all mt-1">
+                  {loading
+                    ? <><Loader2 className="w-4 h-4 animate-spin" /> {forgotMode ? "Se trimite..." : "Se conectează..."}</>
+                    : forgotMode ? "Trimite link de resetare" : "Intră în cont"}
+                </button>
+                {forgotMode && (
+                  <button
+                    type="button"
+                    onClick={() => { setForgotMode(false); setError(null); }}
+                    className="w-full text-center text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    Înapoi la login
+                  </button>
+                )}
+              </form>
+            )}
+
+            {!forgotMode && (
+              <p className="mt-5 text-center text-sm text-gray-500">
+                Nu ai cont?{" "}
+                <Link href="/register" className="text-indigo-600 font-semibold hover:underline">Creează unul gratuit</Link>
+              </p>
+            )}
           </div>
         </motion.div>
       </div>
