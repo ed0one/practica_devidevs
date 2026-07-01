@@ -13,6 +13,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { useTimeFormat, formatClock } from "@/lib/time-format";
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Status, Priority } from "@/types/task";
 import {
@@ -79,6 +80,7 @@ function DraggableCard({
   onEdit: (task: Task) => void;
   isDraggingThis: boolean;
 }) {
+  const timeFmt = useTimeFormat();
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id });
   const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined;
   const overdue = isOverdue(task.deadline, task.status);
@@ -138,7 +140,7 @@ function DraggableCard({
         {task.scheduled_start && (
           <span className="inline-flex items-center gap-0.5 text-[10px] rounded-full bg-violet-50 px-1.5 py-0.5 text-violet-600">
             <Clock className="w-2.5 h-2.5" />
-            {task.scheduled_start.substring(11, 16)}
+            {formatClock(task.scheduled_start.substring(11, 16), timeFmt)}
           </span>
         )}
       </div>
