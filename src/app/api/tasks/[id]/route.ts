@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { TaskUpdateSchema } from '@/lib/schemas'
+import { nextOccurrence } from '@/lib/recurrence'
+import type { Task } from '@/types/task'
 
 async function getSupabase() {
   const cookieStore = await cookies()
@@ -81,5 +83,17 @@ export async function PATCH(
     return NextResponse.json({ error: 'Task inexistent' }, { status: 404 })
   }
 
-  return NextResponse.json(data[0])
+  const updated = data[0] as Task
+
+  // La finalizarea unui task recurent, generăm automat următoarea apariție.
+  // Best-effort: un eșec aici nu trebuie să pice update-ul principal.
+  if (updates.status === 'done') {
+    const next = nextOccurrence(updated)
+    if (next) {
+      const { error: spawnErr } = await supabase.from('tasks').insert(next)
+      if (spawnErr) console.error('[tasks PATCH] recurrence spawn error:', spawnErr)
+    }
+  }
+
+  return NextResponse.json(updated)
 }

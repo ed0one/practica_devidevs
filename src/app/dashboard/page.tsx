@@ -116,6 +116,8 @@ export default function DashboardPage() {
 
   const handleToggleDone = async (id: string, newStatus: Status) => {
     const prev = tasks;
+    const target = tasks.find((t) => t.id === id);
+    const isRecurring = newStatus === "done" && target?.recurrence && target.recurrence !== "none";
     setTasks((t) => t.map((task) => task.id === id ? { ...task, status: newStatus } : task));
     try {
       const res = await fetch(`/api/tasks/${id}`, {
@@ -124,12 +126,14 @@ export default function DashboardPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error();
+      // Task recurent finalizat → serverul a creat următoarea apariție; o aducem.
+      if (isRecurring) fetchTasks();
     } catch { setTasks(prev); }
   };
 
   const handleEdit = async (
     id: string,
-    updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category">>
+    updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence">>
   ) => {
     const prev = tasks;
     setTasks((t) => t.map((task) => task.id === id ? { ...task, ...updates } : task));
@@ -167,6 +171,7 @@ export default function DashboardPage() {
         body: JSON.stringify(updates),
       });
       if (!res.ok) throw new Error();
+      if (updates.status === "done" && task.recurrence && task.recurrence !== "none") fetchTasks();
     } catch {
       setTasks(prev);
       toast.error("Nu s-a putut muta task-ul.");

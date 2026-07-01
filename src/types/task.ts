@@ -1,6 +1,7 @@
 export type Priority = 'low' | 'medium' | 'high'
 export type Status = 'pending' | 'done'
 export type ViewMode = 'week' | 'day' | 'list' | 'board'
+export type Recurrence = 'none' | 'daily' | 'weekly'
 
 export interface Task {
   id: string
@@ -15,6 +16,7 @@ export interface Task {
   scheduled_date: string | null
   scheduled_start: string | null
   scheduled_end: string | null
+  recurrence: Recurrence
   jira_issue_key?: string | null
 }
 
