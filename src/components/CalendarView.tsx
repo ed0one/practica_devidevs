@@ -191,7 +191,7 @@ export default function CalendarView({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="grid grid-cols-7 gap-1.5"
+            className="grid grid-cols-1 sm:grid-cols-7 gap-2 sm:gap-1.5"
           >
             {weekDays.map((day, i) => {
               const dayTasks = getTasksForDay(tasks, day);
@@ -204,30 +204,37 @@ export default function CalendarView({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
-                  className={`rounded-xl border p-2 min-h-[140px] transition-all ${
+                  className={`rounded-xl border p-3 sm:p-2 sm:min-h-[140px] transition-all ${
                     today
-                      ? "border-indigo-300 bg-indigo-50/50 shadow-md shadow-indigo-100/50"
+                      ? "border-indigo-300 bg-indigo-50/50 dark:bg-indigo-500/10 shadow-md shadow-indigo-100/50 dark:shadow-none"
                       : past
                         ? "border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] opacity-60"
                         : "border-gray-200/80 dark:border-white/10 bg-white/80 dark:bg-[#16161f] backdrop-blur-sm hover:shadow-md"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
-                      {format(day, "EEE", { locale: ro })}
+                  {/* Mobile: "luni 30" pe un rând; desktop: EEE sus, număr dreapta */}
+                  <div className="flex items-center justify-between mb-2 sm:mb-1.5">
+                    <span className="text-xs sm:text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                      <span className="sm:hidden">{format(day, "EEEE", { locale: ro })}</span>
+                      <span className="hidden sm:inline">{format(day, "EEE", { locale: ro })}</span>
                     </span>
                     <span
                       className={`text-sm font-bold ${
                         today
                           ? "bg-indigo-600 text-white w-7 h-7 flex items-center justify-center rounded-full"
-                          : "text-gray-700"
+                          : "text-gray-700 dark:text-gray-300"
                       }`}
                     >
                       {format(day, "d")}
                     </span>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5 sm:space-y-1">
+                    {dayTasks.length === 0 && (
+                      <p className="text-[11px] text-gray-300 dark:text-gray-600 italic sm:hidden">
+                        Nimic programat
+                      </p>
+                    )}
                     {dayTasks.map((task) => {
                       const config = {
                         high: "border-l-red-500 bg-white dark:bg-white/5",
@@ -239,14 +246,14 @@ export default function CalendarView({
                         <motion.div
                           key={task.id}
                           whileHover={{ x: 2 }}
-                          className={`border-l-2 rounded-r px-1.5 py-0.5 cursor-pointer ${config} ${task.status === "done" ? "opacity-40 line-through" : ""}`}
+                          className={`flex items-center justify-between gap-2 sm:block border-l-2 rounded-r px-2 py-1.5 sm:px-1.5 sm:py-0.5 cursor-pointer ${config} ${task.status === "done" ? "opacity-40 line-through" : ""}`}
                           onClick={() => onSchedule(task.id)}
                         >
-                          <p className="text-[10px] font-medium text-gray-700 dark:text-gray-300 truncate">
+                          <p className="text-xs sm:text-[10px] font-medium text-gray-700 dark:text-gray-300 truncate">
                             {task.title}
                           </p>
                           {task.scheduled_start && (
-                            <p className="text-[9px] text-gray-500">
+                            <p className="text-[11px] sm:text-[9px] text-gray-500 shrink-0">
                               {formatTimeShort(task.scheduled_start)}
                             </p>
                           )}
