@@ -21,12 +21,6 @@ const GOOGLE_SVG = (
   </svg>
 );
 
-const APPLE_SVG = (
-  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-    <path d="M17.05 12.54c-.03-3.02 2.46-4.46 2.58-4.53-1.41-2.05-3.59-2.33-4.36-2.36-1.85-.19-3.62 1.09-4.56 1.09-.94 0-2.39-1.07-3.94-1.04-2.03.03-3.9 1.18-4.94 2.99-2.1 3.65-.54 9.05 1.51 12.01 1 1.45 2.2 3.08 3.77 3.02 1.51-.06 2.08-.98 3.91-.98 1.82 0 2.34.98 3.94.95 1.62-.03 2.65-1.48 3.65-2.93 1.15-1.68 1.62-3.31 1.65-3.39-.04-.02-3.17-1.22-3.2-4.82zM14.09 3.86c.83-1.01 1.39-2.4 1.24-3.8-1.2.05-2.65.8-3.51 1.81-.77.89-1.45 2.31-1.27 3.68 1.34.1 2.7-.68 3.54-1.69z"/>
-  </svg>
-);
-
 const features = [
   { icon: Sparkles, text: "AI extrage task-uri din text natural" },
   { icon: Calendar, text: "Calendar săptămânal și zilnic" },
@@ -72,7 +66,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleOAuth = async (provider: "github" | "google" | "apple") => {
+  const handleOAuth = async (provider: "github" | "google") => {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
@@ -171,18 +165,14 @@ export default function RegisterPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-2.5 mb-5">
-              <button type="button" onClick={() => handleOAuth("github")} disabled={loading} aria-label="Continuă cu GitHub"
-                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-                {GITHUB_SVG} <span className="hidden sm:inline">GitHub</span>
+            <div className="grid grid-cols-2 gap-2.5 mb-5">
+              <button type="button" onClick={() => handleOAuth("github")} disabled={loading}
+                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                {GITHUB_SVG} GitHub
               </button>
-              <button type="button" onClick={() => handleOAuth("google")} disabled={loading} aria-label="Continuă cu Google"
-                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-                {GOOGLE_SVG} <span className="hidden sm:inline">Google</span>
-              </button>
-              <button type="button" onClick={() => handleOAuth("apple")} disabled={loading} aria-label="Continuă cu Apple"
-                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
-                {APPLE_SVG} <span className="hidden sm:inline">Apple</span>
+              <button type="button" onClick={() => handleOAuth("google")} disabled={loading}
+                className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                {GOOGLE_SVG} Google
               </button>
             </div>
 
