@@ -49,7 +49,7 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 280, damping: 24, delay: i * 0.07 }}
-            className="bg-white rounded-2xl border border-gray-200/70 p-4 shadow-sm hover:shadow-md transition-shadow"
+            className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/70 dark:border-white/10 p-4 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between">
               <div>
@@ -59,7 +59,7 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
                   initial={{ scale: 0.7, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 400 }}
-                  className="text-4xl font-black text-gray-900 leading-none"
+                  className="text-4xl font-black text-gray-900 dark:text-gray-100 leading-none"
                 >
                   {stat.value}
                 </motion.p>
@@ -78,7 +78,7 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl border border-gray-200/70 p-5 shadow-sm"
+            className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/70 dark:border-white/10 p-5 shadow-sm"
           >
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -87,7 +87,7 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
               </div>
               <span className="text-3xl font-black text-indigo-600">{completionRate}%</span>
             </div>
-            <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${completionRate}%` }}
@@ -101,7 +101,7 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white rounded-2xl border border-gray-200/70 p-5 shadow-sm"
+            className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/70 dark:border-white/10 p-5 shadow-sm"
           >
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Ultimele 7 zile</p>
             <div className="flex items-end justify-between gap-1.5 h-14">

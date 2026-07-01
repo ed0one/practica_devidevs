@@ -88,7 +88,7 @@ function DraggableCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group bg-white rounded-xl border border-gray-200/80 p-3 shadow-sm transition-all
+      className={`group bg-white dark:bg-[#16161f] rounded-xl border border-gray-200/80 dark:border-white/10 p-3 shadow-sm transition-all
         ${isDraggingThis ? "opacity-30 scale-95" : "hover:shadow-md"}
         ${isDone ? "opacity-55" : ""}
         ${overdue ? "border-red-300 ring-1 ring-red-200" : ""}
@@ -115,7 +115,7 @@ function DraggableCard({
             : <Circle className="w-4 h-4 text-gray-300 hover:text-blue-400 transition-colors" />}
         </button>
 
-        <p className={`text-[13px] font-medium leading-snug flex-1 ${isDone ? "line-through text-gray-400" : "text-gray-800"}`}>
+        <p className={`text-[13px] font-medium leading-snug flex-1 ${isDone ? "line-through text-gray-400" : "text-gray-800 dark:text-gray-200"}`}>
           {task.title}
         </p>
       </div>
@@ -186,15 +186,15 @@ function DroppableColumn({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border border-gray-200/70 bg-white/60 overflow-hidden transition-all duration-150
+      className={`rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] overflow-hidden transition-all duration-150
         ${isOver ? `ring-2 ${col.ring} shadow-md scale-[1.01]` : "hover:shadow-sm"}
       `}
     >
       {/* Header */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200/60 bg-white/80">
+      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200/60 dark:border-white/10 bg-white/80 dark:bg-white/[0.04]">
         <div className="flex items-center gap-2.5">
           <span className={`w-2.5 h-2.5 rounded-full ${col.dot} shrink-0`} />
-          <span className="text-sm font-semibold text-gray-800">{col.label}</span>
+          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{col.label}</span>
         </div>
         <span className={`text-xs font-bold ${col.countBg} ${col.countText} rounded-full px-2 py-0.5 min-w-[20px] text-center`}>
           {tasks.length}

@@ -11,6 +11,7 @@ import EditTaskModal from "@/components/EditTaskModal";
 import StatsHeader from "@/components/StatsHeader";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
+import ThemeToggle from "@/components/ThemeToggle";
 import { Plus, Sparkles, Search, Download, X } from "lucide-react";
 import { Priority } from "@/types/task";
 import { tasksToCsv } from "@/lib/csv";
@@ -171,7 +172,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] dark:bg-[#0a0a0f]">
         <div className="text-center">
           <div className="relative mx-auto w-14 h-14 mb-4">
             <div className="absolute inset-0 rounded-full border-4 border-gray-100" />
@@ -189,8 +190,8 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] p-4">
-        <div className="w-full max-w-sm rounded-2xl border border-red-100 bg-white p-6 text-center shadow-xl">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] dark:bg-[#0a0a0f] p-4">
+        <div className="w-full max-w-sm rounded-2xl border border-red-100 dark:border-red-500/20 bg-white dark:bg-[#16161f] p-6 text-center shadow-xl">
           <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-2xl">⚠️</div>
           <p className="text-red-600 font-semibold text-sm">{error}</p>
           <button onClick={fetchTasks} className="mt-4 w-full h-10 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors">
@@ -204,7 +205,7 @@ export default function DashboardPage() {
   const schedulingTask = tasks.find((t) => t.id === schedulingTaskId);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] flex">
+    <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0a0a0f] flex">
       <Sidebar userEmail={userEmail} />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -217,6 +218,7 @@ export default function DashboardPage() {
             <span className="font-bold text-white text-sm tracking-tight">TaskCapture</span>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle variant="sidebar" className="w-8 h-8" />
             <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold shadow-md shadow-indigo-500/20">
               <Plus className="w-3.5 h-3.5" /> Adaugă
             </a>
@@ -226,7 +228,7 @@ export default function DashboardPage() {
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 max-w-5xl w-full mx-auto">
           {/* Greeting */}
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-            <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+            <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
               {greeting()}{userEmail ? `, ${userEmail.split("@")[0]}` : ""}
             </h2>
             <p className="text-sm text-gray-400 mt-0.5 capitalize">{todayStr}</p>
@@ -245,7 +247,7 @@ export default function DashboardPage() {
               >
                 <Sparkles className="w-10 h-10 text-indigo-400" />
               </motion.div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Nu ai task-uri încă</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Nu ai task-uri încă</h3>
               <p className="text-gray-400 text-sm max-w-xs mb-6">
                 Scrie ce ai de făcut în limbaj natural și AI-ul extrage task-urile automat.
               </p>
@@ -279,7 +281,7 @@ export default function DashboardPage() {
                     onChange={(e) => setSearch(e.target.value)}
                     aria-label="Caută task-uri"
                     placeholder="Caută task-uri..."
-                    className="w-full h-10 pl-9 pr-9 rounded-xl border border-gray-200 bg-white shadow-sm text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all"
+                    className="w-full h-10 pl-9 pr-9 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] shadow-sm text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all"
                   />
                   <AnimatePresence>
                     {search && (
@@ -309,7 +311,7 @@ export default function DashboardPage() {
 
                 <button
                   onClick={() => { exportCSV(tasks); toast.success("CSV descărcat!"); }}
-                  className="ml-auto flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gray-200 bg-white text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="ml-auto flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                   title="Exportă CSV"
                 >
                   <Download className="w-3.5 h-3.5" />

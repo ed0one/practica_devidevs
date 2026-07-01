@@ -11,10 +11,18 @@ export const metadata: Metadata = {
   keywords: ["task management", "AI", "productivitate", "organizare"],
 };
 
+// Setează clasa `.dark` înainte de primul paint ca să evităm flash-ul de temă
+// (FOUC). Rulează sincron din <head>, citind preferința salvată sau setarea
+// sistemului.
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ro" className={`${inter.variable} font-sans h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-slate-50">
+    <html lang="ro" className={`${inter.variable} font-sans h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0f]">
         {children}
         <Toaster
           position="bottom-center"
