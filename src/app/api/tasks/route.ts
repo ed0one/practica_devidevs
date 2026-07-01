@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { ParsedTaskSchema } from '@/lib/schemas'
 import { buildTaskRow } from '@/lib/task-rows'
 import { sendNewTasksEmail } from '@/lib/resend'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import type { Task } from '@/types/task'
 
 async function getSupabase() {
@@ -30,6 +31,9 @@ export async function GET() {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rl = await checkRateLimit('read', user.id)
+  if (!rl.success) return rateLimitResponse(rl)
 
   const { data: tasks, error } = await supabase
     .from('tasks')
@@ -68,6 +72,9 @@ export async function POST(request: NextRequest) {
   const supabase = await getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rl = await checkRateLimit('write', user.id)
+  if (!rl.success) return rateLimitResponse(rl)
 
   const rawInput = parsed.data.raw_input ?? ''
   const rows = parsed.data.tasks.map((t) => buildTaskRow(t, user.id, rawInput))

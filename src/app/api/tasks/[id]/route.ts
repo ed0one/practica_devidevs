@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { TaskUpdateSchema } from '@/lib/schemas'
 import { nextOccurrence } from '@/lib/recurrence'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import type { Task } from '@/types/task'
 
 async function getSupabase() {
@@ -31,6 +32,9 @@ export async function DELETE(
   const supabase = await getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rl = await checkRateLimit('write', user.id)
+  if (!rl.success) return rateLimitResponse(rl)
 
   const { error } = await supabase
     .from('tasks')
@@ -70,6 +74,9 @@ export async function PATCH(
   const supabase = await getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rl = await checkRateLimit('write', user.id)
+  if (!rl.success) return rateLimitResponse(rl)
 
   const { data, error } = await supabase
     .from('tasks')
