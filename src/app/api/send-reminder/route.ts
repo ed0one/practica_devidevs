@@ -3,17 +3,20 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendReminderEmail } from '@/lib/resend'
 import type { Task } from '@/types/task'
 
-export async function POST(request: NextRequest) {
-  const secret = process.env.REMINDER_CRON_SECRET
+// Vercel Cron injectează automat `Authorization: Bearer ${CRON_SECRET}` folosind
+// variabila numită exact CRON_SECRET. Acceptăm și REMINDER_CRON_SECRET ca
+// fallback pentru trigger manual (curl) și compatibilitate.
+function isAuthorized(request: NextRequest): boolean {
   const authHeader = request.headers.get('authorization')
+  const secrets = [process.env.CRON_SECRET, process.env.REMINDER_CRON_SECRET].filter(Boolean)
+  if (secrets.length === 0) return false
+  return secrets.some((s) => authHeader === `Bearer ${s}`)
+}
 
-  if (!secret || authHeader !== `Bearer ${secret}`) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
+async function runReminder() {
   const supabase = createAdminClient()
 
-  // Selectează task-urile cu deadline azi (orice oră), neprelucrate încă
+  // Task-urile cu deadline azi (orice oră), încă nefinalizate
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
   const todayEnd = new Date()
@@ -27,6 +30,7 @@ export async function POST(request: NextRequest) {
     .lte('deadline', todayEnd.toISOString())
 
   if (tasksError) {
+    console.error('[send-reminder] query error:', tasksError.message)
     return Response.json({ error: tasksError.message }, { status: 500 })
   }
 
@@ -55,11 +59,29 @@ export async function POST(request: NextRequest) {
       await sendReminderEmail(userData.user.email, userTasks)
       results.push({ userId, status: 'sent' })
     } catch (err) {
+      console.error(`[send-reminder] email error pentru ${userId}:`, err)
       results.push({ userId, status: 'error', reason: (err as Error).message })
     }
   }
 
   const sentCount = results.filter((r) => r.status === 'sent').length
+  console.log(`[send-reminder] trimise ${sentCount}/${Object.keys(byUser).length}`)
 
   return Response.json({ sent: sentCount, total: Object.keys(byUser).length, results })
+}
+
+// Vercel Cron invocă endpoint-ul cu GET.
+export async function GET(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  return runReminder()
+}
+
+// Păstrat pentru trigger manual (ex: test cu curl -X POST).
+export async function POST(request: NextRequest) {
+  if (!isAuthorized(request)) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  return runReminder()
 }
