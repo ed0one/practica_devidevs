@@ -3,14 +3,20 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { parseTasksInputSchema } from "@/lib/schemas";
 import { parseTasksWithNim } from "@/lib/nim";
+import { llmRateLimit, getClientIp } from "@/lib/rate-limit";
 
-// POST /api/parse-tasks
-// input:  { text: string }
-// output: { tasks: Task[] }
 export async function POST(request) {
+  const ip = getClientIp(request);
+  const result = await llmRateLimit.limit(`parse-tasks_${ip}`);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: "Prea multe cereri! Așteptați câteva momente." },
+      { status: 429 }
+    );
+  }
+
   const supabase = await createClient();
 
-  // 1. Auth: dacă nu e logat, oprim aici.
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -18,7 +24,6 @@ export async function POST(request) {
     return NextResponse.json({ error: "Neautentificat." }, { status: 401 });
   }
 
-  // 2. Validăm body-ul.
   let text;
   try {
     const body = await request.json();
@@ -33,7 +38,6 @@ export async function POST(request) {
     return NextResponse.json({ error: "JSON invalid." }, { status: 400 });
   }
 
-  // 3. Chemăm NVIDIA NIM + validăm cu Zod (în interiorul helper-ului).
   let llmTasks;
   try {
     llmTasks = await parseTasksWithNim(text);
@@ -52,7 +56,6 @@ export async function POST(request) {
     return NextResponse.json({ tasks: [] });
   }
 
-  // 4. INSERT în Supabase (RLS leagă fiecare task de user).
   const rows = llmTasks.map((t) => ({
     user_id: user.id,
     title: t.title,

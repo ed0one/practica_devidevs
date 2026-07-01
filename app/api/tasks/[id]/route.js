@@ -2,10 +2,18 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { updateTaskInputSchema } from "@/lib/schemas";
+import { writeRateLimit, getClientIp } from "@/lib/rate-limit";
 
-// PATCH /api/tasks/[id]
-// input: { status: 'done' | 'pending' }
 export async function PATCH(request, ctx) {
+  const ip = getClientIp(request);
+  const result = await writeRateLimit.limit(`tasks_write_${ip}`);
+  if (!result.success) {
+    return NextResponse.json(
+      { error: "Prea multe cereri! Așteptați câteva momente." },
+      { status: 429 }
+    );
+  }
+
   const { id } = await ctx.params;
   const supabase = await createClient();
 
@@ -30,7 +38,6 @@ export async function PATCH(request, ctx) {
     return NextResponse.json({ error: "JSON invalid." }, { status: 400 });
   }
 
-  // .eq('user_id') ne asigură că un user nu poate modifica task-ul altcuiva.
   const { data, error } = await supabase
     .from("tasks")
     .update({ status })
@@ -40,7 +47,6 @@ export async function PATCH(request, ctx) {
     .single();
 
   if (error) {
-    // PGRST116 = niciun rând (id inexistent sau al altui user).
     if (error.code === "PGRST116") {
       return NextResponse.json({ error: "Task negăsit." }, { status: 404 });
     }
