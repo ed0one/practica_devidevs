@@ -18,6 +18,15 @@ export interface Task {
   scheduled_end: string | null
   recurrence: Recurrence
   jira_issue_key?: string | null
+  reminder_offset_min?: number | null
+  reminder_sent_at?: string | null
+}
+
+export interface UserPrefs {
+  timezone: string
+  reminder_hour: number
+  email_daily: boolean
+  email_new_tasks: boolean
 }
 
 // Ce trimite LLM-ul pentru un singur task (fără id/user_id/created_at)

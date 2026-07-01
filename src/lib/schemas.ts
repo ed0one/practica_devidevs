@@ -54,6 +54,28 @@ export const TaskUpdateSchema = z
     scheduled_start: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/)).nullable(),
     scheduled_end: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/)).nullable(),
     recurrence: z.enum(['none', 'daily', 'weekly']),
+    reminder_offset_min: z.number().int().min(0).max(10080).nullable(),
+  })
+  .partial()
+  .strict()
+
+// ─── Preferințe notificări (PUT /api/prefs) ─────────────────────────────────
+export const UserPrefsSchema = z
+  .object({
+    timezone: z.string().min(1).max(64).refine(
+      (tz) => {
+        try {
+          new Intl.DateTimeFormat('en-US', { timeZone: tz })
+          return true
+        } catch {
+          return false
+        }
+      },
+      { message: 'Timezone invalid' }
+    ),
+    reminder_hour: z.number().int().min(0).max(23),
+    email_daily: z.boolean(),
+    email_new_tasks: z.boolean(),
   })
   .partial()
   .strict()

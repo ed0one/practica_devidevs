@@ -2,19 +2,28 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Type, Tag, Calendar, Flag, Repeat } from "lucide-react";
+import { X, Type, Tag, Calendar, Flag, Repeat, Bell } from "lucide-react";
 import { Task, Priority, Recurrence } from "@/types/task";
 
 interface EditTaskModalProps {
   task: Task | null;
   onClose: () => void;
-  onSave: (id: string, updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence">>) => Promise<void>;
+  onSave: (id: string, updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence" | "reminder_offset_min">>) => Promise<void>;
 }
 
 const RECURRENCE_OPTIONS: { value: Recurrence; label: string }[] = [
   { value: "none", label: "Niciodată" },
   { value: "daily", label: "Zilnic" },
   { value: "weekly", label: "Săptămânal" },
+];
+
+const REMINDER_OPTIONS: { value: number | null; label: string }[] = [
+  { value: null, label: "Fără reminder" },
+  { value: 0, label: "La ora programată" },
+  { value: 10, label: "Cu 10 min înainte" },
+  { value: 30, label: "Cu 30 min înainte" },
+  { value: 60, label: "Cu 1 oră înainte" },
+  { value: 1440, label: "Cu o zi înainte" },
 ];
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
@@ -29,6 +38,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
   const [deadline, setDeadline] = useState("");
   const [category, setCategory] = useState("");
   const [recurrence, setRecurrence] = useState<Recurrence>("none");
+  const [reminderOffset, setReminderOffset] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +51,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
       setDeadline(task.deadline ? task.deadline.substring(0, 10) : "");
       setCategory(task.category ?? "");
       setRecurrence(task.recurrence ?? "none");
+      setReminderOffset(task.reminder_offset_min ?? null);
       setError(null);
     }
   }, [task]);
@@ -68,6 +79,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
         deadline: deadline || null,
         category: category.trim() || null,
         recurrence,
+        reminder_offset_min: reminderOffset,
       });
       onClose();
     } catch {
@@ -205,6 +217,27 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                     La finalizare, se creează automat următorul task {recurrence === "daily" ? "peste o zi" : "peste o săptămână"}.
                   </p>
                 )}
+              </div>
+
+              {/* Reminder */}
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <Bell className="w-3.5 h-3.5" /> Reminder pe email
+                </label>
+                <select
+                  value={reminderOffset === null ? "" : String(reminderOffset)}
+                  onChange={(e) => setReminderOffset(e.target.value === "" ? null : Number(e.target.value))}
+                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white dark:focus:bg-white/10 transition-all"
+                >
+                  {REMINDER_OPTIONS.map((opt) => (
+                    <option key={String(opt.value)} value={opt.value === null ? "" : String(opt.value)}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1.5 text-[11px] text-gray-400">
+                  Relativ la ora programată; fără oră, se folosește deadline-ul la 09:00.
+                </p>
               </div>
 
               {error && (
