@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Task, Priority, Status } from "@/types/task";
 import TaskCard from "./TaskCard";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, CheckSquare, Square, CheckCircle2, Trash2, X } from "lucide-react";
 
 type SortKey = "deadline" | "priority" | "created";
 
@@ -36,6 +36,8 @@ interface TaskListProps {
   onDelete?: (id: string) => void;
   onSchedule?: (id: string) => void;
   onEdit?: (task: Task) => void;
+  onBulkDone?: (ids: string[]) => void;
+  onBulkDelete?: (ids: string[]) => void;
 }
 
 export default function TaskList({
@@ -44,13 +46,39 @@ export default function TaskList({
   onDelete,
   onSchedule,
   onEdit,
+  onBulkDone,
+  onBulkDelete,
 }: TaskListProps) {
   const [sortKey, setSortKey] = useState<SortKey>("deadline");
   const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const filtered =
     filter === "all" ? tasks : tasks.filter((t) => t.status === filter);
   const sorted = sortTasks(filtered, sortKey);
+
+  const bulkEnabled = Boolean(onBulkDone || onBulkDelete);
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const allVisibleSelected = sorted.length > 0 && sorted.every((t) => selected.has(t.id));
+  const toggleSelectAll = () =>
+    setSelected(allVisibleSelected ? new Set() : new Set(sorted.map((t) => t.id)));
+
+  const exitSelect = () => {
+    setSelectMode(false);
+    setSelected(new Set());
+  };
+
+  // Doar id-urile selectate care sunt încă vizibile în lista curentă.
+  const selectedIds = sorted.filter((t) => selected.has(t.id)).map((t) => t.id);
 
   return (
     <div>
@@ -87,21 +115,97 @@ export default function TaskList({
             </button>
           ))}
         </div>
+
+        {bulkEnabled && !selectMode && sorted.length > 0 && (
+          <button
+            onClick={() => setSelectMode(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <CheckSquare className="w-3.5 h-3.5" /> Selectează
+          </button>
+        )}
       </div>
+
+      {/* Bara de acțiuni bulk */}
+      <AnimatePresence>
+        {selectMode && (
+          <div className="mb-4 flex items-center gap-2 flex-wrap rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/70 dark:bg-indigo-500/10 px-3 py-2.5">
+            <button
+              onClick={toggleSelectAll}
+              aria-label={allVisibleSelected ? "Deselectează tot" : "Selectează tot"}
+              className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
+              {allVisibleSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
+              {allVisibleSelected ? "Deselectează tot" : "Selectează tot"}
+            </button>
+            <span className="text-xs text-indigo-600/70 dark:text-indigo-300/70">
+              {selectedIds.length} selectate
+            </span>
+
+            <div className="ml-auto flex items-center gap-2">
+              {onBulkDone && (
+                <button
+                  onClick={() => { onBulkDone(selectedIds); exitSelect(); }}
+                  disabled={selectedIds.length === 0}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Finalizează
+                </button>
+              )}
+              {onBulkDelete && (
+                <button
+                  onClick={() => { onBulkDelete(selectedIds); exitSelect(); }}
+                  disabled={selectedIds.length === 0}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-red-500 text-white text-xs font-semibold hover:bg-red-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                >
+                  <Trash2 className="w-3.5 h-3.5" /> Șterge
+                </button>
+              )}
+              <button
+                onClick={exitSelect}
+                aria-label="Anulează selecția"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="popLayout">
         <div className="flex flex-col gap-2.5">
-          {sorted.map((task, i) => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onToggleDone={onToggleDone}
-              onDelete={onDelete}
-              onSchedule={onSchedule}
-              onEdit={onEdit}
-              index={i}
-            />
-          ))}
+          {sorted.map((task, i) => {
+            const card = (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onToggleDone={onToggleDone}
+                onDelete={onDelete}
+                onSchedule={onSchedule}
+                onEdit={onEdit}
+                index={i}
+              />
+            );
+            if (!selectMode) return card;
+            const isChecked = selected.has(task.id);
+            return (
+              <div key={task.id} className="flex items-center gap-2.5">
+                <button
+                  onClick={() => toggleSelect(task.id)}
+                  role="checkbox"
+                  aria-checked={isChecked}
+                  aria-label={`Selectează: ${task.title}`}
+                  className="shrink-0 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  {isChecked
+                    ? <CheckSquare className="w-5 h-5 text-indigo-600" />
+                    : <Square className="w-5 h-5 text-gray-300 dark:text-gray-600 hover:text-indigo-400 transition-colors" />}
+                </button>
+                <div className="flex-1 min-w-0">{card}</div>
+              </div>
+            );
+          })}
         </div>
       </AnimatePresence>
     </div>

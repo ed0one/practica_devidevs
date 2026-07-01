@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -58,12 +58,60 @@ export default function DashboardPage() {
     createClient().auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
   }, [fetchTasks]);
 
-  const handleDelete = async (id: string) => {
-    const prev = tasks;
+  // Curăță ștergerile în așteptare la demontare (evită setState după unmount).
+  useEffect(() => {
+    const map = pendingDeletes.current;
+    return () => {
+      map.forEach((tm) => clearTimeout(tm));
+      map.clear();
+    };
+  }, []);
+
+  // Ștergeri în așteptare: id → timeout. DELETE-ul real se execută după 5s,
+  // lăsând timp pentru "Anulează".
+  const pendingDeletes = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Reinserează un task șters la poziția lui originală (dacă nu e deja prezent).
+  const restoreTask = useCallback((task: Task, index: number) => {
+    setTasks((t) => {
+      if (t.some((x) => x.id === task.id)) return t;
+      const copy = [...t];
+      copy.splice(Math.min(index, copy.length), 0, task);
+      return copy;
+    });
+  }, []);
+
+  const handleDelete = (id: string) => {
+    const index = tasks.findIndex((t) => t.id === id);
+    if (index === -1) return;
+    const removed = tasks[index];
+
     setTasks((t) => t.filter((task) => task.id !== id));
-    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
-    if (!res.ok) { setTasks(prev); toast.error("Nu s-a putut șterge task-ul."); }
-    else toast.success("Task șters.");
+
+    const timer = setTimeout(async () => {
+      pendingDeletes.current.delete(id);
+      try {
+        const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error();
+      } catch {
+        restoreTask(removed, index);
+        toast.error("Nu s-a putut șterge task-ul.");
+      }
+    }, 5000);
+    pendingDeletes.current.set(id, timer);
+
+    toast("Task șters.", {
+      action: {
+        label: "Anulează",
+        onClick: () => {
+          const tm = pendingDeletes.current.get(id);
+          if (tm) clearTimeout(tm);
+          pendingDeletes.current.delete(id);
+          restoreTask(removed, index);
+        },
+      },
+      duration: 5000,
+    });
   };
 
   const handleToggleDone = async (id: string, newStatus: Status) => {
@@ -123,6 +171,65 @@ export default function DashboardPage() {
       setTasks(prev);
       toast.error("Nu s-a putut muta task-ul.");
     }
+  };
+
+  const handleBulkDone = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    const idSet = new Set(ids);
+    const prev = tasks;
+    setTasks((t) => t.map((task) => (idSet.has(task.id) ? { ...task, status: "done" as Status } : task)));
+    try {
+      const results = await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/tasks/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "done" }),
+          })
+        )
+      );
+      if (results.some((r) => !r.ok)) throw new Error();
+      toast.success(`${ids.length} task-uri marcate ca finalizate.`);
+    } catch {
+      setTasks(prev);
+      toast.error("Nu s-au putut actualiza task-urile.");
+    }
+  };
+
+  const handleBulkDelete = (ids: string[]) => {
+    if (ids.length === 0) return;
+    const idSet = new Set(ids);
+    const removed = tasks
+      .map((t, index) => ({ task: t, index }))
+      .filter((x) => idSet.has(x.task.id));
+
+    setTasks((t) => t.filter((task) => !idSet.has(task.id)));
+
+    const timer = setTimeout(async () => {
+      ids.forEach((id) => pendingDeletes.current.delete(id));
+      try {
+        const results = await Promise.all(
+          ids.map((id) => fetch(`/api/tasks/${id}`, { method: "DELETE" }))
+        );
+        if (results.some((r) => !r.ok)) throw new Error();
+      } catch {
+        [...removed].sort((a, b) => a.index - b.index).forEach(({ task, index }) => restoreTask(task, index));
+        toast.error("Unele task-uri nu au putut fi șterse.");
+      }
+    }, 5000);
+    ids.forEach((id) => pendingDeletes.current.set(id, timer));
+
+    toast(`${ids.length} task-uri șterse.`, {
+      action: {
+        label: "Anulează",
+        onClick: () => {
+          clearTimeout(timer);
+          ids.forEach((id) => pendingDeletes.current.delete(id));
+          [...removed].sort((a, b) => a.index - b.index).forEach(({ task, index }) => restoreTask(task, index));
+        },
+      },
+      duration: 5000,
+    });
   };
 
   const handleSchedule = (id: string) => {
@@ -327,6 +434,8 @@ export default function DashboardPage() {
                   onSchedule={handleSchedule}
                   onEdit={setEditingTask}
                   onMoveTask={handleMoveTask}
+                  onBulkDone={handleBulkDone}
+                  onBulkDelete={handleBulkDelete}
                 />
               </motion.div>
             </>
