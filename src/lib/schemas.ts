@@ -53,6 +53,7 @@ export const TaskUpdateSchema = z
     scheduled_date: z.string().regex(DATE_RE, 'Dată invalidă').nullable(),
     scheduled_start: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/)).nullable(),
     scheduled_end: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/)).nullable(),
+    recurrence: z.enum(['none', 'daily', 'weekly']),
   })
   .partial()
   .strict()

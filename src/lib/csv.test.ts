@@ -16,6 +16,7 @@ function makeTask(over: Partial<Task>): Task {
     scheduled_date: null,
     scheduled_start: null,
     scheduled_end: null,
+    recurrence: "none",
     ...over,
   }
 }

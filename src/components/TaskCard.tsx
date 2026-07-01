@@ -2,7 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Priority, Status } from "@/types/task";
-import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, Tag, Trash2, Pencil } from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, Tag, Trash2, Pencil, Repeat } from "lucide-react";
+
+const RECURRENCE_LABEL: Record<string, string> = { daily: "Zilnic", weekly: "Săptămânal" };
 
 const priorityConfig: Record<Priority, { border: string; dot: string; label: string; badgeBg: string; badgeText: string }> = {
   high:   { border: "border-l-red-500",    dot: "bg-red-500",    label: "Urgent",  badgeBg: "bg-red-50",    badgeText: "text-red-600" },
@@ -141,6 +143,12 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                   <Clock className="w-2.5 h-2.5" />
                   {formatTime(task.scheduled_start)}
                   {task.scheduled_end && `–${formatTime(task.scheduled_end)}`}
+                </span>
+              )}
+              {task.recurrence && task.recurrence !== "none" && (
+                <span className="inline-flex items-center gap-1 rounded-lg bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400 px-2 py-0.5 text-[11px] font-medium">
+                  <Repeat className="w-2.5 h-2.5" />
+                  {RECURRENCE_LABEL[task.recurrence]}
                 </span>
               )}
             </div>

@@ -2,14 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Type, Tag, Calendar, Flag } from "lucide-react";
-import { Task, Priority } from "@/types/task";
+import { X, Type, Tag, Calendar, Flag, Repeat } from "lucide-react";
+import { Task, Priority, Recurrence } from "@/types/task";
 
 interface EditTaskModalProps {
   task: Task | null;
   onClose: () => void;
-  onSave: (id: string, updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category">>) => Promise<void>;
+  onSave: (id: string, updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence">>) => Promise<void>;
 }
+
+const RECURRENCE_OPTIONS: { value: Recurrence; label: string }[] = [
+  { value: "none", label: "Niciodată" },
+  { value: "daily", label: "Zilnic" },
+  { value: "weekly", label: "Săptămânal" },
+];
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
   { value: "high", label: "Ridicată", color: "bg-red-500" },
@@ -22,6 +28,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
   const [priority, setPriority] = useState<Priority>("medium");
   const [deadline, setDeadline] = useState("");
   const [category, setCategory] = useState("");
+  const [recurrence, setRecurrence] = useState<Recurrence>("none");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +40,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
       setPriority(task.priority);
       setDeadline(task.deadline ? task.deadline.substring(0, 10) : "");
       setCategory(task.category ?? "");
+      setRecurrence(task.recurrence ?? "none");
       setError(null);
     }
   }, [task]);
@@ -59,6 +67,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
         priority,
         deadline: deadline || null,
         category: category.trim() || null,
+        recurrence,
       });
       onClose();
     } catch {
@@ -167,6 +176,35 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                   placeholder="ex: muncă, personal, sănătate..."
                   className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white dark:focus:bg-white/10 transition-all"
                 />
+              </div>
+
+              {/* Recurrence */}
+              <div>
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <Repeat className="w-3.5 h-3.5" /> Recurență
+                </label>
+                <div className="flex gap-2">
+                  {RECURRENCE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setRecurrence(opt.value)}
+                      aria-pressed={recurrence === opt.value}
+                      className={`flex-1 h-9 rounded-xl text-xs font-semibold border transition-all ${
+                        recurrence === opt.value
+                          ? "border-indigo-500 bg-indigo-500 text-white shadow-md"
+                          : "border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-gray-300 bg-white dark:bg-white/5"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+                {recurrence !== "none" && (
+                  <p className="mt-1.5 text-[11px] text-gray-400">
+                    La finalizare, se creează automat următorul task {recurrence === "daily" ? "peste o zi" : "peste o săptămână"}.
+                  </p>
+                )}
               </div>
 
               {error && (
