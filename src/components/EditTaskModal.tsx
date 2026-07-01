@@ -37,6 +37,15 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
     }
   }, [task]);
 
+  useEffect(() => {
+    if (!task) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [task, onClose]);
+
   const handleSave = async () => {
     if (!task || !title.trim()) {
       setError("Titlul nu poate fi gol");
@@ -81,12 +90,15 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Editează task"
             className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden"
           >
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h2 className="font-bold text-gray-900">Editează task</h2>
-              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors">
+              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" aria-label="Închide">
                 <X className="w-4 h-4" />
               </button>
             </div>
