@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { parseTasks } from '@/lib/llm'
+import { checkRateLimit, getClientIp, rateLimitResponse } from '@/lib/rate-limit'
 
 const MAX_INPUT_LENGTH = 5000
 
@@ -43,6 +44,9 @@ export async function POST(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rl = await checkRateLimit('llm', user.id ?? getClientIp(request))
+  if (!rl.success) return rateLimitResponse(rl)
 
   try {
     const tasks = await parseTasks(text)
