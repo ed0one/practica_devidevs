@@ -96,7 +96,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -107,17 +107,17 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 16 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 40 }}
+            transition={{ type: "spring", stiffness: 400, damping: 32 }}
             role="dialog"
             aria-modal="true"
             aria-label="Editează task"
-            className="relative w-full max-w-md rounded-2xl bg-white dark:bg-[#16161f] shadow-2xl overflow-hidden"
+            className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white dark:bg-[#16161f] shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col"
           >
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between shrink-0">
               <h2 className="font-bold text-gray-900 dark:text-gray-100">Editează task</h2>
               <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" aria-label="Închide">
                 <X className="w-4 h-4" />
@@ -125,7 +125,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
             </div>
 
             {/* Body */}
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto">
               {/* Title */}
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -246,7 +246,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-6 flex gap-3">
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-white/10 flex gap-3 shrink-0">
               <button
                 onClick={onClose}
                 className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"

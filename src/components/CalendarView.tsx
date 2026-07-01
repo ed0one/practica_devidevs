@@ -216,8 +216,8 @@ export default function CalendarView({
                 />
               )}
               <span className="relative z-10 flex items-center gap-1">
-                <Icon className="w-3.5 h-3.5" />
-                {label}
+                <Icon className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">{label}</span>
               </span>
             </button>
           ))}
