@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { parseTasks } from '@/lib/llm'
-import { sendNewTasksEmail } from '@/lib/resend'
-import type { Task } from '@/types/task'
 
 const MAX_INPUT_LENGTH = 5000
 
+// Extrage task-urile din text și le RETURNEAZĂ pentru preview — NU le salvează.
+// Inserarea se face separat prin POST /api/tasks după confirmarea userului.
 export async function POST(request: NextRequest) {
   let text: unknown
   try {
@@ -44,9 +44,9 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  let tasks
   try {
-    tasks = await parseTasks(text)
+    const tasks = await parseTasks(text)
+    return NextResponse.json({ tasks })
   } catch (err) {
     console.error('[parse-tasks] LLM error:', err)
     return NextResponse.json(
@@ -54,39 +54,4 @@ export async function POST(request: NextRequest) {
       { status: 502 }
     )
   }
-  if (tasks.length === 0) return NextResponse.json({ tasks: [] })
-
-  const rows = tasks.map((t) => {
-    // Build scheduled_* from AI-extracted start_time/end_time + deadline date
-    const dateStr = t.deadline ?? new Date().toISOString().substring(0, 10)
-    const scheduled_date = (t.start_time || t.end_time) ? dateStr : null
-    const scheduled_start = t.start_time ? `${dateStr}T${t.start_time}:00` : null
-    const scheduled_end = t.end_time ? `${dateStr}T${t.end_time}:00` : null
-
-    return {
-      user_id: user.id,
-      title: t.title,
-      deadline: t.deadline,
-      priority: t.priority,
-      category: t.category,
-      status: 'pending' as const,
-      raw_input: text,
-      scheduled_date,
-      scheduled_start,
-      scheduled_end,
-    }
-  })
-
-  if (rows.length === 0) return NextResponse.json({ tasks: [] })
-
-  const { data, error } = await supabase.from('tasks').insert(rows).select()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  if (user.email && data) {
-    sendNewTasksEmail(user.email, data as Task[]).catch((e) =>
-      console.error('[parse-tasks] email error:', e)
-    )
-  }
-
-  return NextResponse.json({ tasks: data })
 }

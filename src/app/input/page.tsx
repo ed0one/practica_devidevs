@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Sparkles, ArrowLeft, Loader2, Zap, CheckCircle2 } from "lucide-react";
+import { Sparkles, ArrowLeft, Loader2, Zap, CheckCircle2, Trash2, Save, Calendar } from "lucide-react";
 import MobileNav from "@/components/MobileNav";
+import type { ParsedTask, Priority } from "@/types/task";
 
 const EXAMPLES = [
   "Trebuie să sun la doctor mâine dimineață",
@@ -14,15 +15,24 @@ const EXAMPLES = [
   "Meeting cu echipa joi de la 14:00 la 15:30",
 ];
 
+const PRIORITY_OPTIONS: { value: Priority; label: string; active: string }[] = [
+  { value: "high", label: "Urgent", active: "bg-red-500 text-white border-red-500" },
+  { value: "medium", label: "Mediu", active: "bg-amber-400 text-white border-amber-400" },
+  { value: "low", label: "Scăzut", active: "bg-emerald-500 text-white border-emerald-500" },
+];
+
 export default function InputPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  // null = pasul 1 (input); array = pasul 2 (preview)
+  const [preview, setPreview] = useState<ParsedTask[] | null>(null);
   const router = useRouter();
 
   const charCount = text.length;
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleExtract = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim()) return;
     setLoading(true);
@@ -34,16 +44,40 @@ export default function InputPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Eroare la procesare");
-      if (data.tasks?.length === 0) {
+      if (!data.tasks || data.tasks.length === 0) {
         toast.error("Nu am găsit task-uri. Încearcă să fii mai specific.");
         return;
       }
-      toast.success(`${data.tasks.length} task${data.tasks.length === 1 ? "" : "-uri"} adăugate!`);
-      router.push("/dashboard");
+      setPreview(data.tasks as ParsedTask[]);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Eroare necunoscută");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateTask = (i: number, patch: Partial<ParsedTask>) =>
+    setPreview((p) => (p ? p.map((t, idx) => (idx === i ? { ...t, ...patch } : t)) : p));
+
+  const removeTask = (i: number) =>
+    setPreview((p) => (p ? p.filter((_, idx) => idx !== i) : p));
+
+  const handleSave = async () => {
+    if (!preview || preview.length === 0) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tasks: preview, raw_input: text }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Eroare la salvare");
+      toast.success(`${preview.length} task${preview.length === 1 ? "" : "-uri"} salvate!`);
+      router.push("/dashboard");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Eroare necunoscută");
+      setSaving(false);
     }
   };
 
@@ -77,7 +111,7 @@ export default function InputPage() {
               </span>
             </h2>
             <p className="text-white/40 text-sm leading-relaxed max-w-xs">
-              Nu trebuie format special. Scrie cum gândești — AI-ul extrage task-urile, deadline-urile și prioritățile.
+              Nu trebuie format special. Scrie cum gândești — AI-ul extrage task-urile, apoi le poți verifica înainte de salvare.
             </p>
           </div>
 
@@ -114,12 +148,13 @@ export default function InputPage() {
         </div>
       </div>
 
-      {/* Right panel — form */}
-      <div className="flex-1 flex flex-col bg-[#f5f5f7] pb-20 sm:pb-0">
-        <header className="lg:hidden border-b border-gray-200 px-4 py-3 flex items-center gap-3 bg-white sticky top-0 z-10">
+      {/* Right panel */}
+      <div className="flex-1 flex flex-col bg-[#f5f5f7] dark:bg-[#0a0a0f] pb-20 sm:pb-0">
+        <header className="lg:hidden border-b border-gray-200 dark:border-white/10 px-4 py-3 flex items-center gap-3 bg-white dark:bg-[#16161f] sticky top-0 z-10">
           <button
-            onClick={() => router.push("/dashboard")}
-            className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors"
+            onClick={() => (preview ? setPreview(null) : router.push("/dashboard"))}
+            aria-label="Înapoi"
+            className="w-9 h-9 rounded-xl border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -127,77 +162,194 @@ export default function InputPage() {
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-sm font-bold text-gray-900">Adaugă task-uri</span>
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+              {preview ? "Verifică task-urile" : "Adaugă task-uri"}
+            </span>
           </div>
         </header>
 
         <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
           <div className="w-full max-w-xl">
-            <a
-              href="/dashboard"
-              className="hidden lg:inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-8"
+            <button
+              onClick={() => (preview ? setPreview(null) : router.push("/dashboard"))}
+              className="hidden lg:inline-flex items-center gap-2 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
-              Înapoi la dashboard
-            </a>
+              {preview ? "Înapoi la text" : "Înapoi la dashboard"}
+            </button>
 
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-1">Ce ai de făcut?</h1>
-              <p className="text-gray-400 text-sm mb-6">Scrie în limbaj natural — AI-ul extrage și organizează automat</p>
+            <AnimatePresence mode="wait">
+              {!preview ? (
+                <motion.div key="input" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                  <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight mb-1">Ce ai de făcut?</h1>
+                  <p className="text-gray-400 text-sm mb-6">Scrie în limbaj natural — AI-ul extrage și organizează automat</p>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative">
-                  <textarea
-                    value={text}
-                    onChange={e => setText(e.target.value)}
-                    placeholder="Ex: Trebuie să sun la doctor mâine, să trimit raportul până vineri urgent și să cumpăr pâine azi seară..."
-                    rows={7}
-                    disabled={loading}
-                    className="w-full rounded-2xl border border-gray-200 bg-white p-4 pb-10 text-gray-900 text-[15px] leading-relaxed placeholder-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-400 resize-none transition-all"
-                  />
-                  <AnimatePresence>
-                    {charCount > 0 && (
-                      <motion.div
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="absolute bottom-3 right-4 text-xs text-gray-300 select-none"
-                      >
-                        {wordCount} cuv · {charCount} car
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                  <form onSubmit={handleExtract} className="space-y-4">
+                    <div className="relative">
+                      <textarea
+                        value={text}
+                        onChange={e => setText(e.target.value)}
+                        aria-label="Text pentru extragerea task-urilor"
+                        placeholder="Ex: Trebuie să sun la doctor mâine, să trimit raportul până vineri urgent și să cumpăr pâine azi seară..."
+                        rows={7}
+                        disabled={loading}
+                        className="w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] p-4 pb-10 text-gray-900 dark:text-gray-100 text-[15px] leading-relaxed placeholder-gray-300 dark:placeholder-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-400 resize-none transition-all"
+                      />
+                      <AnimatePresence>
+                        {charCount > 0 && (
+                          <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="absolute bottom-3 right-4 text-xs text-gray-300 dark:text-gray-600 select-none"
+                          >
+                            {wordCount} cuv · {charCount} car
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5">Exemple rapide</p>
-                  <div className="flex flex-wrap gap-2">
-                    {EXAMPLES.map(ex => (
-                      <button
-                        key={ex}
-                        type="button"
-                        onClick={() => setText(t => t ? `${t}\n${ex}` : ex)}
-                        className="text-xs bg-white border border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-lg px-3 py-1.5 transition-all"
-                      >
-                        + {ex}
-                      </button>
-                    ))}
+                    <div>
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5">Exemple rapide</p>
+                      <div className="flex flex-wrap gap-2">
+                        {EXAMPLES.map(ex => (
+                          <button
+                            key={ex}
+                            type="button"
+                            onClick={() => setText(t => t ? `${t}\n${ex}` : ex)}
+                            className="text-xs bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 rounded-lg px-3 py-1.5 transition-all"
+                          >
+                            + {ex}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <motion.button
+                      type="submit"
+                      disabled={loading || !text.trim()}
+                      whileHover={!loading && text.trim() ? { scale: 1.01 } : {}}
+                      whileTap={!loading && text.trim() ? { scale: 0.99 } : {}}
+                      className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-200 dark:shadow-none hover:from-indigo-500 hover:to-violet-500 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+                    >
+                      {loading ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> AI procesează...</>
+                      ) : (
+                        <><Sparkles className="w-4 h-4" /> Extrage task-urile</>
+                      )}
+                    </motion.button>
+                  </form>
+                </motion.div>
+              ) : (
+                <motion.div key="preview" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                  <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 tracking-tight mb-1">
+                    Verifică task-urile
+                  </h1>
+                  <p className="text-gray-400 text-sm mb-6">
+                    {preview.length} task{preview.length === 1 ? "" : "-uri"} extrase — editează sau elimină înainte de salvare
+                  </p>
+
+                  <div className="space-y-3 mb-5">
+                    <AnimatePresence mode="popLayout">
+                      {preview.map((t, i) => (
+                        <motion.div
+                          key={i}
+                          layout
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.97 }}
+                          className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] p-4 shadow-sm"
+                        >
+                          <div className="flex items-start gap-2">
+                            <input
+                              value={t.title}
+                              onChange={(e) => updateTask(i, { title: e.target.value })}
+                              aria-label="Titlu task"
+                              className="flex-1 min-w-0 rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-white/10 focus:border-indigo-400 bg-transparent px-2 py-1 text-[15px] font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                            />
+                            <button
+                              onClick={() => removeTask(i)}
+                              aria-label="Elimină task-ul"
+                              className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1 rounded-lg border border-gray-200 dark:border-white/10 p-0.5">
+                              {PRIORITY_OPTIONS.map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  onClick={() => updateTask(i, { priority: opt.value })}
+                                  aria-pressed={t.priority === opt.value}
+                                  className={`rounded-md px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                                    t.priority === opt.value
+                                      ? opt.active
+                                      : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                                  }`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+
+                            <label className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-white/10 px-2 py-1 text-xs text-gray-600 dark:text-gray-300">
+                              <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                              <input
+                                type="date"
+                                value={t.deadline ?? ""}
+                                onChange={(e) => updateTask(i, { deadline: e.target.value || null })}
+                                aria-label="Deadline"
+                                className="bg-transparent text-xs focus:outline-none text-gray-700 dark:text-gray-200"
+                              />
+                            </label>
+
+                            <input
+                              value={t.category ?? ""}
+                              onChange={(e) => updateTask(i, { category: e.target.value || null })}
+                              placeholder="categorie"
+                              aria-label="Categorie"
+                              className="w-28 rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-2 py-1 text-xs text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-400 transition-all"
+                            />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
-                </div>
 
-                <motion.button
-                  type="submit"
-                  disabled={loading || !text.trim()}
-                  whileHover={!loading && text.trim() ? { scale: 1.01 } : {}}
-                  whileTap={!loading && text.trim() ? { scale: 0.99 } : {}}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-200 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
-                >
-                  {loading ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> AI procesează...</>
+                  {preview.length === 0 ? (
+                    <div className="text-center py-6 text-sm text-gray-400">
+                      Ai eliminat toate task-urile.{" "}
+                      <button onClick={() => setPreview(null)} className="text-indigo-600 font-semibold hover:underline">
+                        Înapoi la text
+                      </button>
+                    </div>
                   ) : (
-                    <><Sparkles className="w-4 h-4" /> Extrage task-urile</>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setPreview(null)}
+                        disabled={saving}
+                        className="h-12 px-5 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
+                      >
+                        Anulează
+                      </button>
+                      <motion.button
+                        onClick={handleSave}
+                        disabled={saving}
+                        whileHover={!saving ? { scale: 1.01 } : {}}
+                        whileTap={!saving ? { scale: 0.99 } : {}}
+                        className="flex-1 h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-200 dark:shadow-none hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                      >
+                        {saving ? (
+                          <><Loader2 className="w-4 h-4 animate-spin" /> Se salvează...</>
+                        ) : (
+                          <><Save className="w-4 h-4" /> Salvează {preview.length} task{preview.length === 1 ? "" : "-uri"}</>
+                        )}
+                      </motion.button>
+                    </div>
                   )}
-                </motion.button>
-              </form>
-            </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
