@@ -133,6 +133,22 @@ function getNextDay(): string {
   return tomorrow.toISOString().split('T')[0]
 }
 
+// Extrage și validează task-urile din răspunsul brut al modelului. Pură și
+// exportată separat pentru a putea fi testată fără apel de rețea. Tolerează
+// fence-uri markdown și text în jurul JSON-ului.
+export function parseModelResponse(raw: string): ParsedTask[] {
+  const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim()
+  const start = cleaned.indexOf('{')
+  const end = cleaned.lastIndexOf('}')
+  if (start === -1 || end === -1) {
+    throw new Error('Modelul nu a returnat JSON valid.')
+  }
+
+  const parsed = JSON.parse(cleaned.slice(start, end + 1))
+  const validated = ParsedTasksResponseSchema.parse(parsed)
+  return validated.tasks
+}
+
 export async function parseTasks(userText: string): Promise<ParsedTask[]> {
   const response = await getClient().chat.completions.create({
     model: MODEL,
@@ -143,15 +159,5 @@ export async function parseTasks(userText: string): Promise<ParsedTask[]> {
   })
 
   const raw = response.choices[0]?.message?.content ?? ''
-
-  const cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim()
-  const start = cleaned.indexOf('{')
-  const end = cleaned.lastIndexOf('}')
-  if (start === -1 || end === -1) {
-    throw new Error(`Modelul nu a returnat JSON valid. Răspuns: ${raw}`)
-  }
-
-  const parsed = JSON.parse(cleaned.slice(start, end + 1))
-  const validated = ParsedTasksResponseSchema.parse(parsed)
-  return validated.tasks
+  return parseModelResponse(raw)
 }

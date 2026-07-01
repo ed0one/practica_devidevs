@@ -13,28 +13,10 @@ import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
 import { Plus, Sparkles, Search, Download, X } from "lucide-react";
 import { Priority } from "@/types/task";
-
-// Escapează un câmp CSV: dublează ghilimelele, învelește în ghilimele și
-// neutralizează formula injection (=, +, -, @, tab, CR la început) prefixând
-// cu apostrof — convenția prin care Excel/Sheets tratează celula ca text.
-function csvCell(value: string | null | undefined): string {
-  let v = value ?? "";
-  if (/^[=+\-@\t\r]/.test(v)) v = `'${v}`;
-  return `"${v.replace(/"/g, '""')}"`;
-}
+import { tasksToCsv } from "@/lib/csv";
 
 function exportCSV(tasks: Task[]) {
-  const header = ["Titlu", "Prioritate", "Status", "Deadline", "Categorie", "Creat la"];
-  const rows = tasks.map((t) => [
-    t.title,
-    t.priority,
-    t.status,
-    t.deadline ? t.deadline.substring(0, 10) : "",
-    t.category ?? "",
-    t.created_at.substring(0, 10),
-  ]);
-  const csv = [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
-  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob(["﻿" + tasksToCsv(tasks)], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
