@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Priority, Status } from "@/types/task";
 import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, Tag, Trash2, Pencil, Repeat } from "lucide-react";
+import { useTimeFormat, formatClock, type TimeFormat } from "@/lib/time-format";
 
 const RECURRENCE_LABEL: Record<string, string> = { daily: "Zilnic", weekly: "Săptămânal" };
 
@@ -12,9 +13,9 @@ const priorityConfig: Record<Priority, { border: string; dot: string; label: str
   low:    { border: "border-l-emerald-500",dot: "bg-emerald-500",label: "Scăzut", badgeBg: "bg-emerald-50 dark:bg-emerald-500/15",badgeText: "text-emerald-700 dark:text-emerald-400" },
 };
 
-function formatTime(iso: string | null): string {
+function formatTime(iso: string | null, fmt: TimeFormat): string {
   if (!iso) return "";
-  return iso.substring(11, 16);
+  return formatClock(iso.substring(11, 16), fmt);
 }
 
 function formatDateShort(iso: string | null): string {
@@ -40,6 +41,7 @@ interface TaskCardProps {
 }
 
 export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onEdit, compact = false, index = 0 }: TaskCardProps) {
+  const timeFmt = useTimeFormat();
   const overdue = task.status === "pending" && isOverdue(task.deadline);
   const cfg = priorityConfig[task.priority];
   const isDone = task.status === "done";
@@ -71,7 +73,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
         {task.scheduled_start && (
           <span className="text-[10px] text-gray-400 flex items-center gap-0.5 shrink-0">
             <Clock className="w-2.5 h-2.5" />
-            {formatTime(task.scheduled_start)}
+            {formatTime(task.scheduled_start, timeFmt)}
           </span>
         )}
         {onDelete && (
@@ -141,8 +143,8 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               {task.scheduled_start && (
                 <span className="inline-flex items-center gap-1 rounded-lg bg-violet-50 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 px-2 py-0.5 text-[11px] font-medium">
                   <Clock className="w-2.5 h-2.5" />
-                  {formatTime(task.scheduled_start)}
-                  {task.scheduled_end && `–${formatTime(task.scheduled_end)}`}
+                  {formatTime(task.scheduled_start, timeFmt)}
+                  {task.scheduled_end && `–${formatTime(task.scheduled_end, timeFmt)}`}
                 </span>
               )}
               {task.recurrence && task.recurrence !== "none" && (

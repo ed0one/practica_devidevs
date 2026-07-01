@@ -25,8 +25,56 @@ import {
   Kanban,
 } from "lucide-react";
 import BoardView from "./BoardView";
+import { useTimeFormat, formatClock, formatHourLabel } from "@/lib/time-format";
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
+const DAY_START_MIN = 6 * 60; // 06:00
+const DAY_END_MIN = 22 * 60; // 22:00
+const HOUR_H = 56; // px per oră în day view
+
+// minute din zi pentru "YYYY-MM-DDTHH:MM:SS"
+function minutesOf(local: string): number {
+  const h = parseInt(local.substring(11, 13), 10);
+  const m = parseInt(local.substring(14, 16), 10);
+  return h * 60 + (Number.isNaN(m) ? 0 : m);
+}
+
+interface DayBlock {
+  task: Task;
+  start: number; // minute
+  end: number;
+  col: number;
+  cols: number;
+}
+
+// Așază task-urile suprapuse pe coloane (clasic calendar): task-urile care
+// se intersectează în timp împart lățimea în mod egal.
+function layoutDayBlocks(items: { task: Task; start: number; end: number }[]): DayBlock[] {
+  const sorted = [...items].sort((a, b) => a.start - b.start || b.end - a.end);
+  const placed: DayBlock[] = [];
+  let cluster: DayBlock[] = [];
+  let clusterEnd = -1;
+
+  const flush = () => {
+    const n = Math.max(...cluster.map((c) => c.col)) + 1;
+    cluster.forEach((c) => (c.cols = n));
+    cluster = [];
+    clusterEnd = -1;
+  };
+
+  for (const item of sorted) {
+    if (cluster.length > 0 && item.start >= clusterEnd) flush();
+    const used = new Set(cluster.filter((c) => c.end > item.start).map((c) => c.col));
+    let col = 0;
+    while (used.has(col)) col++;
+    const block: DayBlock = { ...item, col, cols: 1 };
+    cluster.push(block);
+    placed.push(block);
+    clusterEnd = Math.max(clusterEnd, item.end);
+  }
+  if (cluster.length > 0) flush();
+  return placed;
+}
 
 interface CalendarViewProps {
   tasks: Task[];
@@ -55,17 +103,6 @@ function getTasksForDay(tasks: Task[], date: Date): Task[] {
   });
 }
 
-function getTasksForHour(tasks: Task[], date: Date, hour: number): Task[] {
-  return tasks.filter((t) => {
-    if (!t.scheduled_start) return false;
-    // Parse date part directly from string to avoid timezone shifts
-    const datePart = t.scheduled_start.substring(0, 10); // "YYYY-MM-DD"
-    const hourPart = parseInt(t.scheduled_start.substring(11, 13), 10);
-    const taskDate = new Date(datePart + "T00:00:00");
-    return isSameDay(taskDate, date) && hourPart === hour;
-  });
-}
-
 export default function CalendarView({
   tasks,
   onToggleDone,
@@ -76,6 +113,7 @@ export default function CalendarView({
   onBulkDone,
   onBulkDelete,
 }: CalendarViewProps) {
+  const timeFmt = useTimeFormat();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>(
     typeof window !== "undefined" && window.innerWidth < 640
@@ -247,14 +285,14 @@ export default function CalendarView({
                           key={task.id}
                           whileHover={{ x: 2 }}
                           className={`flex items-center justify-between gap-2 sm:block border-l-2 rounded-r px-2 py-1.5 sm:px-1.5 sm:py-0.5 cursor-pointer ${config} ${task.status === "done" ? "opacity-40 line-through" : ""}`}
-                          onClick={() => onSchedule(task.id)}
+                          onClick={() => (onEdit ? onEdit(task) : onSchedule(task.id))}
                         >
                           <p className="text-xs sm:text-[10px] font-medium text-gray-700 dark:text-gray-300 truncate">
                             {task.title}
                           </p>
                           {task.scheduled_start && (
                             <p className="text-[11px] sm:text-[9px] text-gray-500 shrink-0">
-                              {formatTimeShort(task.scheduled_start)}
+                              {formatClock(task.scheduled_start.substring(11, 16), timeFmt)}
                             </p>
                           )}
                         </motion.div>
@@ -304,44 +342,111 @@ export default function CalendarView({
               );
             })()}
 
-            {HOURS.map((hour) => {
-              const hourTasks = getTasksForHour(tasks, currentDate, hour);
-              const isNow =
-                isToday(currentDate) && new Date().getHours() === hour;
+            {/* Timeline: task-urile se întind de la scheduled_start la scheduled_end */}
+            {(() => {
+              const scheduled = tasks.filter((t) => {
+                if (!t.scheduled_start) return false;
+                return isSameDay(parseLocalDate(t.scheduled_start), currentDate);
+              });
+
+              const blocks = layoutDayBlocks(
+                scheduled.map((t) => {
+                  const start = Math.max(minutesOf(t.scheduled_start!), DAY_START_MIN);
+                  const rawEnd = t.scheduled_end
+                    ? minutesOf(t.scheduled_end)
+                    : minutesOf(t.scheduled_start!) + 60;
+                  const end = Math.min(Math.max(rawEnd, start + 30), DAY_END_MIN);
+                  return { task: t, start, end };
+                })
+              );
+
+              const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+              const showNow =
+                isToday(currentDate) && nowMin >= DAY_START_MIN && nowMin <= DAY_END_MIN;
+
+              const blockColor: Record<string, string> = {
+                high: "border-l-red-500 bg-red-50/90 dark:bg-red-500/15 hover:bg-red-100/90 dark:hover:bg-red-500/25",
+                medium: "border-l-amber-400 bg-amber-50/90 dark:bg-amber-500/15 hover:bg-amber-100/90 dark:hover:bg-amber-500/25",
+                low: "border-l-emerald-500 bg-emerald-50/90 dark:bg-emerald-500/15 hover:bg-emerald-100/90 dark:hover:bg-emerald-500/25",
+              };
 
               return (
-                <div
-                  key={hour}
-                  className={`flex border-b border-gray-100 dark:border-white/5 last:border-b-0 ${isNow ? "bg-indigo-50/30 dark:bg-indigo-500/10" : ""}`}
-                >
-                  <div className="w-16 flex-shrink-0 p-3 text-xs font-medium text-gray-400 border-r border-gray-100 dark:border-white/5">
-                    {String(hour).padStart(2, "0")}:00
+                <div className="flex">
+                  {/* Coloana orelor */}
+                  <div className="w-16 flex-shrink-0 border-r border-gray-100 dark:border-white/5">
+                    {HOURS.map((hour) => (
+                      <div
+                        key={hour}
+                        style={{ height: HOUR_H }}
+                        className="px-3 pt-1 text-xs font-medium text-gray-400"
+                      >
+                        {formatHourLabel(hour, timeFmt)}
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1 p-2 min-h-[52px] space-y-1">
-                    {isNow && (
-                      <motion.div
-                        layoutId="currentTimeIndicator"
-                        className="h-0.5 bg-indigo-500 rounded-full mb-1"
-                      />
-                    )}
-                    {hourTasks.map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onToggleDone={onToggleDone}
-                        onDelete={onDelete}
-                        onSchedule={onSchedule}
-                        onEdit={onEdit}
-                        compact
+
+                  {/* Zona de timeline */}
+                  <div
+                    className="relative flex-1"
+                    style={{ height: HOURS.length * HOUR_H }}
+                  >
+                    {/* Linii orare */}
+                    {HOURS.map((hour, i) => (
+                      <div
+                        key={hour}
+                        className="absolute inset-x-0 border-t border-gray-100 dark:border-white/5"
+                        style={{ top: i * HOUR_H }}
                       />
                     ))}
-                    {hourTasks.length === 0 && (
-                      <div className="h-full min-h-[28px] rounded border border-dashed border-gray-100 dark:border-white/5" />
+
+                    {/* Indicator ora curentă */}
+                    {showNow && (
+                      <div
+                        className="absolute inset-x-0 z-20 flex items-center pointer-events-none"
+                        style={{ top: ((nowMin - DAY_START_MIN) / 60) * HOUR_H }}
+                      >
+                        <div className="w-2 h-2 rounded-full bg-indigo-500 -ml-1" />
+                        <div className="flex-1 h-0.5 bg-indigo-500" />
+                      </div>
                     )}
+
+                    {/* Blocuri task */}
+                    {blocks.map(({ task, start, end, col, cols }) => {
+                      const top = ((start - DAY_START_MIN) / 60) * HOUR_H;
+                      const height = Math.max(((end - start) / 60) * HOUR_H - 2, 24);
+                      const width = 100 / cols;
+                      const isDone = task.status === "done";
+
+                      return (
+                        <button
+                          key={task.id}
+                          onClick={() => (onEdit ? onEdit(task) : onSchedule(task.id))}
+                          className={`absolute z-10 text-left rounded-lg border-l-4 px-2 py-1 overflow-hidden shadow-sm hover:shadow-md transition-all ${blockColor[task.priority]} ${isDone ? "opacity-45" : ""}`}
+                          style={{
+                            top,
+                            height,
+                            left: `calc(${col * width}% + 4px)`,
+                            width: `calc(${width}% - 8px)`,
+                          }}
+                          title={task.title}
+                        >
+                          <p className={`text-xs font-semibold text-gray-800 dark:text-gray-200 truncate ${isDone ? "line-through" : ""}`}>
+                            {task.title}
+                          </p>
+                          {height >= 40 && (
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400">
+                              {formatClock(task.scheduled_start!.substring(11, 16), timeFmt)}
+                              {task.scheduled_end &&
+                                ` – ${formatClock(task.scheduled_end.substring(11, 16), timeFmt)}`}
+                            </p>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               );
-            })}
+            })()}
           </motion.div>
         )}
 
@@ -412,12 +517,4 @@ export default function CalendarView({
       )}
     </div>
   );
-}
-
-function formatTimeShort(iso: string | null): string {
-  if (!iso) return "";
-  return new Date(iso).toLocaleTimeString("ro-RO", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }

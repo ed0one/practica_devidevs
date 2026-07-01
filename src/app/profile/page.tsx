@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Task } from "@/types/task";
+import { useTimeFormat, setTimeFormat, type TimeFormat } from "@/lib/time-format";
 import {
   User,
   Mail,
@@ -32,6 +33,7 @@ export default function ProfilePage() {
   const [savingName, setSavingName] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const timeFmt = useTimeFormat();
 
   useEffect(() => {
     const supabase = createClient();
@@ -262,6 +264,46 @@ export default function ProfilePage() {
                   <div className="h-10 rounded-xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 flex items-center text-sm text-gray-400 select-none">
                     {user?.email}
                   </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Preferințe */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.17 }}
+              className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
+            >
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-indigo-500" />
+                Preferințe
+              </h3>
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Format oră</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Cum se afișează orele în calendar și task-uri
+                  </p>
+                </div>
+                <div className="flex items-center rounded-xl border border-gray-200 dark:border-white/10 p-0.5 shrink-0">
+                  {([
+                    ["24h", "24h"],
+                    ["12h", "AM/PM"],
+                  ] as [TimeFormat, string][]).map(([value, label]) => (
+                    <button
+                      key={value}
+                      onClick={() => setTimeFormat(value)}
+                      aria-pressed={timeFmt === value}
+                      className={`px-3.5 h-8 rounded-lg text-xs font-semibold transition-all ${
+                        timeFmt === value
+                          ? "bg-indigo-600 text-white shadow-sm"
+                          : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </motion.div>
