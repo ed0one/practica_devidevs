@@ -12,7 +12,8 @@ import StatsHeader from "@/components/StatsHeader";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Plus, Sparkles, Search, Download, X } from "lucide-react";
+import CommandPalette from "@/components/CommandPalette";
+import { Plus, Sparkles, Search, Download, X, Tag, Command } from "lucide-react";
 import { Priority } from "@/types/task";
 import { tasksToCsv } from "@/lib/csv";
 
@@ -35,6 +36,7 @@ export default function DashboardPage() {
   const [schedulingTaskId, setSchedulingTaskId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<string>("all");
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -272,29 +274,70 @@ export default function DashboardPage() {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
+  // Categorii distincte pentru chips (max 6, alfabetic)
+  const categories = useMemo(
+    () =>
+      [...new Set(tasks.map((t) => t.category).filter((c): c is string => !!c))]
+        .sort((a, b) => a.localeCompare(b, "ro"))
+        .slice(0, 6),
+    [tasks]
+  );
+
   const filteredTasks = useMemo(() => {
+    let result = tasks;
+
+    // filtru rapid
+    if (filter === "active") result = result.filter((t) => t.status === "pending");
+    else if (filter === "done") result = result.filter((t) => t.status === "done");
+    else if (filter === "urgent") result = result.filter((t) => t.status === "pending" && t.priority === "high");
+    else if (filter.startsWith("cat:")) {
+      const cat = filter.slice(4);
+      result = result.filter((t) => t.category === cat);
+    }
+
+    // căutare text
     const q = search.trim().toLowerCase();
-    if (!q) return tasks;
-    return tasks.filter(
-      (t) =>
-        t.title.toLowerCase().includes(q) ||
-        (t.category ?? "").toLowerCase().includes(q)
-    );
-  }, [tasks, search]);
+    if (q) {
+      result = result.filter(
+        (t) =>
+          t.title.toLowerCase().includes(q) ||
+          (t.category ?? "").toLowerCase().includes(q)
+      );
+    }
+    return result;
+  }, [tasks, search, filter]);
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] dark:bg-[#0a0a0f]">
-        <div className="text-center">
-          <div className="relative mx-auto w-14 h-14 mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-gray-100" />
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full border-4 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent"
-            />
-          </div>
-          <p className="text-sm text-gray-400 font-medium">Se încarcă...</p>
+      <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0a0a0f] flex">
+        <Sidebar userEmail={null} />
+        <div className="flex-1 flex flex-col min-w-0">
+          <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 max-w-5xl w-full mx-auto animate-pulse">
+            {/* Greeting skeleton */}
+            <div className="mb-6 space-y-2">
+              <div className="h-7 w-64 bg-gray-200/60 dark:bg-white/5 rounded-xl" />
+              <div className="h-4 w-40 bg-gray-200/60 dark:bg-white/5 rounded-xl" />
+            </div>
+            {/* Stat cards skeleton */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-24 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
+              ))}
+            </div>
+            {/* Wide cards skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              <div className="h-28 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
+              <div className="h-28 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
+            </div>
+            {/* Toolbar skeleton */}
+            <div className="h-10 w-full max-w-sm bg-gray-200/60 dark:bg-white/5 rounded-xl mb-4" />
+            {/* Task list skeleton */}
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="h-20 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
+              ))}
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -422,13 +465,70 @@ export default function DashboardPage() {
                 )}
 
                 <button
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
+                  className="ml-auto hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] text-xs font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  title="Paletă de comenzi (⌘K)"
+                >
+                  <Command className="w-3.5 h-3.5" />
+                  <kbd className="text-[10px] font-bold">K</kbd>
+                </button>
+
+                <button
                   onClick={() => { exportCSV(tasks); toast.success("CSV descărcat!"); }}
-                  className="ml-auto flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  className="ml-auto sm:ml-0 flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                   title="Exportă CSV"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Export CSV</span>
                 </button>
+              </motion.div>
+
+              {/* Filtre rapide */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 mb-4"
+              >
+                {(
+                  [
+                    ["all", "Toate"],
+                    ["active", "Active"],
+                    ["done", "Finalizate"],
+                    ["urgent", "Urgente"],
+                  ] as [string, string][]
+                ).map(([value, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => setFilter(value)}
+                    aria-pressed={filter === value}
+                    className={`shrink-0 h-8 px-3.5 rounded-lg text-xs font-semibold transition-all ${
+                      filter === value
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-indigo-300 hover:text-indigo-600"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+                {categories.map((cat) => {
+                  const value = `cat:${cat}`;
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => setFilter(filter === value ? "all" : value)}
+                      aria-pressed={filter === value}
+                      className={`shrink-0 h-8 px-3.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                        filter === value
+                          ? "bg-indigo-600 text-white shadow-sm"
+                          : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-indigo-300 hover:text-indigo-600"
+                      }`}
+                    >
+                      <Tag className="w-3 h-3" />
+                      {cat}
+                    </button>
+                  );
+                })}
               </motion.div>
 
               <motion.div id="calendar-section" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
@@ -461,6 +561,12 @@ export default function DashboardPage() {
         task={editingTask}
         onClose={() => setEditingTask(null)}
         onSave={handleEdit}
+      />
+
+      <CommandPalette
+        tasks={tasks}
+        onEditTask={setEditingTask}
+        onExportCSV={() => { exportCSV(tasks); toast.success("CSV descărcat!"); }}
       />
     </div>
   );
