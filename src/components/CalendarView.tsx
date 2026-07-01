@@ -23,6 +23,9 @@ import {
   Clock,
   LayoutGrid,
   Kanban,
+  CheckCircle2,
+  Circle,
+  Trash2,
 } from "lucide-react";
 import BoardView from "./BoardView";
 import { useTimeFormat, formatClock, formatHourLabel } from "@/lib/time-format";
@@ -418,10 +421,19 @@ export default function CalendarView({
                       const isDone = task.status === "done";
 
                       return (
-                        <button
+                        <div
                           key={task.id}
+                          role="button"
+                          tabIndex={0}
                           onClick={() => (onEdit ? onEdit(task) : onSchedule(task.id))}
-                          className={`absolute z-10 text-left rounded-lg border-l-4 px-2 py-1 overflow-hidden shadow-sm hover:shadow-md transition-all ${blockColor[task.priority]} ${isDone ? "opacity-45" : ""}`}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              if (onEdit) onEdit(task);
+                              else onSchedule(task.id);
+                            }
+                          }}
+                          className={`group absolute z-10 text-left rounded-lg border-l-4 px-2 py-1 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${blockColor[task.priority]} ${isDone ? "opacity-45" : ""}`}
                           style={{
                             top,
                             height,
@@ -430,7 +442,33 @@ export default function CalendarView({
                           }}
                           title={task.title}
                         >
-                          <p className={`text-xs font-semibold text-gray-800 dark:text-gray-200 truncate ${isDone ? "line-through" : ""}`}>
+                          {/* Acțiuni: vizibile mereu pe touch, hover pe desktop */}
+                          <div className="absolute top-1 right-1 flex items-center gap-1 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleDone(task.id, isDone ? "pending" : "done");
+                              }}
+                              className="w-6 h-6 rounded-md bg-white/80 dark:bg-black/30 backdrop-blur flex items-center justify-center text-gray-400 hover:text-emerald-600 transition-colors"
+                              aria-label={isDone ? "Marchează ca activ" : "Marchează ca finalizat"}
+                            >
+                              {isDone
+                                ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                                : <Circle className="w-3.5 h-3.5" />}
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(task.id);
+                              }}
+                              className="w-6 h-6 rounded-md bg-white/80 dark:bg-black/30 backdrop-blur flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+                              aria-label={`Șterge task-ul: ${task.title}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <p className={`text-xs font-semibold text-gray-800 dark:text-gray-200 truncate pr-14 ${isDone ? "line-through" : ""}`}>
                             {task.title}
                           </p>
                           {height >= 40 && (
@@ -440,7 +478,7 @@ export default function CalendarView({
                                 ` – ${formatClock(task.scheduled_end.substring(11, 16), timeFmt)}`}
                             </p>
                           )}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
