@@ -148,17 +148,17 @@ export default function ProfilePage() {
             >
               <div className="h-24 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600" />
               <div className="px-6 pb-6">
-                <div className="flex items-end gap-4 -mt-10 mb-5">
-                  <div className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-2xl font-black shadow-lg border-4 border-white dark:border-[#16161f]">
+                <div className="-mt-10 mb-4">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-2xl font-black shadow-lg border-4 border-white dark:border-[#16161f]">
                     {initials}
                   </div>
-                  <div className="pb-1 min-w-0 flex-1">
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{user?.full_name || "—"}</h2>
-                    <p className="text-sm text-gray-400 flex items-center gap-1.5 min-w-0">
-                      <Mail className="w-3.5 h-3.5 shrink-0" />
-                      <span className="truncate">{user?.email}</span>
-                    </p>
-                  </div>
+                </div>
+                <div className="min-w-0 mb-5">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{user?.full_name || "—"}</h2>
+                  <p className="text-sm text-gray-400 flex items-center gap-1.5 min-w-0 mt-0.5">
+                    <Mail className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{user?.email}</span>
+                  </p>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <span className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-gray-500 dark:text-gray-400">
