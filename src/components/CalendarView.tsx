@@ -329,10 +329,7 @@ export default function CalendarView({
                       />
                     ))}
                     {hourTasks.length === 0 && (
-                      <div
-                        className="h-full min-h-[28px] rounded border border-dashed border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30 transition-colors cursor-pointer"
-                        onClick={() => onSchedule("new")}
-                      />
+                      <div className="h-full min-h-[28px] rounded border border-dashed border-gray-100 dark:border-white/5" />
                     )}
                   </div>
                 </div>
