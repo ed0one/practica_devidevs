@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({
@@ -34,11 +34,11 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isAuthPage = request.nextUrl.pathname.startsWith("/login") || request.nextUrl.pathname.startsWith("/register");
-  const isApiRoute = request.nextUrl.pathname.startsWith("/api");
   const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
   const isInput = request.nextUrl.pathname.startsWith("/input");
+  const isProfile = request.nextUrl.pathname.startsWith("/profile");
 
-  if (!user && (isDashboard || isInput)) {
+  if (!user && (isDashboard || isInput || isProfile)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -57,6 +57,7 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/input/:path*",
+    "/profile/:path*",
     "/login",
     "/register",
   ],
