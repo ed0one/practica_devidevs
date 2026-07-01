@@ -102,7 +102,8 @@ export async function transitionJiraIssue(
 ) {
   const transitions = await jiraFetch(`/issue/${issueKey}/transitions`);
   const t = transitions.transitions.find(
-    (tr: any) => tr.name.toLowerCase() === transitionName.toLowerCase()
+    (tr: { id: string; name: string }) =>
+      tr.name.toLowerCase() === transitionName.toLowerCase()
   );
   if (!t) throw new Error(`Transition "${transitionName}" not found`);
   await jiraFetch(`/issue/${issueKey}/transitions`, {

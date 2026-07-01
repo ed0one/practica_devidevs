@@ -26,7 +26,9 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Sincronizăm câmpurile formularului când se deschide alt task.
     if (task) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTitle(task.title);
       setPriority(task.priority);
       setDeadline(task.deadline ? task.deadline.substring(0, 10) : "");

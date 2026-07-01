@@ -3,11 +3,26 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { parseTasks } from '@/lib/llm'
 import { sendNewTasksEmail } from '@/lib/resend'
+import type { Task } from '@/types/task'
+
+const MAX_INPUT_LENGTH = 5000
 
 export async function POST(request: NextRequest) {
-  const { text } = await request.json()
-  if (!text?.trim()) {
+  let text: unknown
+  try {
+    ({ text } = await request.json())
+  } catch {
+    return NextResponse.json({ error: 'Corp JSON invalid' }, { status: 400 })
+  }
+
+  if (typeof text !== 'string' || !text.trim()) {
     return NextResponse.json({ error: 'Text lipsă' }, { status: 400 })
+  }
+  if (text.length > MAX_INPUT_LENGTH) {
+    return NextResponse.json(
+      { error: `Textul depășește ${MAX_INPUT_LENGTH} de caractere` },
+      { status: 413 }
+    )
   }
 
   const cookieStore = await cookies()
@@ -29,7 +44,16 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const tasks = await parseTasks(text)
+  let tasks
+  try {
+    tasks = await parseTasks(text)
+  } catch (err) {
+    console.error('[parse-tasks] LLM error:', err)
+    return NextResponse.json(
+      { error: 'Nu am putut procesa textul. Încearcă din nou.' },
+      { status: 502 }
+    )
+  }
   if (tasks.length === 0) return NextResponse.json({ tasks: [] })
 
   const rows = tasks.map((t) => {
@@ -59,7 +83,9 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   if (user.email && data) {
-    sendNewTasksEmail(user.email, data as never).catch(() => {})
+    sendNewTasksEmail(user.email, data as Task[]).catch((e) =>
+      console.error('[parse-tasks] email error:', e)
+    )
   }
 
   return NextResponse.json({ tasks: data })

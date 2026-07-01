@@ -9,7 +9,8 @@ import {
 } from "@/lib/jira/sync";
 import { searchMyIssues } from "@/lib/jira/client";
 
-const API_BASE = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(".supabase.co", "") || "http://localhost:3000";
+const API_BASE =
+  process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 async function fetchTasks(): Promise<Task[]> {
   const res = await fetch(`${API_BASE}/api/tasks`);
@@ -94,7 +95,7 @@ async function cmdStatus() {
   const tasks = await fetchTasks();
   console.log("📋 Task Status:");
   for (const task of tasks) {
-    const key = (task as any).jira_issue_key;
+    const key = task.jira_issue_key;
     const synced = key ? `→ ${key}` : "❌ not synced";
     console.log(`  [${task.status}] ${task.title} ${synced}`);
   }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { Task, Priority, Status } from "@/types/task";
 import TaskCard from "./TaskCard";
 import { ArrowUpDown } from "lucide-react";

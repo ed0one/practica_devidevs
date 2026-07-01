@@ -4,17 +4,14 @@ import {
   updateJiraIssue,
   transitionJiraIssue,
   logWork,
-  JIRA_PROJECT_KEY,
 } from "./client";
 
-const JIRA_KEY_FIELD = "jira_issue_key";
-
 function getJiraKey(task: Task): string | null {
-  return (task as any)[JIRA_KEY_FIELD] || null;
+  return task.jira_issue_key ?? null;
 }
 
 function setJiraKey(task: Task, key: string) {
-  (task as any)[JIRA_KEY_FIELD] = key;
+  task.jira_issue_key = key;
 }
 
 export async function syncTaskToJira(task: Task): Promise<string> {
