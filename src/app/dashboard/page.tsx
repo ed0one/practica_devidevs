@@ -133,7 +133,7 @@ export default function DashboardPage() {
 
   const handleEdit = async (
     id: string,
-    updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence">>
+    updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence" | "reminder_offset_min">>
   ) => {
     const prev = tasks;
     setTasks((t) => t.map((task) => task.id === id ? { ...task, ...updates } : task));

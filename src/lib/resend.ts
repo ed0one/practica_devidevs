@@ -127,6 +127,34 @@ export async function sendNewTasksEmail(to: string, tasks: Task[]) {
   if (error) throw new Error(`Resend error: ${error.message}`)
 }
 
+// Reminder individual: "task-ul X începe în 30 de minute"
+export async function sendTaskReminderEmail(to: string, task: Task, offsetMin: number) {
+  const when =
+    offsetMin === 0 ? 'acum' :
+    offsetMin < 60 ? `în ${offsetMin} de minute` :
+    offsetMin < 1440 ? `în ${Math.round(offsetMin / 60)} ${offsetMin < 120 ? 'oră' : 'ore'}` :
+    `mâine`
+
+  const html = emailWrapper(
+    `„${task.title}" începe ${when}`,
+    task.scheduled_start
+      ? `Programat la ${task.scheduled_start.substring(11, 16)}.`
+      : 'Deadline-ul se apropie.',
+    taskCard(task),
+    'Vezi în dashboard',
+    `${APP_URL}/dashboard`
+  )
+
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `⏰ „${task.title}" începe ${when} — TaskCapture`,
+    html,
+  })
+
+  if (error) throw new Error(`Resend error: ${error.message}`)
+}
+
 export async function sendReminderEmail(to: string, tasks: Task[]) {
   const count = tasks.length
   const urgent = tasks.filter(t => t.priority === 'high')

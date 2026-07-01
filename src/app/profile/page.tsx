@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import Sidebar from "@/components/Sidebar";
 import MobileNav from "@/components/MobileNav";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Task } from "@/types/task";
-import { useTimeFormat, setTimeFormat, type TimeFormat } from "@/lib/time-format";
+import { Task, UserPrefs } from "@/types/task";
+import { useTimeFormat, setTimeFormat, formatHourLabel, type TimeFormat } from "@/lib/time-format";
 import {
   User,
   Mail,
@@ -19,6 +19,8 @@ import {
   Tag,
   Save,
   LogOut,
+  Bell,
+  Globe,
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -33,6 +35,7 @@ export default function ProfilePage() {
   const [savingName, setSavingName] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [prefs, setPrefs] = useState<UserPrefs | null>(null);
   const timeFmt = useTimeFormat();
 
   useEffect(() => {
@@ -50,7 +53,48 @@ export default function ProfilePage() {
       setDisplayName(name);
     });
     fetch("/api/tasks").then(r => r.json()).then(d => setTasks(d.tasks ?? []));
+
+    // Preferințe notificări + sincronizare automată a timezone-ului detectat
+    fetch("/api/prefs")
+      .then(r => r.json())
+      .then(d => {
+        const p: UserPrefs | undefined = d.prefs;
+        if (!p) return;
+        const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (browserTz && browserTz !== p.timezone) {
+          // userul e în alt fus decât cel salvat — actualizăm silențios
+          fetch("/api/prefs", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ timezone: browserTz }),
+          })
+            .then(r => r.json())
+            .then(d2 => setPrefs(d2.prefs ?? { ...p, timezone: browserTz }))
+            .catch(() => setPrefs(p));
+        } else {
+          setPrefs(p);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  const updatePrefs = async (updates: Partial<UserPrefs>) => {
+    const prev = prefs;
+    setPrefs(p => p ? { ...p, ...updates } : p);
+    try {
+      const res = await fetch("/api/prefs", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error();
+      const d = await res.json();
+      setPrefs(d.prefs);
+    } catch {
+      setPrefs(prev ?? null);
+      toast.error("Nu s-au putut salva preferințele.");
+    }
+  };
 
   const handleSaveName = async () => {
     if (!displayName.trim()) return;
@@ -307,6 +351,87 @@ export default function ProfilePage() {
                 </div>
               </div>
             </motion.div>
+
+            {/* Notificări */}
+            {prefs && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18 }}
+                className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
+              >
+                <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-indigo-500" />
+                  Notificări pe email
+                </h3>
+                <div className="space-y-4">
+                  {/* Digest zilnic */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Rezumat zilnic</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Task-urile scadente în ziua respectivă</p>
+                    </div>
+                    <button
+                      role="switch"
+                      aria-checked={prefs.email_daily}
+                      onClick={() => updatePrefs({ email_daily: !prefs.email_daily })}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${prefs.email_daily ? "bg-indigo-600" : "bg-gray-200 dark:bg-white/10"}`}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${prefs.email_daily ? "left-[22px]" : "left-0.5"}`} />
+                    </button>
+                  </div>
+
+                  {/* Ora rezumatului */}
+                  {prefs.email_daily && (
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Ora rezumatului</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Pe fusul tău orar</p>
+                      </div>
+                      <select
+                        value={prefs.reminder_hour}
+                        onChange={(e) => updatePrefs({ reminder_hour: Number(e.target.value) })}
+                        className="h-9 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shrink-0"
+                      >
+                        {Array.from({ length: 24 }, (_, h) => (
+                          <option key={h} value={h}>{formatHourLabel(h, timeFmt)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Email la task-uri noi */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Confirmare task-uri noi</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Email la fiecare adăugare de task-uri</p>
+                    </div>
+                    <button
+                      role="switch"
+                      aria-checked={prefs.email_new_tasks}
+                      onClick={() => updatePrefs({ email_new_tasks: !prefs.email_new_tasks })}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${prefs.email_new_tasks ? "bg-indigo-600" : "bg-gray-200 dark:bg-white/10"}`}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${prefs.email_new_tasks ? "left-[22px]" : "left-0.5"}`} />
+                    </button>
+                  </div>
+
+                  {/* Timezone */}
+                  <div className="flex items-center justify-between gap-4 pt-3 border-t border-gray-100 dark:border-white/5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Globe className="w-4 h-4 text-gray-400 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Fus orar</p>
+                        <p className="text-xs text-gray-400 mt-0.5 truncate">{prefs.timezone}</p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] text-gray-400 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-2.5 py-1 shrink-0">
+                      detectat automat
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             {/* Securitate */}
             {user?.provider === "email" && (

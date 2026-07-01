@@ -83,9 +83,18 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   if (user.email && data && data.length > 0) {
-    sendNewTasksEmail(user.email, data as Task[]).catch((e) =>
-      console.error('[tasks POST] email error:', e)
-    )
+    // respectă preferința userului (default: trimite)
+    const { data: prefs } = await supabase
+      .from('user_prefs')
+      .select('email_new_tasks')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if (prefs?.email_new_tasks !== false) {
+      sendNewTasksEmail(user.email, data as Task[]).catch((e) =>
+        console.error('[tasks POST] email error:', e)
+      )
+    }
   }
 
   return NextResponse.json({ tasks: data }, { status: 201 })
