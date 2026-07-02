@@ -66,4 +66,18 @@ describe('buildTaskRow', () => {
     )
     expect(row.scheduled_end).toBe('2026-07-01T17:00:00')
   })
+
+  it('uses the user timezone for the no-deadline fallback date near midnight', () => {
+    // 22:30 UTC == 01:30 ziua următoare în Bucharest (vara, +3)
+    const today = new Date('2026-07-01T22:30:00Z')
+    const row = buildTaskRow({ ...base, start_time: '09:00' }, 'u', '', today, 'Europe/Bucharest')
+    expect(row.scheduled_date).toBe('2026-07-02') // ziua userului, nu UTC (2026-07-01)
+    expect(row.scheduled_start).toBe('2026-07-02T09:00:00')
+  })
+
+  it('falls back to UTC date when no timezone is provided', () => {
+    const today = new Date('2026-07-01T22:30:00Z')
+    const row = buildTaskRow({ ...base, start_time: '09:00' }, 'u', '', today)
+    expect(row.scheduled_date).toBe('2026-07-01')
+  })
 })

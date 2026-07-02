@@ -1,6 +1,7 @@
 import type { ParsedTaskInput } from './schemas'
 import type { Priority } from '@/types/task'
 import { addDays } from './recurrence'
+import { zonedDateString } from './reminder-time'
 
 export interface TaskRow {
   user_id: string
@@ -21,9 +22,12 @@ export function buildTaskRow(
   t: ParsedTaskInput,
   userId: string,
   rawInput: string,
-  today: Date = new Date()
+  today: Date = new Date(),
+  tz?: string
 ): TaskRow {
-  const dateStr = t.deadline ?? today.toISOString().substring(0, 10)
+  // fără deadline → „azi" în fusul userului (dacă îl știm), altfel UTC
+  const fallbackDate = tz ? zonedDateString(today, tz) : today.toISOString().substring(0, 10)
+  const dateStr = t.deadline ?? fallbackDate
   const hasTime = Boolean(t.start_time || t.end_time)
 
   // Interval peste noapte (ex: "de la 22:00 la 02:00"): end_time e mai mic decât

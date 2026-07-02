@@ -57,25 +57,28 @@ export async function POST(request: NextRequest) {
   const rl = await checkRateLimit('write', user.id)
   if (!rl.success) return rateLimitResponse(rl)
 
+  // Citim prefs o singură dată, ÎNAINTE de build: timezone-ul e folosit ca
+  // „azi" al userului pentru task-urile fără deadline (evită off-by-one la
+  // miezul nopții), iar email_new_tasks decide confirmarea pe email.
+  const { data: prefs } = await supabase
+    .from('user_prefs')
+    .select('timezone, email_new_tasks')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
   const rawInput = parsed.data.raw_input ?? ''
-  const rows = parsed.data.tasks.map((t) => buildTaskRow(t, user.id, rawInput))
+  const rows = parsed.data.tasks.map((t) =>
+    buildTaskRow(t, user.id, rawInput, new Date(), prefs?.timezone)
+  )
 
   const { data, error } = await supabase.from('tasks').insert(rows).select()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  if (user.email && data && data.length > 0) {
+  if (user.email && data && data.length > 0 && prefs?.email_new_tasks !== false) {
     // respectă preferința userului (default: trimite)
-    const { data: prefs } = await supabase
-      .from('user_prefs')
-      .select('email_new_tasks')
-      .eq('user_id', user.id)
-      .maybeSingle()
-
-    if (prefs?.email_new_tasks !== false) {
-      sendNewTasksEmail(user.email, data as Task[]).catch((e) =>
-        console.error('[tasks POST] email error:', e)
-      )
-    }
+    sendNewTasksEmail(user.email, data as Task[]).catch((e) =>
+      console.error('[tasks POST] email error:', e)
+    )
   }
 
   return NextResponse.json({ tasks: data }, { status: 201 })
