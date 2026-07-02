@@ -47,4 +47,23 @@ describe('buildTaskRow', () => {
     expect(row.scheduled_start).toBe('2026-03-15T08:00:00')
     expect(row.scheduled_end).toBeNull()
   })
+
+  it('rolls an overnight interval end to the next day', () => {
+    const row = buildTaskRow(
+      { ...base, deadline: '2026-07-01', start_time: '22:00', end_time: '02:00' },
+      'u',
+      ''
+    )
+    expect(row.scheduled_start).toBe('2026-07-01T22:00:00')
+    expect(row.scheduled_end).toBe('2026-07-02T02:00:00') // ziua următoare
+  })
+
+  it('keeps end on the same day for a normal interval', () => {
+    const row = buildTaskRow(
+      { ...base, deadline: '2026-07-01', start_time: '09:00', end_time: '17:00' },
+      'u',
+      ''
+    )
+    expect(row.scheduled_end).toBe('2026-07-01T17:00:00')
+  })
 })

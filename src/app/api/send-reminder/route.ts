@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendReminderEmail, sendTaskReminderEmail } from '@/lib/resend'
+import { reminderFireAt } from '@/lib/reminder-time'
 import type { Task } from '@/types/task'
 
 // Vercel Cron injectează automat `Authorization: Bearer ${CRON_SECRET}` folosind
@@ -45,21 +46,29 @@ function localNow(tz: string): { hour: number; dateStr: string } {
   }
 }
 
-// ─── Digest zilnic la ora locală a fiecărui user ─────────────────────────────
-async function runDailyDigest(supabase: ReturnType<typeof createAdminClient>) {
-  const { data: prefsRows, error } = await supabase
+// Încarcă preferințele tuturor userilor ca map user_id → PrefsRow. Tabela
+// user_prefs poate lipsi dacă migration 005 nu e rulată — returnăm și eroarea
+// ca fiecare apelant să decidă cum degradează.
+async function loadPrefsMap(supabase: ReturnType<typeof createAdminClient>) {
+  const { data, error } = await supabase
     .from('user_prefs')
     .select('user_id, timezone, reminder_hour, email_daily, last_daily_sent_on')
 
+  const map = new Map<string, PrefsRow>(
+    ((data ?? []) as PrefsRow[]).map((p) => [p.user_id, p])
+  )
+  return { map, error }
+}
+
+// ─── Digest zilnic la ora locală a fiecărui user ─────────────────────────────
+async function runDailyDigest(supabase: ReturnType<typeof createAdminClient>) {
+  const { map: prefsByUser, error } = await loadPrefsMap(supabase)
+
   if (error) {
-    // Tabela user_prefs poate lipsi dacă migration 005 nu e rulată — degradăm
+    // Fără prefs nu știm ora/fusul fiecărui user — degradăm în loc să dăm 500
     console.error('[send-reminder] prefs query error:', error.message)
     return { sent: 0, error: error.message }
   }
-
-  const prefsByUser = new Map<string, PrefsRow>(
-    ((prefsRows ?? []) as PrefsRow[]).map((p) => [p.user_id, p])
-  )
 
   // Toate task-urile pending cu deadline — filtrăm pe data locală per user
   const { data: allTasks, error: tasksError } = await supabase
@@ -129,19 +138,21 @@ async function runTaskReminders(supabase: ReturnType<typeof createAdminClient>) 
     return { sent: 0, error: error.message }
   }
 
+  // tz per user pentru a interpreta corect orele local-naive; dacă prefs lipsesc
+  // (migration 005 nerulată), toți cad pe DEFAULT_TZ.
+  const { map: prefsByUser } = await loadPrefsMap(supabase)
+
   const now = Date.now()
   let sent = 0
 
   for (const task of (rows ?? []) as Task[]) {
-    // Momentul țintă: scheduled_start, altfel deadline la 09:00 local naive
-    const anchor = task.scheduled_start ?? (task.deadline ? `${task.deadline.substring(0, 10)}T09:00:00` : null)
-    if (!anchor) continue
+    const tz = prefsByUser.get(task.user_id)?.timezone ?? DEFAULT_TZ
 
-    // string local naive → epoch aproximat în UTC; comparăm cu fereastra cron
-    const dueMs = new Date(anchor).getTime()
-    if (Number.isNaN(dueMs)) continue
+    // scheduled_start/deadline sunt oră de perete în fusul userului — le
+    // interpretăm în tz-ul lui, NU în UTC-ul serverului (vezi reminder-time.ts)
+    const fireAt = reminderFireAt(task, tz)
+    if (fireAt === null) continue
 
-    const fireAt = dueMs - (task.reminder_offset_min ?? 0) * 60_000
     // fereastră de 65 min în urmă (cron orar) + nu trimite dacă a trecut deja de start
     if (fireAt > now || fireAt < now - 65 * 60_000) continue
 

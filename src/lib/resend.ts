@@ -15,6 +15,19 @@ function getResend(): Resend {
 const FROM = process.env.RESEND_FROM_EMAIL ?? 'TaskCapture <onboarding@resend.dev>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.taskcapture.xyz'
 
+// Escape pentru orice text controlat de user (titlu, categorie) înainte de a-l
+// interpola în HTML-ul emailului. Titlul vine din input prin LLM: fără escape,
+// un titlu ca `<a href="http://phish">…</a>` ar livra HTML arbitrar de pe
+// domeniul nostru verificat (SPF/DKIM) — phishing cu antetul TaskCapture.
+export function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function formatDate(str: string | null): string {
   if (!str) return '—'
   const [y, m, d] = str.substring(0, 10).split('-').map(Number)
@@ -24,6 +37,8 @@ function formatDate(str: string | null): string {
     year: 'numeric',
   })
 }
+
+const PRIORITY_ORDER: Record<Task['priority'], number> = { high: 0, medium: 1, low: 2 }
 
 const PRIORITY_CONFIG: Record<Task['priority'], { label: string; bg: string; color: string; dot: string }> = {
   high:   { label: 'Urgent',  bg: '#fef2f2', color: '#dc2626', dot: '#ef4444' },
@@ -47,7 +62,7 @@ function taskCard(t: Task): string {
   return `
   <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;margin-bottom:12px;border-left:4px solid ${p.dot}">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px">
-      <p style="margin:0;font-size:15px;font-weight:600;color:#111827;line-height:1.4">${t.title}</p>
+      <p style="margin:0;font-size:15px;font-weight:600;color:#111827;line-height:1.4">${escapeHtml(t.title)}</p>
       <span style="display:inline-flex;align-items:center;gap:5px;background:${p.bg};color:${p.color};padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0">
         <span style="width:6px;height:6px;border-radius:50%;background:${p.dot};display:inline-block"></span>
         ${p.label}
@@ -59,7 +74,7 @@ function taskCard(t: Task): string {
         <span style="font-size:13px">📅</span> ${deadline}${time ? ` · ${time}` : ''}
       </span>` : ''}
       ${t.category ? `
-      <span style="font-size:12px;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:6px;font-weight:500">${t.category}</span>` : ''}
+      <span style="font-size:12px;color:#6366f1;background:#eef2ff;padding:2px 8px;border-radius:6px;font-weight:500">${escapeHtml(t.category)}</span>` : ''}
       <span style="font-size:12px;color:${s.color};background:${s.bg};padding:2px 8px;border-radius:6px;font-weight:500">${s.label}</span>
     </div>
   </div>`
@@ -136,7 +151,7 @@ export async function sendTaskReminderEmail(to: string, task: Task, offsetMin: n
     `mâine`
 
   const html = emailWrapper(
-    `„${task.title}" începe ${when}`,
+    `„${escapeHtml(task.title)}" începe ${when}`,
     task.scheduled_start
       ? `Programat la ${task.scheduled_start.substring(11, 16)}.`
       : 'Deadline-ul se apropie.',
@@ -158,11 +173,8 @@ export async function sendTaskReminderEmail(to: string, task: Task, offsetMin: n
 export async function sendReminderEmail(to: string, tasks: Task[]) {
   const count = tasks.length
   const urgent = tasks.filter(t => t.priority === 'high')
-  const cards = tasks
-    .sort((a, b) => {
-      const order = { high: 0, medium: 1, low: 2 }
-      return order[a.priority] - order[b.priority]
-    })
+  const cards = [...tasks]
+    .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
     .map(taskCard)
     .join('')
 
