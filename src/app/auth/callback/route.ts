@@ -2,16 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+// Acceptăm doar căi interne relative ("/dashboard"), nu URL-uri absolute sau
+// protocol-relative ("//evil.com") — altfel `next` devine open redirect.
+export function safeNextPath(nextParam: string | null): string {
+  const p = nextParam ?? '/dashboard'
+  return p.startsWith('/') && !p.startsWith('//') ? p : '/dashboard'
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
 
-  // Acceptăm doar căi interne relative ("/dashboard"), nu URL-uri absolute sau
-  // protocol-relative ("//evil.com") — altfel `next` devine open redirect.
-  const nextParam = searchParams.get('next') ?? '/dashboard'
-  const next = nextParam.startsWith('/') && !nextParam.startsWith('//')
-    ? nextParam
-    : '/dashboard'
+  const next = safeNextPath(searchParams.get('next'))
 
   if (code) {
     const cookieStore = await cookies()
