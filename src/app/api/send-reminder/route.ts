@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { timingSafeEqual } from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendReminderEmail, sendTaskReminderEmail } from '@/lib/resend'
 import { reminderFireAt } from '@/lib/reminder-time'
@@ -7,11 +8,19 @@ import type { Task } from '@/types/task'
 // Vercel Cron injectează automat `Authorization: Bearer ${CRON_SECRET}` folosind
 // variabila numită exact CRON_SECRET. Acceptăm și REMINDER_CRON_SECRET ca
 // fallback pentru trigger manual (curl) și compatibilitate.
+// Comparație în timp constant — evită timing side-channel pe secret.
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a)
+  const bb = Buffer.from(b)
+  if (ab.length !== bb.length) return false
+  return timingSafeEqual(ab, bb)
+}
+
 function isAuthorized(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization')
+  const authHeader = request.headers.get('authorization') ?? ''
   const secrets = [process.env.CRON_SECRET, process.env.REMINDER_CRON_SECRET].filter(Boolean)
   if (secrets.length === 0) return false
-  return secrets.some((s) => authHeader === `Bearer ${s}`)
+  return secrets.some((s) => safeEqual(authHeader, `Bearer ${s}`))
 }
 
 interface PrefsRow {
