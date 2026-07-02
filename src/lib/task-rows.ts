@@ -1,5 +1,6 @@
 import type { ParsedTaskInput } from './schemas'
 import type { Priority } from '@/types/task'
+import { addDays } from './recurrence'
 
 export interface TaskRow {
   user_id: string
@@ -24,6 +25,13 @@ export function buildTaskRow(
 ): TaskRow {
   const dateStr = t.deadline ?? today.toISOString().substring(0, 10)
   const hasTime = Boolean(t.start_time || t.end_time)
+
+  // Interval peste noapte (ex: "de la 22:00 la 02:00"): end_time e mai mic decât
+  // start_time → sfârșitul cade în ziua următoare. Altfel scheduled_end ar fi
+  // înaintea lui scheduled_start și calendarul ar desena un bloc negativ.
+  const overnight = Boolean(t.start_time && t.end_time && t.end_time < t.start_time)
+  const endDateStr = overnight ? addDays(dateStr, 1) : dateStr
+
   return {
     user_id: userId,
     title: t.title,
@@ -34,6 +42,6 @@ export function buildTaskRow(
     raw_input: rawInput,
     scheduled_date: hasTime ? dateStr : null,
     scheduled_start: t.start_time ? `${dateStr}T${t.start_time}:00` : null,
-    scheduled_end: t.end_time ? `${dateStr}T${t.end_time}:00` : null,
+    scheduled_end: t.end_time ? `${endDateStr}T${t.end_time}:00` : null,
   }
 }

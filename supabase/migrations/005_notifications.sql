@@ -12,6 +12,7 @@ create table if not exists public.user_prefs (
 
 alter table public.user_prefs enable row level security;
 
+drop policy if exists "users manage own prefs" on public.user_prefs;
 create policy "users manage own prefs"
   on public.user_prefs for all
   using (auth.uid() = user_id)
