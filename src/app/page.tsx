@@ -1,9 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import { Sparkles, CheckCircle2, Calendar, Bell, ArrowRight, Zap, Shield, Clock } from 'lucide-react'
-
-const HERO_IMAGE = "https://d8j0ntlcm91z4.cloudfront.net/user_3Fs5lwoxPOgInyA7iQ9Mit0nExj/hf_20260630_203148_184ac31e-18c3-47d3-9d6a-cced3aeb1a7c.png"
+import { Sparkles, Calendar, Bell, ArrowRight, Shield, Repeat, BarChart3, Wand2 } from 'lucide-react'
+import CaptureDemo from '@/components/landing/CaptureDemo'
 
 export default async function Home() {
   const cookieStore = await cookies()
@@ -14,197 +13,217 @@ export default async function Home() {
   )
   const { data: { user } } = await supabase.auth.getUser()
 
+  const cta = user
+    ? { href: '/dashboard', label: 'Mergi la dashboard' }
+    : { href: '/register', label: 'Începe gratuit' }
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden">
-      {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-lg font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-            TaskCapture
-          </span>
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-[var(--ink)] text-white capture-grain">
+      {/* ── Ambient: drifting aurora, warm→cool ─────────────────── */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
+        <div className="capture-aurora absolute -left-[10%] -top-[15%] h-[55vh] w-[55vh] rounded-full bg-[#ff6a3d] opacity-[0.16] blur-[120px]" />
+        <div className="capture-aurora absolute right-[-8%] top-[18%] h-[45vh] w-[45vh] rounded-full bg-[#3dd4a7] opacity-[0.12] blur-[130px]" style={{ animationDelay: '-8s' }} />
+        <div className="capture-aurora absolute bottom-[-15%] left-[25%] h-[50vh] w-[50vh] rounded-full bg-[#7c5cff] opacity-[0.10] blur-[140px]" style={{ animationDelay: '-14s' }} />
+      </div>
 
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <span className="text-sm text-gray-400 hidden sm:block">{user.email?.split('@')[0]}</span>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-1.5 text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-1.5 rounded-lg transition-all shadow-lg shadow-indigo-500/20"
-              >
-                Dashboard <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-sm text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5">
-                Autentificare
-              </Link>
-              <Link href="/register" className="text-sm font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-1.5 rounded-lg transition-all shadow-lg shadow-indigo-500/20">
-                Începe gratuit
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
+      {/* ── Nav ─────────────────────────────────────────────────── */}
+      <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[var(--ink)]/70 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#ff6a3d] shadow-lg shadow-[#ff6a3d]/30">
+              <Sparkles className="h-4 w-4 text-black/80" />
+            </div>
+            <span className="font-display text-lg font-bold tracking-tight">TaskCapture</span>
+          </Link>
 
-      {/* Hero */}
-      <section className="relative pt-32 pb-20 px-6 text-center">
-        <div
-          className="absolute inset-0 opacity-25"
-          style={{ backgroundImage: `url('${HERO_IMAGE}')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/10 via-[#0a0a0f]/50 to-[#0a0a0f]" />
-
-        <div className="relative max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-4 py-1.5 text-sm text-indigo-300 mb-6">
-            <Zap className="w-3.5 h-3.5" />
-            Powered by NVIDIA NIM &middot; Llama 3.1
-          </div>
-
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] mb-6">
-            Transformă{" "}
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-purple-400 bg-clip-text text-transparent">
-              gândurile
-            </span>
-            {" "}în task-uri
-          </h1>
-
-          <p className="text-lg sm:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Scrie ce ai de făcut în limbaj natural. AI-ul extrage automat task-urile,
-            le prioritizează și le organizează în calendarul tău.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
+          <div className="flex items-center gap-2">
             {user ? (
-              <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30 hover:-translate-y-0.5">
-                Mergi la dashboard
-                <ArrowRight className="w-4 h-4" />
-              </Link>
+              <>
+                <span className="hidden font-mono text-xs text-[var(--haze)] sm:block">{user.email?.split('@')[0]}</span>
+                <Link href="/dashboard" className="inline-flex items-center gap-1.5 rounded-lg bg-[#ff6a3d] px-4 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5">
+                  Dashboard <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </>
             ) : (
               <>
-                <Link href="/register" className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30 hover:-translate-y-0.5">
-                  Începe gratuit
-                  <ArrowRight className="w-4 h-4" />
+                <Link href="/login" className="rounded-lg px-3 py-1.5 text-sm text-[var(--haze)] transition-colors hover:bg-white/5 hover:text-white">
+                  Autentificare
                 </Link>
-                <Link href="/login" className="inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold px-8 py-4 rounded-2xl text-base transition-all">
-                  Intră în cont
+                <Link href="/register" className="rounded-lg bg-[#ff6a3d] px-4 py-1.5 text-sm font-semibold text-black transition-transform hover:-translate-y-0.5">
+                  Începe gratuit
                 </Link>
               </>
             )}
           </div>
+        </div>
+      </nav>
 
-          {/* Demo chip */}
-          <div className="inline-flex items-start gap-3 bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-left max-w-md mx-auto">
-            <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Sparkles className="w-4 h-4 text-violet-400" />
+      {/* ── Hero: thesis = the parse ────────────────────────────── */}
+      <section className="relative z-10 mx-auto max-w-6xl px-6 pb-16 pt-36 sm:pt-40">
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
+          {/* copy */}
+          <div>
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-[var(--haze)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#3dd4a7]" />
+              NVIDIA NIM · Llama 3.1
             </div>
-            <div>
-              <p className="text-sm text-gray-300 italic leading-relaxed">
-                &ldquo;Trebuie să sun la doctor mâine, să trimit raportul până vineri și să cumpăr pâine azi seară&rdquo;
-              </p>
-              <p className="text-xs text-indigo-400 mt-2 font-medium">→ 3 task-uri extrase automat în 2 secunde</p>
+
+            <h1 className="font-display text-[2.7rem] font-extrabold leading-[1.02] tracking-tight sm:text-6xl">
+              Scrii un{' '}
+              <span className="text-[#ff8a63]">gând</span>.
+              <br />
+              Primești o zi{' '}
+              <span className="text-[#3dd4a7]">organizată</span>.
+            </h1>
+
+            <p className="mt-6 max-w-md text-lg leading-relaxed text-[var(--haze)]">
+              Notează în română, dezordonat, cum îți vine. AI-ul separă task-urile,
+              prinde deadline-urile relative — <span className="text-white/80">„mâine”</span>,{' '}
+              <span className="text-white/80">„până vineri”</span> — și ți le așază în calendar.
+            </p>
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href={cta.href}
+                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl bg-[#ff6a3d] px-7 py-3.5 text-base font-semibold text-black transition-transform hover:-translate-y-0.5"
+              >
+                <span className="capture-sheen absolute inset-y-0 left-0 w-1/3 bg-white/40 blur-md" />
+                <span className="relative">{cta.label}</span>
+                <ArrowRight className="relative h-4 w-4" />
+              </Link>
+              {!user && (
+                <Link href="/login" className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-7 py-3.5 text-base font-medium text-white transition-colors hover:bg-white/[0.06]">
+                  Intră în cont
+                </Link>
+              )}
             </div>
+
+            <p className="mt-6 font-mono text-xs text-white/30">
+              fără card · 30 de secunde · date private prin RLS
+            </p>
+          </div>
+
+          {/* signature */}
+          <div className="relative">
+            <CaptureDemo />
           </div>
         </div>
       </section>
 
-      {/* Stats banner */}
-      <section className="py-10 px-6 border-y border-white/5">
-        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-6 text-center">
+      {/* ── Ticker rail ─────────────────────────────────────────── */}
+      <section className="relative z-10 overflow-hidden border-y border-white/5 py-4">
+        <div className="capture-marquee flex w-max gap-3 whitespace-nowrap font-mono text-xs uppercase tracking-[0.15em] text-white/25">
+          {Array.from({ length: 2 }).map((_, r) => (
+            <span key={r} className="flex gap-3">
+              {['din text natural', 'deadline-uri relative', 'prioritizare AI', 'reminder pe email', 'calendar săptămânal', 'sync Jira', 'recurență', 'export CSV'].map((t) => (
+                <span key={t} className="flex items-center gap-3">
+                  <span className="text-[#ff6a3d]/50">✦</span> {t}
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Bento features ──────────────────────────────────────── */}
+      <section className="relative z-10 mx-auto max-w-6xl px-6 py-24">
+        <div className="mb-12 max-w-xl">
+          <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-[#ff6a3d]">ce primești</p>
+          <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+            Un instrument, nu încă un to-do list
+          </h2>
+        </div>
+
+        <div className="grid auto-rows-[minmax(0,1fr)] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* hero feature — spans 2×2 */}
+          <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#ff6a3d]/[0.12] to-transparent p-8 sm:col-span-2 lg:row-span-2">
+            <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#ff6a3d] text-black">
+              <Wand2 className="h-5 w-5" />
+            </div>
+            <h3 className="font-display text-2xl font-bold">AI din text natural</h3>
+            <p className="mt-2 max-w-md text-[15px] leading-relaxed text-[var(--haze)]">
+              Scrie o frază, o listă, un vraf de gânduri. Llama 3.1 extrage fiecare
+              task, deadline-ul și prioritatea — fără format special, fără butoane.
+            </p>
+            <div className="mt-7 space-y-2 font-mono text-[13px]">
+              <p className="text-white/40">› „revizuiesc PR-ul lui Ana până joi”</p>
+              <div className="flex items-center gap-2 rounded-lg border border-white/8 bg-black/30 px-3 py-2">
+                <span className="h-2 w-2 rounded-full bg-[#ff6a3d]" />
+                <span className="text-white/85">Revizuiește PR-ul lui Ana</span>
+                <span className="ml-auto text-[#3dd4a7]">joi</span>
+              </div>
+            </div>
+          </div>
+
           {[
-            { value: "< 2s", label: "timp de extragere" },
-            { value: "AI", label: "prioritizare automată" },
-            { value: "100%", label: "gratuit" },
-          ].map((s) => (
-            <div key={s.label}>
-              <p className="text-3xl font-black bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">{s.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
+            { icon: Calendar, title: 'Calendar inteligent', desc: 'Vederi săptămână, zi și listă. Ore de start și sfârșit, drag & drop.' },
+            { icon: Bell, title: 'Reminder pe email', desc: 'La 09:00 primești task-urile scadente azi. Plus confirmare la fiecare adăugare.' },
+            { icon: BarChart3, title: 'Progres vizual', desc: 'Total, finalizate, urgente, scadente — live, cu bară animată.' },
+            { icon: Shield, title: 'Cont securizat', desc: 'Email/parolă sau Google & GitHub. Datele tale, izolate prin RLS.' },
+            { icon: Repeat, title: 'Task-uri recurente', desc: 'Zilnic sau săptămânal — la finalizare, următoarea apariție se creează singură.' },
+          ].map((f) => (
+            <div key={f.title} className="group rounded-3xl border border-white/10 bg-white/[0.02] p-6 transition-colors hover:bg-white/[0.04]">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#3dd4a7] transition-colors group-hover:text-[#ff8a63]">
+                <f.icon className="h-5 w-5" />
+              </div>
+              <h3 className="font-display text-lg font-semibold">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-[var(--haze)]">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Tot ce ai nevoie</h2>
-            <p className="text-gray-400 text-lg">Un singur loc pentru toate task-urile tale</p>
+      {/* ── How it works: a real 3-step sequence ────────────────── */}
+      <section className="relative z-10 border-t border-white/5 py-24">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="mb-14 max-w-xl">
+            <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-[#3dd4a7]">fluxul</p>
+            <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">De la gând la calendar, în trei pași</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/5 sm:grid-cols-3">
             {[
-              { icon: Sparkles, color: "from-indigo-500 to-violet-500", bg: "bg-indigo-500/10", border: "border-indigo-500/20", title: "AI din text natural", desc: "Scrie orice, AI-ul extrage task-urile, deadline-urile și prioritățile automat din limbaj natural." },
-              { icon: Calendar, color: "from-violet-500 to-purple-500", bg: "bg-violet-500/10", border: "border-violet-500/20", title: "Calendar inteligent", desc: "Vizualizare săptămânală, zilnică și listă. Programează ore de start și sfârșit pentru fiecare task." },
-              { icon: Bell, color: "from-purple-500 to-pink-500", bg: "bg-purple-500/10", border: "border-purple-500/20", title: "Reminder zilnic pe email", desc: "Primești automat la 09:00 o listă cu task-urile scadente azi. Și confirmare la fiecare adăugare." },
-              { icon: CheckCircle2, color: "from-emerald-500 to-teal-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", title: "Progres vizual", desc: "Statistici live: total, finalizate, urgente, scadente. Bară de progres animată." },
-              { icon: Shield, color: "from-blue-500 to-indigo-500", bg: "bg-blue-500/10", border: "border-blue-500/20", title: "Cont securizat", desc: "Autentificare cu email/parolă sau OAuth Google și GitHub. Datele tale sunt private prin RLS." },
-              { icon: Clock, color: "from-amber-500 to-orange-500", bg: "bg-amber-500/10", border: "border-amber-500/20", title: "Prioritizare automată", desc: "AI-ul decide prioritatea (ridicată/medie/scăzută) și categoria fiecărui task din context." },
-            ].map((f) => (
-              <div key={f.title} className={`${f.bg} border ${f.border} rounded-2xl p-6 hover:scale-[1.02] transition-transform`}>
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-4 shadow-lg`}>
-                  <f.icon className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="font-bold text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="py-20 px-6 bg-white/2">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-14">Cum funcționează</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-            {[
-              { step: "1", title: "Scrie în română", desc: "Introduci orice text — fraze, liste, gânduri. Nu trebuie format special." },
-              { step: "2", title: "AI procesează", desc: "Llama 3.1 extrage task-uri, detectează deadline-uri relative și setează prioritatea." },
-              { step: "3", title: "Organizezi", desc: "Task-urile apar în dashboard cu calendar, filtre și reminder zilnic pe email." },
+              { n: '01', title: 'Scrii în română', desc: 'Orice text — fraze, liste, gânduri. Fără format, fără reguli.' },
+              { n: '02', title: 'AI procesează', desc: 'Llama 3.1 separă task-urile, rezolvă deadline-urile relative, alege prioritatea.' },
+              { n: '03', title: 'Organizezi', desc: 'Apar în dashboard cu calendar, filtre și reminder zilnic pe email.' },
             ].map((s) => (
-              <div key={s.step} className="flex flex-col items-center">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-lg mb-4 shadow-lg shadow-indigo-500/30">
-                  {s.step}
-                </div>
-                <h3 className="font-bold text-white mb-2">{s.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
+              <div key={s.n} className="bg-[var(--ink-2)] p-8">
+                <span className="font-mono text-sm text-[#ff6a3d]">{s.n}</span>
+                <h3 className="mt-4 font-display text-xl font-semibold">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--haze)]">{s.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 px-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="bg-gradient-to-br from-indigo-900/50 to-violet-900/50 border border-indigo-500/20 rounded-3xl p-10">
-            <h2 className="text-3xl sm:text-4xl font-black mb-4">Gata să fii mai productiv?</h2>
-            <p className="text-gray-400 mb-8">Crează-ți cont în 30 de secunde. Fără card de credit.</p>
-            {user ? (
-              <Link href="/dashboard" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30">
-                Mergi la dashboard <ArrowRight className="w-4 h-4" />
-              </Link>
-            ) : (
-              <Link href="/register" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold px-8 py-4 rounded-2xl text-base transition-all shadow-2xl shadow-indigo-500/30">
-                Creează cont gratuit <ArrowRight className="w-4 h-4" />
-              </Link>
-            )}
-          </div>
+      {/* ── CTA ─────────────────────────────────────────────────── */}
+      <section className="relative z-10 px-6 py-24">
+        <div className="relative mx-auto max-w-3xl overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#ff6a3d]/[0.14] via-transparent to-[#3dd4a7]/[0.10] p-12 text-center">
+          <h2 className="font-display text-3xl font-extrabold tracking-tight sm:text-5xl">
+            Golește-ți capul.<br />Restul se organizează singur.
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-[var(--haze)]">
+            Cont în 30 de secunde. Fără card de credit.
+          </p>
+          <Link
+            href={cta.href}
+            className="group relative mt-8 inline-flex items-center gap-2 overflow-hidden rounded-xl bg-[#ff6a3d] px-8 py-4 text-base font-semibold text-black transition-transform hover:-translate-y-0.5"
+          >
+            <span className="capture-sheen absolute inset-y-0 left-0 w-1/3 bg-white/40 blur-md" />
+            <span className="relative">{cta.label}</span>
+            <ArrowRight className="relative h-4 w-4" />
+          </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-8 px-6 text-center text-sm text-gray-600">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-          <span className="text-gray-400 font-medium">TaskCapture</span>
+      {/* ── Footer ──────────────────────────────────────────────── */}
+      <footer className="relative z-10 border-t border-white/5 px-6 py-10 text-center">
+        <div className="mb-2 flex items-center justify-center gap-2">
+          <Sparkles className="h-3.5 w-3.5 text-[#ff6a3d]" />
+          <span className="font-display text-sm font-semibold">TaskCapture</span>
         </div>
-        <p>Proiect de practică UTCB — Web + AI, Grupa A, 2026</p>
+        <p className="font-mono text-xs text-white/30">Proiect de practică UTCB · Web + AI · Grupa A · 2026</p>
       </footer>
     </div>
   )

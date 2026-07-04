@@ -57,7 +57,7 @@ function isOverdue(deadline: string | null, status: Status): boolean {
 // ─── Mini card used in DragOverlay ──────────────────────────────────────────
 function CardPreview({ task }: { task: Task }) {
   return (
-    <div className="bg-white rounded-xl border border-indigo-300 shadow-2xl shadow-indigo-200/60 p-3 w-56 rotate-2 opacity-95 ring-2 ring-indigo-400">
+    <div className="bg-white rounded-xl border border-[#ff8a63] shadow-2xl shadow-orange-200/60 p-3 w-56 rotate-2 opacity-95 ring-2 ring-[#ff8a63]">
       <p className="text-[13px] font-semibold text-gray-800 leading-snug line-clamp-2">{task.title}</p>
       {task.deadline && (
         <p className="mt-1 text-[10px] text-gray-400">{formatDateShort(task.deadline)}</p>
@@ -132,13 +132,13 @@ function DraggableCard({
           </span>
         )}
         {task.category && (
-          <span className="inline-flex items-center gap-0.5 text-[10px] rounded-full bg-indigo-50 px-1.5 py-0.5 text-indigo-600">
+          <span className="inline-flex items-center gap-0.5 text-[10px] rounded-full bg-orange-50 px-1.5 py-0.5 text-[#d24d1f]">
             <Tag className="w-2.5 h-2.5" />
             {task.category}
           </span>
         )}
         {task.scheduled_start && (
-          <span className="inline-flex items-center gap-0.5 text-[10px] rounded-full bg-violet-50 px-1.5 py-0.5 text-violet-600">
+          <span className="inline-flex items-center gap-0.5 text-[10px] rounded-full bg-[#3dd4a7]/10 px-1.5 py-0.5 text-[#3dd4a7]">
             <Clock className="w-2.5 h-2.5" />
             {formatClock(task.scheduled_start.substring(11, 16), timeFmt)}
           </span>
@@ -150,7 +150,7 @@ function DraggableCard({
         {!isDone && (
           <button
             onClick={() => onEdit(task)}
-            className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+            className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#d24d1f] hover:bg-orange-50 transition-colors"
           >
             <Pencil className="w-3 h-3" />
           </button>
@@ -206,7 +206,7 @@ function DroppableColumn({
       {/* Cards */}
       <div
         ref={setNodeRef}
-        className={`p-3 space-y-2 min-h-[120px] transition-colors duration-150 ${isOver ? "bg-indigo-50/20" : ""}`}
+        className={`p-3 space-y-2 min-h-[120px] transition-colors duration-150 ${isOver ? "bg-orange-50/20" : ""}`}
       >
         <AnimatePresence mode="popLayout">
           {tasks.length === 0 && !isOver && (

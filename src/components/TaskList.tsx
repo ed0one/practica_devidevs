@@ -88,7 +88,7 @@ export default function TaskList({
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="rounded-lg border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur-sm px-3 py-1.5 text-sm text-gray-900 dark:text-gray-200 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+            className="rounded-lg border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/5 backdrop-blur-sm px-3 py-1.5 text-sm text-gray-900 dark:text-gray-200 focus:border-[#ff8a63] focus:outline-none focus:ring-2 focus:ring-orange-100"
           >
             <option value="deadline">Deadline</option>
             <option value="priority">Prioritate</option>
@@ -103,7 +103,7 @@ export default function TaskList({
               onClick={() => setFilter(f)}
               className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
                 filter === f
-                  ? "bg-indigo-50 text-indigo-600 border border-indigo-200"
+                  ? "bg-orange-50 text-[#d24d1f] border border-orange-200"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -119,7 +119,7 @@ export default function TaskList({
         {bulkEnabled && !selectMode && sorted.length > 0 && (
           <button
             onClick={() => setSelectMode(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-white/10 bg-white/80 dark:bg-white/5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
           >
             <CheckSquare className="w-3.5 h-3.5" /> Selectează
           </button>
@@ -129,16 +129,16 @@ export default function TaskList({
       {/* Bara de acțiuni bulk */}
       <AnimatePresence>
         {selectMode && (
-          <div className="mb-4 flex items-center gap-2 flex-wrap rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/70 dark:bg-indigo-500/10 px-3 py-2.5">
+          <div className="mb-4 flex items-center gap-2 flex-wrap rounded-xl border border-orange-200 dark:border-[#ff6a3d]/30 bg-orange-50/70 dark:bg-[#ff6a3d]/10 px-3 py-2.5">
             <button
               onClick={toggleSelectAll}
               aria-label={allVisibleSelected ? "Deselectează tot" : "Selectează tot"}
-              className="flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#c2410c] dark:text-[#ff8a63] rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
             >
               {allVisibleSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
               {allVisibleSelected ? "Deselectează tot" : "Selectează tot"}
             </button>
-            <span className="text-xs text-indigo-600/70 dark:text-indigo-300/70">
+            <span className="text-xs text-[#d24d1f]/70 dark:text-[#ff8a63]/70">
               {selectedIds.length} selectate
             </span>
 
@@ -164,7 +164,7 @@ export default function TaskList({
               <button
                 onClick={exitSelect}
                 aria-label="Anulează selecția"
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-[#d24d1f] dark:text-[#ff8a63] hover:bg-orange-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -196,11 +196,11 @@ export default function TaskList({
                   role="checkbox"
                   aria-checked={isChecked}
                   aria-label={`Selectează: ${task.title}`}
-                  className="shrink-0 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                  className="shrink-0 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
                 >
                   {isChecked
-                    ? <CheckSquare className="w-5 h-5 text-indigo-600" />
-                    : <Square className="w-5 h-5 text-gray-300 dark:text-gray-600 hover:text-indigo-400 transition-colors" />}
+                    ? <CheckSquare className="w-5 h-5 text-[#d24d1f]" />
+                    : <Square className="w-5 h-5 text-gray-300 dark:text-gray-600 hover:text-[#ff8a63] transition-colors" />}
                 </button>
                 <div className="flex-1 min-w-0">{card}</div>
               </div>

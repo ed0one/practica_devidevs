@@ -157,9 +157,9 @@ export default function ProfilePage() {
 
   const stats = [
     { icon: CheckCircle2, label: "Finalizate", value: done, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100" },
-    { icon: Clock,        label: "În așteptare", value: total - done, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10", border: "border-indigo-100" },
+    { icon: Clock,        label: "În așteptare", value: total - done, color: "text-[#d24d1f] dark:text-[#ff8a63]", bg: "bg-orange-50 dark:bg-[#ff6a3d]/10", border: "border-orange-100" },
     { icon: Flame,        label: "Urgente active", value: urgent, color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-500/10", border: "border-red-100" },
-    { icon: Tag,          label: "Categorii", value: categories, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-500/10", border: "border-violet-100" },
+    { icon: Tag,          label: "Categorii", value: categories, color: "text-[#3dd4a7] dark:text-[#3dd4a7]", bg: "bg-[#3dd4a7]/10 dark:bg-[#3dd4a7]/10", border: "border-[#3dd4a7]/20" },
   ];
 
   return (
@@ -192,10 +192,10 @@ export default function ProfilePage() {
               transition={{ delay: 0.05 }}
               className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm overflow-hidden"
             >
-              <div className="h-24 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-600" />
+              <div className="h-24 bg-gradient-to-r from-[#ff6a3d] via-[#3dd4a7] to-[#3dd4a7]" />
               <div className="px-6 pb-6">
                 <div className="-mt-10 mb-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white text-2xl font-black shadow-lg border-4 border-white dark:border-[#16161f]">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#ff6a3d] to-[#3dd4a7] flex items-center justify-center text-white text-2xl font-black shadow-lg border-4 border-white dark:border-[#16161f]">
                     {initials}
                   </div>
                 </div>
@@ -210,7 +210,7 @@ export default function ProfilePage() {
                   <span className="flex items-center gap-1.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-gray-500 dark:text-gray-400">
                     <User className="w-3 h-3 shrink-0" /> Activ din {joinDate}
                   </span>
-                  <span className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-lg px-3 py-1.5 text-indigo-600 dark:text-indigo-400 font-medium capitalize">
+                  <span className="flex items-center gap-1.5 bg-orange-50 dark:bg-[#ff6a3d]/10 border border-orange-100 dark:border-[#ff6a3d]/20 rounded-lg px-3 py-1.5 text-[#d24d1f] dark:text-[#ff8a63] font-medium capitalize">
                     {user?.provider === "email" ? "🔑 Email & parolă" : `🔗 ${user?.provider}`}
                   </span>
                   <span className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-lg px-3 py-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
@@ -249,14 +249,14 @@ export default function ProfilePage() {
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Progres general</span>
-                <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400">{done}/{total} task-uri</span>
+                <span className="text-sm font-bold text-[#d24d1f] dark:text-[#ff8a63]">{done}/{total} task-uri</span>
               </div>
               <div className="h-2.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
                   transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] rounded-full"
                 />
               </div>
               <p className="text-xs text-gray-400 mt-2">{pct}% din task-uri finalizate</p>
@@ -270,7 +270,7 @@ export default function ProfilePage() {
               className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
             >
               <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <User className="w-4 h-4 text-indigo-500" />
+                <User className="w-4 h-4 text-[#d24d1f]" />
                 Informații cont
               </h3>
               <div className="space-y-4">
@@ -284,12 +284,12 @@ export default function ProfilePage() {
                       onChange={e => setDisplayName(e.target.value)}
                       onKeyDown={e => e.key === "Enter" && handleSaveName()}
                       placeholder="Numele tău"
-                      className="flex-1 min-w-0 h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                      className="flex-1 min-w-0 h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d] focus:border-transparent transition"
                     />
                     <button
                       onClick={handleSaveName}
                       disabled={savingName || displayName.trim() === user?.full_name}
-                      className="h-10 px-4 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5 shrink-0"
+                      className="h-10 px-4 rounded-xl bg-[#ff6a3d] text-white text-sm font-semibold hover:bg-[#ff5a28] disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-1.5 shrink-0"
                     >
                       {savingName ? (
                         <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
@@ -320,7 +320,7 @@ export default function ProfilePage() {
               className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
             >
               <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-indigo-500" />
+                <Clock className="w-4 h-4 text-[#d24d1f]" />
                 Preferințe
               </h3>
               <div className="flex items-center justify-between gap-4">
@@ -341,7 +341,7 @@ export default function ProfilePage() {
                       aria-pressed={timeFmt === value}
                       className={`px-3.5 h-8 rounded-lg text-xs font-semibold transition-all ${
                         timeFmt === value
-                          ? "bg-indigo-600 text-white shadow-sm"
+                          ? "bg-[#ff6a3d] text-white shadow-sm"
                           : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                       }`}
                     >
@@ -361,7 +361,7 @@ export default function ProfilePage() {
                 className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
               >
                 <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-indigo-500" />
+                  <Bell className="w-4 h-4 text-[#d24d1f]" />
                   Notificări pe email
                 </h3>
                 <div className="space-y-4">
@@ -375,7 +375,7 @@ export default function ProfilePage() {
                       role="switch"
                       aria-checked={prefs.email_daily}
                       onClick={() => updatePrefs({ email_daily: !prefs.email_daily })}
-                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${prefs.email_daily ? "bg-indigo-600" : "bg-gray-200 dark:bg-white/10"}`}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${prefs.email_daily ? "bg-[#ff6a3d]" : "bg-gray-200 dark:bg-white/10"}`}
                     >
                       <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${prefs.email_daily ? "left-[22px]" : "left-0.5"}`} />
                     </button>
@@ -391,7 +391,7 @@ export default function ProfilePage() {
                       <select
                         value={prefs.reminder_hour}
                         onChange={(e) => updatePrefs({ reminder_hour: Number(e.target.value) })}
-                        className="h-9 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shrink-0"
+                        className="h-9 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 shrink-0"
                       >
                         {Array.from({ length: 24 }, (_, h) => (
                           <option key={h} value={h}>{formatHourLabel(h, timeFmt)}</option>
@@ -410,9 +410,25 @@ export default function ProfilePage() {
                       role="switch"
                       aria-checked={prefs.email_new_tasks}
                       onClick={() => updatePrefs({ email_new_tasks: !prefs.email_new_tasks })}
-                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${prefs.email_new_tasks ? "bg-indigo-600" : "bg-gray-200 dark:bg-white/10"}`}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${prefs.email_new_tasks ? "bg-[#ff6a3d]" : "bg-gray-200 dark:bg-white/10"}`}
                     >
                       <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${prefs.email_new_tasks ? "left-[22px]" : "left-0.5"}`} />
+                    </button>
+                  </div>
+
+{/* Email la editare task */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Confirmare editare task</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Email la fiecare modificare de task</p>
+                    </div>
+                    <button
+                      role="switch"
+                      aria-checked={prefs.email_task_updates}
+                      onClick={() => updatePrefs({ email_task_updates: !prefs.email_task_updates })}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${prefs.email_task_updates ? "bg-[#ff6a3d]" : "bg-gray-200 dark:bg-white/10"}`}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${prefs.email_task_updates ? "left-[22px]" : "left-0.5"}`} />
                     </button>
                   </div>
 
@@ -442,7 +458,7 @@ export default function ProfilePage() {
                 className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
               >
                 <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-indigo-500" />
+                  <Lock className="w-4 h-4 text-[#d24d1f]" />
                   Securitate
                 </h3>
                 <div className="flex items-center justify-between gap-4">

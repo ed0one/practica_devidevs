@@ -58,13 +58,13 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
       >
         <button
           onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")}
-          className="shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className="shrink-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
           aria-label={isDone ? "Marchează ca activ" : "Marchează ca finalizat"}
           aria-pressed={isDone}
         >
           {isDone
             ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            : <Circle className="w-3.5 h-3.5 text-gray-300 hover:text-indigo-400 transition-colors" />
+            : <Circle className="w-3.5 h-3.5 text-gray-300 hover:text-[#ff8a63] transition-colors" />
           }
         </button>
         <span className={`text-xs font-medium flex-1 truncate ${isDone ? "line-through text-gray-400" : "text-gray-800 dark:text-gray-200"}`}>
@@ -103,7 +103,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
         <div className="flex items-start gap-3">
           <button
             onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")}
-            className="mt-0.5 shrink-0 transition-transform hover:scale-110 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            className="mt-0.5 shrink-0 transition-transform hover:scale-110 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
             aria-label={isDone ? "Marchează ca activ" : "Marchează ca finalizat"}
             aria-pressed={isDone}
           >
@@ -114,7 +114,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                 </motion.div>
               ) : (
                 <motion.div key="pending" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
-                  <Circle className="w-5 h-5 text-gray-300 hover:text-indigo-400 transition-colors" />
+                  <Circle className="w-5 h-5 text-gray-300 hover:text-[#ff8a63] transition-colors" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -130,7 +130,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                 {cfg.label}
               </span>
               {task.category && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 text-[11px] font-medium">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-orange-50 dark:bg-[#ff6a3d]/15 text-[#d24d1f] dark:text-[#ff8a63] px-2 py-0.5 text-[11px] font-medium">
                   <Tag className="w-2.5 h-2.5" />
                   {task.category}
                 </span>
@@ -141,7 +141,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                 {overdue && <AlertTriangle className="w-2.5 h-2.5 ml-0.5" />}
               </span>
               {task.scheduled_start && (
-                <span className="inline-flex items-center gap-1 rounded-lg bg-violet-50 dark:bg-violet-500/15 text-violet-600 dark:text-violet-400 px-2 py-0.5 text-[11px] font-medium">
+                <span className="inline-flex items-center gap-1 rounded-lg bg-[#3dd4a7]/10 dark:bg-[#3dd4a7]/15 text-[#3dd4a7] dark:text-[#3dd4a7] px-2 py-0.5 text-[11px] font-medium">
                   <Clock className="w-2.5 h-2.5" />
                   {formatTime(task.scheduled_start, timeFmt)}
                   {task.scheduled_end && `–${formatTime(task.scheduled_end, timeFmt)}`}
@@ -161,7 +161,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onSchedule(task.id)}
-                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-indigo-50 text-gray-400 hover:text-indigo-500 flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-orange-50 text-gray-400 hover:text-[#d24d1f] flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
                 title="Programează"
                 aria-label="Programează task-ul"
               >
@@ -172,7 +172,7 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
               <motion.button
                 whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => onEdit(task)}
-                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-violet-50 text-gray-400 hover:text-violet-500 flex items-center justify-center transition-all lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-[#3dd4a7]/10 text-gray-400 hover:text-[#3dd4a7] flex items-center justify-center transition-all lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#3dd4a7]"
                 title="Editează"
                 aria-label="Editează task-ul"
               >

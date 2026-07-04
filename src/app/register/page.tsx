@@ -87,13 +87,13 @@ export default function RegisterPage() {
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-200/60">
               <CheckCircle2 className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Cont creat!</h2>
+            <h2 className="font-display text-2xl font-bold text-gray-900 mb-2">Cont creat!</h2>
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">
               Am trimis un email de confirmare la <strong className="text-gray-700">{email}</strong>. Verifică inbox-ul și autentifică-te.
             </p>
             <Link
               href="/login"
-              className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200/60 hover:from-indigo-500 hover:to-violet-500 transition-all"
+              className="inline-flex items-center justify-center h-11 px-6 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold shadow-lg shadow-[#ff6a3d]/25 hover:bg-[#ff5a28] hover:-translate-y-0.5 transition-all"
             >
               Mergi la autentificare
             </Link>
@@ -105,44 +105,42 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-[#0c0c14] flex-col justify-between p-10 relative overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[400px] h-[400px] rounded-full bg-indigo-600/15 blur-[120px] pointer-events-none" />
-        <div className="absolute -bottom-32 -right-32 w-[320px] h-[320px] rounded-full bg-violet-600/15 blur-[100px] pointer-events-none" />
+      {/* Left panel — nocturne "Capture" */}
+      <div className="hidden lg:flex lg:w-[45%] bg-[var(--ink)] flex-col justify-between p-10 relative overflow-hidden capture-grain">
+        <div className="capture-aurora absolute -top-40 -left-40 w-[400px] h-[400px] rounded-full bg-[#ff6a3d] opacity-[0.16] blur-[120px] pointer-events-none" />
+        <div className="capture-aurora absolute -bottom-32 -right-32 w-[320px] h-[320px] rounded-full bg-[#3dd4a7] opacity-[0.12] blur-[100px] pointer-events-none" style={{ animationDelay: "-8s" }} />
 
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <Sparkles className="w-5 h-5 text-white" />
+          <Link href="/" className="inline-flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-[#ff6a3d] flex items-center justify-center shadow-lg shadow-[#ff6a3d]/30">
+              <Sparkles className="w-5 h-5 text-black/80" />
             </div>
-            <span className="text-xl font-bold text-white tracking-tight">TaskCapture</span>
+            <span className="font-display text-xl font-bold text-white tracking-tight">TaskCapture</span>
           </Link>
         </div>
 
         <div className="relative z-10">
-          <h2 className="text-4xl font-black text-white leading-snug mb-3">
-            Începe să fii<br />
-            <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-              mai productiv azi
-            </span>
+          <h2 className="font-display text-4xl font-extrabold text-white leading-[1.05] mb-3">
+            Golește-ți capul.<br />
+            <span className="text-[#3dd4a7]">Restul se scrie singur.</span>
           </h2>
-          <p className="text-white/40 text-sm leading-relaxed mb-8 max-w-xs">
+          <p className="text-[var(--haze)] text-sm leading-relaxed mb-8 max-w-xs">
             Cont gratuit. Fără card de credit. Gata în 30 de secunde.
           </p>
           <div className="space-y-3">
             {features.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center shrink-0">
-                  <f.icon className="w-3.5 h-3.5 text-indigo-400" />
+                <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
+                  <f.icon className="w-3.5 h-3.5 text-[#3dd4a7]" />
                 </div>
-                <span className="text-sm text-white/50">{f.text}</span>
+                <span className="text-sm text-white/55">{f.text}</span>
               </motion.div>
             ))}
           </div>
         </div>
 
         <div className="relative z-10">
-          <p className="text-xs text-white/20">Proiect de practică UTCB — Web + AI, 2026</p>
+          <p className="font-mono text-xs text-white/25">Proiect de practică UTCB · Web + AI · 2026</p>
         </div>
       </div>
 
@@ -155,7 +153,7 @@ export default function RegisterPage() {
 
           <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm p-8">
             <div className="mb-7">
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Creează cont gratuit</h1>
+              <h1 className="font-display text-2xl font-bold text-gray-900 tracking-tight">Creează cont gratuit</h1>
               <p className="mt-1.5 text-sm text-gray-400">Fără card de credit. Gata în 30 de secunde.</p>
             </div>
 
@@ -183,22 +181,22 @@ export default function RegisterPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+                <label htmlFor="email" className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)}
-                    className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff6a3d] focus:bg-white transition-all"
                     placeholder="tu@email.com" disabled={loading} />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Parolă</label>
+                <label htmlFor="password" className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Parolă</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" required
                     value={password} onChange={e => setPassword(e.target.value)}
-                    className="w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff6a3d] focus:bg-white transition-all"
                     placeholder="Minim 6 caractere" disabled={loading} />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -209,25 +207,25 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Confirmă parola</label>
+                <label htmlFor="confirmPassword" className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Confirmă parola</label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <input id="confirmPassword" type={showPassword ? "text" : "password"} autoComplete="new-password" required
                     value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-                    className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff6a3d] focus:bg-white transition-all"
                     placeholder="••••••••" disabled={loading} />
                 </div>
               </div>
 
               <button type="submit" disabled={loading || !email || !password || !confirmPassword}
-                className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200/60 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all mt-1">
+                className="w-full h-11 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold shadow-lg shadow-[#ff6a3d]/25 hover:bg-[#ff5a28] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all mt-1">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creează contul...</> : "Creează cont gratuit"}
               </button>
             </form>
 
             <p className="mt-5 text-center text-sm text-gray-500">
               Ai deja cont?{" "}
-              <Link href="/login" className="text-indigo-600 font-semibold hover:underline">Autentifică-te</Link>
+              <Link href="/login" className="text-[#d24d1f] font-semibold hover:underline">Autentifică-te</Link>
             </p>
           </div>
         </motion.div>

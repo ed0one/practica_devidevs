@@ -55,7 +55,7 @@ export default function ResetPasswordPage() {
   };
 
   const inputCls =
-    "w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 focus:bg-white transition-all";
+    "w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff6a3d] focus:bg-white transition-all";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f5f5f7] p-6">
@@ -65,16 +65,16 @@ export default function ResetPasswordPage() {
         className="w-full max-w-sm"
       >
         <div className="flex items-center gap-2 mb-6 justify-center">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-[#ff6a3d] flex items-center justify-center shadow-lg shadow-[#ff6a3d]/30">
+            <Sparkles className="w-4 h-4 text-black/80" />
           </div>
-          <span className="text-lg font-bold text-gray-900">TaskCapture</span>
+          <span className="font-display text-lg font-bold text-gray-900">TaskCapture</span>
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm p-8">
           {state === "checking" && (
             <div className="flex flex-col items-center py-8 gap-3">
-              <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+              <Loader2 className="w-6 h-6 text-[#d24d1f] animate-spin" />
               <p className="text-sm text-gray-400">Se verifică linkul...</p>
             </div>
           )}
@@ -84,13 +84,13 @@ export default function ResetPasswordPage() {
               <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-amber-500" />
               </div>
-              <h1 className="text-lg font-bold text-gray-900 mb-2">Link expirat sau invalid</h1>
+              <h1 className="font-display text-lg font-bold text-gray-900 mb-2">Link expirat sau invalid</h1>
               <p className="text-sm text-gray-400 mb-6">
                 Linkul de resetare a expirat. Cere unul nou din pagina de login.
               </p>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:from-indigo-500 hover:to-violet-500 transition-all"
+                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold hover:bg-[#ff5a28] hover:-translate-y-0.5 transition-all"
               >
                 Înapoi la login
               </Link>
@@ -107,13 +107,13 @@ export default function ResetPasswordPage() {
               >
                 <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               </motion.div>
-              <h1 className="text-lg font-bold text-gray-900 mb-2">Parolă schimbată!</h1>
+              <h1 className="font-display text-lg font-bold text-gray-900 mb-2">Parolă schimbată!</h1>
               <p className="text-sm text-gray-400 mb-6">
                 Poți folosi noua parolă de acum înainte.
               </p>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold hover:from-indigo-500 hover:to-violet-500 transition-all"
+                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold hover:bg-[#ff5a28] hover:-translate-y-0.5 transition-all"
               >
                 Mergi la dashboard
               </Link>
@@ -123,7 +123,7 @@ export default function ResetPasswordPage() {
           {state === "ready" && (
             <>
               <div className="mb-6">
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight">Setează parola nouă</h1>
+                <h1 className="font-display text-xl font-bold text-gray-900 tracking-tight">Setează parola nouă</h1>
                 <p className="mt-1 text-sm text-gray-400">Minim 8 caractere</p>
               </div>
 
@@ -135,7 +135,7 @@ export default function ResetPasswordPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                     Parolă nouă
                   </label>
                   <div className="relative">
@@ -162,7 +162,7 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
                     Confirmă parola
                   </label>
                   <div className="relative">
@@ -183,7 +183,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={saving || !password || !confirm}
-                  className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200/60 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+                  className="w-full h-11 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold shadow-lg shadow-orange-200/60 hover:bg-[#ff5a28] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
                 >
                   {saving ? (
                     <>

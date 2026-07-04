@@ -27,17 +27,17 @@ export default function Sidebar({ userEmail }: SidebarProps) {
   const initials = (userEmail ?? "?").split("@")[0].slice(0, 2).toUpperCase();
 
   return (
-    <aside className="hidden lg:flex flex-col w-60 shrink-0 min-h-screen sticky top-0 bg-[#0c0c14] border-r border-white/[0.06]">
+    <aside className="hidden lg:flex flex-col w-60 shrink-0 min-h-screen sticky top-0 bg-[var(--ink)] border-r border-white/[0.06]">
       {/* Logo */}
       <div className="px-5 py-5">
         <div className="flex items-center gap-2.5">
           <motion.div
             whileHover={{ rotate: 15, scale: 1.05 }}
-            className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25"
+            className="w-8 h-8 rounded-lg bg-[#ff6a3d] flex items-center justify-center shadow-lg shadow-[#ff6a3d]/25"
           >
-            <Sparkles className="w-4 h-4 text-white" />
+            <Sparkles className="w-4 h-4 text-black/80" />
           </motion.div>
-          <span className="font-bold text-white text-[15px] tracking-tight">TaskCapture</span>
+          <span className="font-display font-bold text-white text-[15px] tracking-tight">TaskCapture</span>
         </div>
       </div>
 
@@ -45,7 +45,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
       <div className="px-3 pb-2">
         <Link
           href="/input"
-          className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 hover:from-indigo-500 hover:to-violet-500 transition-all"
+          className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold shadow-lg shadow-[#ff6a3d]/20 hover:bg-[#ff5a28] transition-all"
         >
           <Plus className="w-4 h-4 shrink-0" />
           Adaugă task-uri
@@ -94,7 +94,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
       {/* User */}
       <div className="px-3 py-4 border-t border-white/[0.06]">
         <div className="flex items-center gap-3 px-3 py-2 mb-1 rounded-xl">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600/40 to-violet-600/40 border border-white/10 flex items-center justify-center text-xs font-bold text-white/70 shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#ff6a3d]/40 to-[#3dd4a7]/30 border border-white/10 flex items-center justify-center font-mono text-xs font-bold text-white/80 shrink-0">
             {initials}
           </div>
           <p className="text-xs text-white/50 truncate flex-1">{userEmail}</p>

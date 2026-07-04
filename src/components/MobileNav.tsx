@@ -22,17 +22,17 @@ export default function MobileNav() {
             if (link.primary) {
               return (
                 <Link key={link.href} href={link.href} className="flex flex-col items-center gap-1">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 -mt-4">
+                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#ff6a3d] to-[#3dd4a7] flex items-center justify-center shadow-lg shadow-[#ff6a3d]/30 -mt-4">
                     <link.icon className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-[10px] font-semibold text-indigo-400">{link.label}</span>
+                  <span className="text-[10px] font-semibold text-[#ff8a63]">{link.label}</span>
                 </Link>
               );
             }
             return (
               <a key={link.href} href={link.href} className="flex flex-col items-center gap-1 px-3 py-1">
-                <link.icon className={`w-5 h-5 transition-colors ${active ? "text-indigo-400" : "text-white/30"}`} />
-                <span className={`text-[10px] font-medium transition-colors ${active ? "text-indigo-400" : "text-white/30"}`}>
+                <link.icon className={`w-5 h-5 transition-colors ${active ? "text-[#ff8a63]" : "text-white/30"}`} />
+                <span className={`text-[10px] font-medium transition-colors ${active ? "text-[#ff8a63]" : "text-white/30"}`}>
                   {link.label}
                 </span>
               </a>
