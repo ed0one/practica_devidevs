@@ -172,7 +172,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
   const itemCls = (active: boolean) =>
     `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors cursor-pointer ${
       active
-        ? "bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300"
+        ? "bg-orange-50 dark:bg-[#ff6a3d]/15 text-[#c2410c] dark:text-[#ff8a63]"
         : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
     }`;
 
@@ -283,7 +283,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
                             {t.title}
                           </span>
                           {t.category && (
-                            <span className="text-[10px] text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/15 rounded px-1.5 py-0.5 shrink-0">
+                            <span className="text-[10px] text-[#d24d1f] dark:text-[#ff8a63] bg-orange-50 dark:bg-[#ff6a3d]/15 rounded px-1.5 py-0.5 shrink-0">
                               {t.category}
                             </span>
                           )}

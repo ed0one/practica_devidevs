@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Type, Tag, Calendar, Flag, Repeat, Bell } from "lucide-react";
+import { X, Type, Tag, Calendar, Flag, Repeat, Bell, Clock } from "lucide-react";
 import { Task, Priority, Recurrence } from "@/types/task";
+import { useTimeFormat, formatClock } from "@/lib/time-format";
 
 interface EditTaskModalProps {
   task: Task | null;
   onClose: () => void;
-  onSave: (id: string, updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence" | "reminder_offset_min">>) => Promise<void>;
+  onSave: (id: string, updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence" | "reminder_offset_min" | "scheduled_start" | "scheduled_end">>) => Promise<void>;
 }
 
 const RECURRENCE_OPTIONS: { value: Recurrence; label: string }[] = [
@@ -39,8 +40,11 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
   const [category, setCategory] = useState("");
   const [recurrence, setRecurrence] = useState<Recurrence>("none");
   const [reminderOffset, setReminderOffset] = useState<number | null>(null);
+  const [scheduledStart, setScheduledStart] = useState("");
+  const [scheduledEnd, setScheduledEnd] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const timeFmt = useTimeFormat();
 
   useEffect(() => {
     // Sincronizăm câmpurile formularului când se deschide alt task.
@@ -52,6 +56,8 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
       setCategory(task.category ?? "");
       setRecurrence(task.recurrence ?? "none");
       setReminderOffset(task.reminder_offset_min ?? null);
+      setScheduledStart(task.scheduled_start ? task.scheduled_start.substring(11, 16) : "");
+      setScheduledEnd(task.scheduled_end ? task.scheduled_end.substring(11, 16) : "");
       setError(null);
     }
   }, [task]);
@@ -80,6 +86,8 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
         category: category.trim() || null,
         recurrence,
         reminder_offset_min: reminderOffset,
+        scheduled_start: scheduledStart ? `${deadline || new Date().toISOString().substring(0, 10)}T${scheduledStart}:00` : null,
+        scheduled_end: scheduledEnd ? `${deadline || new Date().toISOString().substring(0, 10)}T${scheduledEnd}:00` : null,
       });
       onClose();
     } catch {
@@ -119,7 +127,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
             {/* Header */}
             <div className="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between shrink-0">
               <h2 className="font-bold text-gray-900 dark:text-gray-100">Editează task</h2>
-              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" aria-label="Închide">
+              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]" aria-label="Închide">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -135,7 +143,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   rows={2}
-                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white resize-none transition-all"
+                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff8a63] focus:bg-white resize-none transition-all"
                 />
               </div>
 
@@ -172,7 +180,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                   type="date"
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white dark:focus:bg-white/10 transition-all"
+                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff8a63] focus:bg-white dark:focus:bg-white/10 transition-all"
                 />
               </div>
 
@@ -186,7 +194,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="ex: muncă, personal, sănătate..."
-                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white dark:focus:bg-white/10 transition-all"
+                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff8a63] focus:bg-white dark:focus:bg-white/10 transition-all"
                 />
               </div>
 
@@ -204,7 +212,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                       aria-pressed={recurrence === opt.value}
                       className={`flex-1 h-9 rounded-xl text-xs font-semibold border transition-all ${
                         recurrence === opt.value
-                          ? "border-indigo-500 bg-indigo-500 text-white shadow-md"
+                          ? "border-[#ff6a3d] bg-[#ff6a3d] text-white shadow-md"
                           : "border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-gray-300 bg-white dark:bg-white/5"
                       }`}
                     >
@@ -227,7 +235,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
                 <select
                   value={reminderOffset === null ? "" : String(reminderOffset)}
                   onChange={(e) => setReminderOffset(e.target.value === "" ? null : Number(e.target.value))}
-                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:bg-white dark:focus:bg-white/10 transition-all"
+                  className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff8a63] focus:bg-white dark:focus:bg-white/10 transition-all"
                 >
                   {REMINDER_OPTIONS.map((opt) => (
                     <option key={String(opt.value)} value={opt.value === null ? "" : String(opt.value)}>
@@ -245,6 +253,54 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
               )}
             </div>
 
+            {/* Programare */}
+            <div className="border-t border-gray-100 dark:border-white/10 pt-4 space-y-4">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-[#d24d1f]" /> Programare
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    <Clock className="w-3.5 h-3.5" /> Începe la
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="time"
+                      value={scheduledStart}
+                      onChange={(e) => setScheduledStart(e.target.value)}
+                      className="flex-1 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff8a63] focus:bg-white dark:focus:bg-white/10 transition-all"
+                    />
+                    {scheduledStart && (
+                      <span className="text-xs text-gray-400 shrink-0">
+                        {formatClock(scheduledStart, timeFmt)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                    <Clock className="w-3.5 h-3.5" /> Se termină la
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="time"
+                      value={scheduledEnd}
+                      onChange={(e) => setScheduledEnd(e.target.value)}
+                      className="flex-1 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff8a63] focus:bg-white dark:focus:bg-white/10 transition-all"
+                    />
+                    {scheduledEnd && (
+                      <span className="text-xs text-gray-400 shrink-0">
+                        {formatClock(scheduledEnd, timeFmt)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-400">
+                Lăsați gol pentru a șterge programarea. Data se ia din Deadline.
+              </p>
+            </div>
+
             {/* Footer */}
             <div className="px-6 py-4 border-t border-gray-100 dark:border-white/10 flex gap-3 shrink-0">
               <button
@@ -256,7 +312,7 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
               <button
                 onClick={handleSave}
                 disabled={saving || !title.trim()}
-                className="flex-1 h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-sm font-semibold text-white disabled:opacity-50 hover:from-indigo-500 hover:to-violet-500 transition-all"
+                className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-sm font-semibold text-white disabled:opacity-50 hover:from-[#ff6a3d] hover:to-[#3dd4a7] transition-all"
               >
                 {saving ? "Se salvează..." : "Salvează"}
               </button>

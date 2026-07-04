@@ -87,12 +87,12 @@ export default function InputPage() {
 
       {/* Left panel — dark branding */}
       <div className="hidden lg:flex lg:w-[42%] flex-col justify-between p-10 relative overflow-hidden border-r border-white/[0.06]">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 bg-violet-600/10 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[#ff6a3d]/10 rounded-full blur-[120px] pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#3dd4a7]/10 rounded-full blur-[100px] pointer-events-none translate-x-1/3 translate-y-1/3" />
 
         <div className="relative z-10">
           <a href="/dashboard" className="inline-flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#ff6a3d] to-[#3dd4a7] flex items-center justify-center shadow-lg shadow-[#ff6a3d]/30">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-white tracking-tight">TaskCapture</span>
@@ -101,12 +101,12 @@ export default function InputPage() {
 
         <div className="relative z-10 space-y-8">
           <div>
-            <div className="inline-flex items-center gap-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full px-3 py-1 text-xs text-indigo-300 mb-5">
+            <div className="inline-flex items-center gap-2 bg-[#ff6a3d]/10 border border-[#ff6a3d]/20 rounded-full px-3 py-1 text-xs text-[#ff8a63] mb-5">
               <Zap className="w-3 h-3" /> Powered by Llama 3.1
             </div>
             <h2 className="text-3xl font-black text-white leading-tight mb-3">
               Scrie natural,<br />
-              <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#ff8a63] to-[#3dd4a7] bg-clip-text text-transparent">
                 AI organizează.
               </span>
             </h2>
@@ -134,7 +134,7 @@ export default function InputPage() {
                 transition={{ delay: 0.3 + i * 0.1 }}
                 className="flex items-center gap-3"
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#ff8a63] shrink-0" />
                 <span className="text-sm text-white/70 flex-1">{item.title}</span>
                 <span className={`text-[10px] font-semibold ${item.color}`}>{item.badge}</span>
                 <span className="text-[10px] text-white/30">{item.time}</span>
@@ -159,7 +159,7 @@ export default function InputPage() {
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#ff6a3d] to-[#3dd4a7] flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
@@ -193,7 +193,7 @@ export default function InputPage() {
                         placeholder="Ex: Trebuie să sun la doctor mâine, să trimit raportul până vineri urgent și să cumpăr pâine azi seară..."
                         rows={7}
                         disabled={loading}
-                        className="w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] p-4 pb-10 text-gray-900 dark:text-gray-100 text-[15px] leading-relaxed placeholder-gray-300 dark:placeholder-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-400 resize-none transition-all"
+                        className="w-full rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] p-4 pb-10 text-gray-900 dark:text-gray-100 text-[15px] leading-relaxed placeholder-gray-300 dark:placeholder-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/15 focus:border-[#ff8a63] resize-none transition-all"
                       />
                       <AnimatePresence>
                         {charCount > 0 && (
@@ -215,7 +215,7 @@ export default function InputPage() {
                             key={ex}
                             type="button"
                             onClick={() => setText(t => t ? `${t}\n${ex}` : ex)}
-                            className="text-xs bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-indigo-300 hover:text-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 rounded-lg px-3 py-1.5 transition-all"
+                            className="text-xs bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-[#ff8a63] hover:text-[#d24d1f] hover:bg-orange-50/50 dark:hover:bg-[#ff6a3d]/10 rounded-lg px-3 py-1.5 transition-all"
                           >
                             + {ex}
                           </button>
@@ -228,7 +228,7 @@ export default function InputPage() {
                       disabled={loading || !text.trim()}
                       whileHover={!loading && text.trim() ? { scale: 1.01 } : {}}
                       whileTap={!loading && text.trim() ? { scale: 0.99 } : {}}
-                      className="w-full h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-200 dark:shadow-none hover:from-indigo-500 hover:to-violet-500 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+                      className="w-full h-12 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-white font-semibold text-sm shadow-lg shadow-orange-200 dark:shadow-none hover:from-[#ff6a3d] hover:to-[#3dd4a7] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
                     >
                       {loading ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> AI procesează...</>
@@ -263,7 +263,7 @@ export default function InputPage() {
                               value={t.title}
                               onChange={(e) => updateTask(i, { title: e.target.value })}
                               aria-label="Titlu task"
-                              className="flex-1 min-w-0 rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-white/10 focus:border-indigo-400 bg-transparent px-2 py-1 text-[15px] font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 transition-all"
+                              className="flex-1 min-w-0 rounded-lg border border-transparent hover:border-gray-200 dark:hover:border-white/10 focus:border-[#ff8a63] bg-transparent px-2 py-1 text-[15px] font-semibold text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/15 transition-all"
                             />
                             <button
                               onClick={() => removeTask(i)}
@@ -308,7 +308,7 @@ export default function InputPage() {
                               onChange={(e) => updateTask(i, { category: e.target.value || null })}
                               placeholder="categorie"
                               aria-label="Categorie"
-                              className="w-28 rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-2 py-1 text-xs text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-400 transition-all"
+                              className="w-28 rounded-lg border border-gray-200 dark:border-white/10 bg-transparent px-2 py-1 text-xs text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/15 focus:border-[#ff8a63] transition-all"
                             />
                           </div>
                         </motion.div>
@@ -319,7 +319,7 @@ export default function InputPage() {
                   {preview.length === 0 ? (
                     <div className="text-center py-6 text-sm text-gray-400">
                       Ai eliminat toate task-urile.{" "}
-                      <button onClick={() => setPreview(null)} className="text-indigo-600 font-semibold hover:underline">
+                      <button onClick={() => setPreview(null)} className="text-[#d24d1f] font-semibold hover:underline">
                         Înapoi la text
                       </button>
                     </div>
@@ -337,7 +337,7 @@ export default function InputPage() {
                         disabled={saving}
                         whileHover={!saving ? { scale: 1.01 } : {}}
                         whileTap={!saving ? { scale: 0.99 } : {}}
-                        className="flex-1 h-12 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold text-sm shadow-lg shadow-indigo-200 dark:shadow-none hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+                        className="flex-1 h-12 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-white font-semibold text-sm shadow-lg shadow-orange-200 dark:shadow-none hover:from-[#ff6a3d] hover:to-[#3dd4a7] disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
                       >
                         {saving ? (
                           <><Loader2 className="w-4 h-4 animate-spin" /> Se salvează...</>

@@ -55,7 +55,7 @@ export default function ThemeToggle({ variant = "sidebar", className = "" }: The
       onClick={toggle}
       aria-label={label}
       title={label}
-      className={`flex items-center justify-center rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${base} ${className}`}
+      className={`flex items-center justify-center rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d] ${base} ${className}`}
     >
       {mounted && isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
     </button>

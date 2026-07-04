@@ -158,7 +158,7 @@ export default function CalendarView({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={prev}
-                className="rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur border border-gray-200 dark:border-white/10 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur border border-gray-200 dark:border-white/10 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
                 aria-label={viewMode === "day" ? "Ziua anterioară" : "Săptămâna anterioară"}
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -167,7 +167,7 @@ export default function CalendarView({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={next}
-                className="rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur border border-gray-200 dark:border-white/10 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="rounded-lg bg-white/80 dark:bg-white/5 backdrop-blur border border-gray-200 dark:border-white/10 p-1.5 shadow-sm hover:shadow-md transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
                 aria-label={viewMode === "day" ? "Ziua următoare" : "Săptămâna următoare"}
               >
                 <ChevronRight className="w-4 h-4" />
@@ -176,7 +176,7 @@ export default function CalendarView({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={goToday}
-                className="rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-100 transition-colors"
+                className="rounded-lg bg-orange-50 border border-orange-200 px-3 py-1.5 text-xs font-semibold text-[#d24d1f] hover:bg-orange-100 transition-colors"
               >
                 Astăzi
               </motion.button>
@@ -202,16 +202,16 @@ export default function CalendarView({
               onClick={() => setViewMode(mode)}
               aria-pressed={viewMode === mode}
               aria-label={`Vizualizare ${label}`}
-              className={`relative rounded-md px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+              className={`relative rounded-md px-3 py-1.5 text-xs font-medium transition-all flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d] ${
                 viewMode === mode
-                  ? "text-indigo-600"
+                  ? "text-[#d24d1f]"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
               {viewMode === mode && (
                 <motion.div
                   layoutId="viewTab"
-                  className="absolute inset-0 bg-indigo-50 border border-indigo-200 rounded-md"
+                  className="absolute inset-0 bg-orange-50 border border-orange-200 rounded-md"
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
               )}
@@ -247,7 +247,7 @@ export default function CalendarView({
                   transition={{ delay: i * 0.04 }}
                   className={`rounded-xl border p-3 sm:p-2 sm:min-h-[140px] transition-all ${
                     today
-                      ? "border-indigo-300 bg-indigo-50/50 dark:bg-indigo-500/10 shadow-md shadow-indigo-100/50 dark:shadow-none"
+                      ? "border-[#ff8a63] bg-orange-50/50 dark:bg-[#ff6a3d]/10 shadow-md shadow-orange-100/50 dark:shadow-none"
                       : past
                         ? "border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/[0.02] opacity-60"
                         : "border-gray-200/80 dark:border-white/10 bg-white/80 dark:bg-[#16161f] backdrop-blur-sm hover:shadow-md"
@@ -262,7 +262,7 @@ export default function CalendarView({
                     <span
                       className={`text-sm font-bold ${
                         today
-                          ? "bg-indigo-600 text-white w-7 h-7 flex items-center justify-center rounded-full"
+                          ? "bg-[#ff6a3d] text-white w-7 h-7 flex items-center justify-center rounded-full"
                           : "text-gray-700 dark:text-gray-300"
                       }`}
                     >
@@ -324,8 +324,8 @@ export default function CalendarView({
               );
               if (allDayTasks.length === 0) return null;
               return (
-                <div className="flex border-b border-gray-200 bg-indigo-50/40">
-                  <div className="w-16 flex-shrink-0 px-3 py-2 text-[10px] font-semibold text-indigo-400 uppercase tracking-wider border-r border-gray-200 flex items-center">
+                <div className="flex border-b border-gray-200 bg-orange-50/40">
+                  <div className="w-16 flex-shrink-0 px-3 py-2 text-[10px] font-semibold text-[#ff8a63] uppercase tracking-wider border-r border-gray-200 flex items-center">
                     Toată ziua
                   </div>
                   <div className="flex-1 p-2 flex flex-col gap-1">
@@ -408,8 +408,8 @@ export default function CalendarView({
                         className="absolute inset-x-0 z-20 flex items-center pointer-events-none"
                         style={{ top: ((nowMin - DAY_START_MIN) / 60) * HOUR_H }}
                       >
-                        <div className="w-2 h-2 rounded-full bg-indigo-500 -ml-1" />
-                        <div className="flex-1 h-0.5 bg-indigo-500" />
+                        <div className="w-2 h-2 rounded-full bg-[#ff6a3d] -ml-1" />
+                        <div className="flex-1 h-0.5 bg-[#ff6a3d]" />
                       </div>
                     )}
 
@@ -433,7 +433,7 @@ export default function CalendarView({
                               else onSchedule(task.id);
                             }
                           }}
-                          className={`group absolute z-10 text-left rounded-lg border-l-4 px-2 py-1 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${blockColor[task.priority]} ${isDone ? "opacity-45" : ""}`}
+                          className={`group absolute z-10 text-left rounded-lg border-l-4 px-2 py-1 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d] ${blockColor[task.priority]} ${isDone ? "opacity-45" : ""}`}
                           style={{
                             top,
                             height,

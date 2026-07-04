@@ -34,7 +34,7 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
   const maxVal = Math.max(...dayData.map(d => d.count), 1);
 
   const stats = [
-    { label: "Total",      value: total,        icon: TrendingUp,   gradient: "from-indigo-500 to-violet-500", bg: "bg-indigo-50",  text: "text-indigo-600" },
+    { label: "Total",      value: total,        icon: TrendingUp,   gradient: "from-[#ff6a3d] to-[#ff8a63]", bg: "bg-orange-50",  text: "text-[#d24d1f]" },
     { label: "Finalizate", value: done,         icon: CheckCircle2, gradient: "from-emerald-400 to-teal-500",  bg: "bg-emerald-50", text: "text-emerald-600" },
     { label: "Urgente",    value: highPriority, icon: Flame,        gradient: "from-orange-400 to-red-500",    bg: "bg-orange-50",  text: "text-orange-600" },
     { label: "Restante",   value: overdue,      icon: AlertTriangle,gradient: "from-red-400 to-rose-500",      bg: "bg-red-50",     text: "text-red-600" },
@@ -53,13 +53,13 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{stat.label}</p>
+                <p className="font-mono text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{stat.label}</p>
                 <motion.p
                   key={stat.value}
                   initial={{ scale: 0.7, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 400 }}
-                  className="text-4xl font-black text-gray-900 dark:text-gray-100 leading-none"
+                  className="font-display text-4xl font-extrabold text-gray-900 dark:text-gray-100 leading-none"
                 >
                   {stat.value}
                 </motion.p>
@@ -82,17 +82,17 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
           >
             <div className="flex items-center justify-between mb-4">
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Progres total</p>
+                <p className="font-mono text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Progres total</p>
                 <p className="text-sm text-gray-500 mt-0.5">{done} din {total} finalizate</p>
               </div>
-              <span className="text-3xl font-black text-indigo-600">{completionRate}%</span>
+              <span className="font-display text-3xl font-extrabold text-[#3dd4a7]">{completionRate}%</span>
             </div>
             <div className="h-2.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${completionRate}%` }}
                 transition={{ type: "spring", stiffness: 60, delay: 0.4 }}
-                className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+                className="h-full bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] rounded-full"
               />
             </div>
           </motion.div>
@@ -103,7 +103,7 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
             transition={{ delay: 0.4 }}
             className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/70 dark:border-white/10 p-5 shadow-sm"
           >
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Ultimele 7 zile</p>
+            <p className="font-mono text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-4">Ultimele 7 zile</p>
             <div className="flex items-end justify-between gap-1.5 h-14">
               {dayData.map((d, i) => (
                 <div key={i} className="flex flex-col items-center gap-1.5 flex-1">
@@ -115,10 +115,10 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
                       initial={{ height: 0 }}
                       animate={{ height: `${Math.max((d.count / maxVal) * 40, d.count > 0 ? 4 : 0)}px` }}
                       transition={{ delay: 0.45 + i * 0.05, type: "spring", stiffness: 200 }}
-                      className={`w-full rounded-t-lg ${d.isToday ? "bg-gradient-to-t from-indigo-600 to-violet-500" : "bg-indigo-100"}`}
+                      className={`w-full rounded-t-lg ${d.isToday ? "bg-gradient-to-t from-[#ff6a3d] to-[#ff8a63]" : "bg-orange-100 dark:bg-white/10"}`}
                     />
                   </div>
-                  <span className={`text-[9px] font-semibold capitalize ${d.isToday ? "text-indigo-600" : "text-gray-400"}`}>
+                  <span className={`font-mono text-[9px] font-semibold capitalize ${d.isToday ? "text-[#d24d1f]" : "text-gray-400"}`}>
                     {d.label}
                   </span>
                 </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Clock, Calendar, ArrowRight } from "lucide-react";
-import { useTimeFormat, formatClock } from "@/lib/time-format";
+import { useTimeFormat, setTimeFormat, formatClock, type TimeFormat } from "@/lib/time-format";
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -115,12 +115,12 @@ export default function ScheduleModal({
   const tomorrow = localTodayStr(1);
 
   const inputCls =
-    "w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:bg-white dark:focus:bg-white/10 transition-all";
+    "w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-[#ff8a63] focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/15 focus:bg-white dark:focus:bg-white/10 transition-all";
   const chipCls = (active: boolean) =>
     `px-3 h-8 rounded-lg text-xs font-semibold border transition-all ${
       active
-        ? "border-indigo-500 bg-indigo-500 text-white shadow-sm"
-        : "border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:border-indigo-300 hover:text-indigo-600"
+        ? "border-[#ff6a3d] bg-[#ff6a3d] text-white shadow-sm"
+        : "border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:border-[#ff8a63] hover:text-[#d24d1f]"
     }`;
 
   return (
@@ -160,7 +160,7 @@ export default function ScheduleModal({
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
                 aria-label="Închide"
               >
                 <X className="w-4 h-4" />
@@ -191,9 +191,30 @@ export default function ScheduleModal({
 
               {/* Ora de start */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  <Clock className="w-3.5 h-3.5" /> Începe la
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <Clock className="w-3.5 h-3.5" /> Începe la
+                  </label>
+                  <div className="flex items-center rounded-xl border border-gray-200 dark:border-white/10 p-0.5 shrink-0">
+                    {([
+                      ["24h", "24h"],
+                      ["12h", "AM/PM"],
+                    ] as [TimeFormat, string][]).map(([value, label]) => (
+                      <button
+                        key={value}
+                        onClick={() => setTimeFormat(value)}
+                        aria-pressed={timeFmt === value}
+                        className={`px-3 h-7 rounded-lg text-[10px] font-semibold transition-all ${
+                          timeFmt === value
+                            ? "bg-[#ff6a3d] text-white shadow-sm"
+                            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {START_PRESETS.map((p) => (
                     <button
@@ -264,7 +285,7 @@ export default function ScheduleModal({
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-lg shadow-indigo-200/40 dark:shadow-none hover:from-indigo-500 hover:to-violet-500 transition-all"
+                  className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-sm font-semibold text-white shadow-lg shadow-orange-200/40 dark:shadow-none hover:from-[#ff6a3d] hover:to-[#3dd4a7] transition-all"
                 >
                   Salvează
                 </button>

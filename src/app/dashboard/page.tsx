@@ -135,7 +135,7 @@ export default function DashboardPage() {
 
   const handleEdit = async (
     id: string,
-    updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence" | "reminder_offset_min">>
+    updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence" | "reminder_offset_min" | "scheduled_start" | "scheduled_end">>
   ) => {
     const prev = tasks;
     setTasks((t) => t.map((task) => task.id === id ? { ...task, ...updates } : task));
@@ -367,14 +367,14 @@ export default function DashboardPage() {
         {/* Mobile top bar */}
         <header className="lg:hidden sticky top-0 z-20 bg-[#0c0c14]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 flex items-center justify-between h-14">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-500/20">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#ff6a3d] to-[#3dd4a7] flex items-center justify-center shadow-md shadow-[#ff6a3d]/20">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="font-bold text-white text-sm tracking-tight">TaskCapture</span>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle variant="sidebar" className="w-8 h-8" />
-            <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-xs font-semibold shadow-md shadow-indigo-500/20">
+            <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-white text-xs font-semibold shadow-md shadow-[#ff6a3d]/20">
               <Plus className="w-3.5 h-3.5" /> Adaugă
             </a>
           </div>
@@ -398,9 +398,9 @@ export default function DashboardPage() {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center mb-5"
+                className="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-100 to-[#3dd4a7]/20 flex items-center justify-center mb-5"
               >
-                <Sparkles className="w-10 h-10 text-indigo-400" />
+                <Sparkles className="w-10 h-10 text-[#ff8a63]" />
               </motion.div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Nu ai task-uri încă</h3>
               <p className="text-gray-400 text-sm max-w-xs mb-6">
@@ -410,7 +410,7 @@ export default function DashboardPage() {
                 href="/input"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold shadow-lg shadow-indigo-200"
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-white text-sm font-semibold shadow-lg shadow-orange-200"
               >
                 <Plus className="w-4 h-4" /> Adaugă primul task
               </motion.a>
@@ -436,7 +436,7 @@ export default function DashboardPage() {
                     onChange={(e) => setSearch(e.target.value)}
                     aria-label="Caută task-uri"
                     placeholder="Caută task-uri..."
-                    className="w-full h-10 pl-9 pr-9 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] shadow-sm text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all"
+                    className="w-full h-10 pl-9 pr-9 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] shadow-sm text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/15 focus:border-[#ff6a3d] transition-all"
                   />
                   <AnimatePresence>
                     {search && (
@@ -446,7 +446,7 @@ export default function DashboardPage() {
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => setSearch("")}
                         aria-label="Șterge căutarea"
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
                       >
                         <X className="w-3.5 h-3.5" />
                       </motion.button>
@@ -504,8 +504,8 @@ export default function DashboardPage() {
                     aria-pressed={filter === value}
                     className={`shrink-0 h-8 px-3.5 rounded-lg text-xs font-semibold transition-all ${
                       filter === value
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-indigo-300 hover:text-indigo-600"
+                        ? "bg-[#ff6a3d] text-white shadow-sm"
+                        : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-[#ff8a63] hover:text-[#d24d1f]"
                     }`}
                   >
                     {label}
@@ -520,8 +520,8 @@ export default function DashboardPage() {
                       aria-pressed={filter === value}
                       className={`shrink-0 h-8 px-3.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
                         filter === value
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-indigo-300 hover:text-indigo-600"
+                          ? "bg-[#ff6a3d] text-white shadow-sm"
+                          : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-[#ff8a63] hover:text-[#d24d1f]"
                       }`}
                     >
                       <Tag className="w-3 h-3" />
