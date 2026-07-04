@@ -199,3 +199,28 @@ export async function sendReminderEmail(to: string, tasks: Task[]) {
 
   if (error) throw new Error(`Resend error pentru ${to}: ${error.message}`)
 }
+
+export async function sendTaskUpdatedEmail(to: string, task: Task) {
+  const html = emailWrapper(
+    `Task actualizat: „${escapeHtml(task.title)}”`,
+    task.scheduled_start
+      ? `Programat la ${task.scheduled_start.substring(11, 16)}.`
+      : task.deadline
+        ? `Deadline: ${formatDate(task.deadline)}.`
+        : 'Task actualizat cu succes.',
+
+    taskCard(task),
+
+    'Vezi task-ul pe dashboard',
+    `${APP_URL}/dashboard`
+  )
+
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `✏️ Task actualizat: ${task.title} — TaskCapture`,
+    html,
+  })
+
+  if (error) throw new Error(`Resend error: ${error.message}`)
+}

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { TaskUpdateSchema } from '@/lib/schemas'
 import { nextOccurrence } from '@/lib/recurrence'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { sendTaskUpdatedEmail } from '@/lib/resend'
 import type { Task } from '@/types/task'
 
 export async function DELETE(
@@ -81,6 +82,20 @@ export async function PATCH(
       const { error: spawnErr } = await supabase.from('tasks').insert(next)
       if (spawnErr) console.error('[tasks PATCH] recurrence spawn error:', spawnErr)
     }
+  }
+
+  // Trimitem email de confirmare actualizare (best-effort)
+  try {
+    const { data: prefs } = await supabase
+      .from('user_prefs')
+      .select('email_task_updates')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (prefs?.email_task_updates) {
+      await sendTaskUpdatedEmail(user.email!, updated)
+    }
+  } catch (emailErr) {
+    console.error('[tasks PATCH] email send error:', emailErr)
   }
 
   return NextResponse.json(updated)
