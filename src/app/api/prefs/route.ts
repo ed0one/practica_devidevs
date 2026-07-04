@@ -7,6 +7,7 @@ const DEFAULTS = {
   reminder_hour: 9,
   email_daily: true,
   email_new_tasks: true,
+  email_task_updates: true,
 }
 
 export async function GET() {
@@ -16,7 +17,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('user_prefs')
-    .select('timezone, reminder_hour, email_daily, email_new_tasks')
+    .select('timezone, reminder_hour, email_daily, email_new_tasks, email_task_updates')
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -54,7 +55,7 @@ export async function PUT(request: NextRequest) {
       { user_id: user.id, ...parsed.data, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     )
-    .select('timezone, reminder_hour, email_daily, email_new_tasks')
+    .select('timezone, reminder_hour, email_daily, email_new_tasks, email_task_updates')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

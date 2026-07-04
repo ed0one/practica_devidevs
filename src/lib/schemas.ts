@@ -76,6 +76,7 @@ export const UserPrefsSchema = z
     reminder_hour: z.number().int().min(0).max(23),
     email_daily: z.boolean(),
     email_new_tasks: z.boolean(),
+    email_task_updates: z.boolean(),
   })
   .partial()
   .strict()
