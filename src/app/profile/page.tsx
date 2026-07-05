@@ -21,6 +21,11 @@ import {
   LogOut,
   Bell,
   Globe,
+  CalendarDays,
+  Copy,
+  Check,
+  RefreshCw,
+  Trash2,
 } from "lucide-react";
 
 export default function ProfilePage() {
@@ -36,7 +41,59 @@ export default function ProfilePage() {
   const [sendingReset, setSendingReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [prefs, setPrefs] = useState<UserPrefs | null>(null);
+  const [syncBusy, setSyncBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
   const timeFmt = useTimeFormat();
+
+  // URL-ul de abonare la calendar, construit din token-ul curent.
+  const icsUrl = prefs?.ics_token
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/api/tasks/ics?token=${prefs.ics_token}`
+    : null;
+  // webcal:// declanșează dialogul de abonare nativ (iOS + macOS Calendar).
+  const webcalUrl = icsUrl ? icsUrl.replace(/^https?:\/\//, "webcal://") : null;
+  const googleUrl = icsUrl
+    ? `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl ?? icsUrl)}`
+    : null;
+
+  const generateIcsToken = async () => {
+    setSyncBusy(true);
+    try {
+      const res = await fetch("/api/tasks/ics/token", { method: "POST" });
+      if (!res.ok) throw new Error();
+      const d = await res.json();
+      setPrefs((p) => (p ? { ...p, ics_token: d.ics_token } : p));
+      toast.success("Link de sincronizare generat.");
+    } catch {
+      toast.error("Nu s-a putut genera link-ul.");
+    } finally {
+      setSyncBusy(false);
+    }
+  };
+
+  const revokeIcsToken = async () => {
+    setSyncBusy(true);
+    try {
+      const res = await fetch("/api/tasks/ics/token", { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      setPrefs((p) => (p ? { ...p, ics_token: null } : p));
+      toast.success("Link revocat. Sincronizarea s-a oprit.");
+    } catch {
+      toast.error("Nu s-a putut revoca link-ul.");
+    } finally {
+      setSyncBusy(false);
+    }
+  };
+
+  const copyIcsUrl = async () => {
+    if (!icsUrl) return;
+    try {
+      await navigator.clipboard.writeText(icsUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Nu s-a putut copia.");
+    }
+  };
 
   useEffect(() => {
     const supabase = createClient();
@@ -448,6 +505,95 @@ export default function ProfilePage() {
                 </div>
               </motion.div>
             )}
+
+            {/* Sincronizare calendar */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.185 }}
+              className="bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/80 dark:border-white/10 shadow-sm p-5"
+            >
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center gap-2">
+                <CalendarDays className="w-4 h-4 text-[#d24d1f]" />
+                Sincronizare calendar
+              </h3>
+              <p className="text-xs text-gray-400 mb-4">
+                Abonează-te cu Google sau iOS/macOS Calendar și task-urile tale apar automat pe telefon. Se actualizează la câteva ore (limită impusă de calendar).
+              </p>
+
+              {prefs?.ics_token ? (
+                <div className="space-y-3">
+                  {/* URL feed */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      readOnly
+                      value={icsUrl ?? ""}
+                      onFocus={(e) => e.target.select()}
+                      className="flex-1 min-w-0 h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 text-xs text-gray-500 dark:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 font-mono truncate"
+                    />
+                    <button
+                      onClick={copyIcsUrl}
+                      className="h-10 px-4 rounded-xl bg-[#ff6a3d] text-white text-sm font-semibold hover:bg-[#ff5a28] transition flex items-center justify-center gap-1.5 shrink-0"
+                    >
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      {copied ? "Copiat" : "Copiază"}
+                    </button>
+                  </div>
+
+                  {/* Acțiuni rapide */}
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={googleUrl ?? "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-9 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition flex items-center gap-1.5"
+                    >
+                      Adaugă în Google Calendar
+                    </a>
+                    <a
+                      href={webcalUrl ?? "#"}
+                      className="h-9 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition flex items-center gap-1.5"
+                    >
+                      Adaugă în iOS / macOS
+                    </a>
+                  </div>
+
+                  {/* Gestionare token */}
+                  <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100 dark:border-white/5">
+                    <button
+                      onClick={generateIcsToken}
+                      disabled={syncBusy}
+                      className="h-9 px-3.5 rounded-xl text-xs font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-40 transition flex items-center gap-1.5"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" /> Regenerează
+                    </button>
+                    <button
+                      onClick={revokeIcsToken}
+                      disabled={syncBusy}
+                      className="h-9 px-3.5 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-40 transition flex items-center gap-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Revocă
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    Oricine are acest link îți poate vedea task-urile. Nu-l distribui. Dacă a ajuns unde nu trebuie, apasă <span className="font-semibold">Regenerează</span> — link-ul vechi devine inutil.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  onClick={generateIcsToken}
+                  disabled={syncBusy}
+                  className="h-10 px-4 rounded-xl bg-[#ff6a3d] text-white text-sm font-semibold hover:bg-[#ff5a28] disabled:opacity-40 transition flex items-center justify-center gap-1.5"
+                >
+                  {syncBusy ? (
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                  ) : (
+                    <CalendarDays className="w-4 h-4" />
+                  )}
+                  Generează link de sincronizare
+                </button>
+              )}
+            </motion.div>
 
             {/* Securitate */}
             {user?.provider === "email" && (

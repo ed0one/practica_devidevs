@@ -39,6 +39,7 @@ export interface UserPrefs {
   email_daily: boolean
   email_new_tasks: boolean
   email_task_updates: boolean
+  ics_token?: string | null
 }
 
 // Ce trimite LLM-ul pentru un singur task (fără id/user_id/created_at)

@@ -17,7 +17,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('user_prefs')
-    .select('timezone, reminder_hour, email_daily, email_new_tasks, email_task_updates')
+    .select('timezone, reminder_hour, email_daily, email_new_tasks, email_task_updates, ics_token')
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -55,7 +55,7 @@ export async function PUT(request: NextRequest) {
       { user_id: user.id, ...parsed.data, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
     )
-    .select('timezone, reminder_hour, email_daily, email_new_tasks, email_task_updates')
+    .select('timezone, reminder_hour, email_daily, email_new_tasks, email_task_updates, ics_token')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
