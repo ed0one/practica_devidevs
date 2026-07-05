@@ -36,6 +36,8 @@ interface TaskListProps {
   onDelete?: (id: string) => void;
   onSchedule?: (id: string) => void;
   onEdit?: (task: Task) => void;
+  onDuplicate?: (id: string) => void;
+  onSnooze?: (id: string) => void;
   onBulkDone?: (ids: string[]) => void;
   onBulkDelete?: (ids: string[]) => void;
 }
@@ -46,6 +48,8 @@ export default function TaskList({
   onDelete,
   onSchedule,
   onEdit,
+  onDuplicate,
+  onSnooze,
   onBulkDone,
   onBulkDelete,
 }: TaskListProps) {
@@ -184,6 +188,8 @@ export default function TaskList({
                 onDelete={onDelete}
                 onSchedule={onSchedule}
                 onEdit={onEdit}
+                onDuplicate={onDuplicate}
+                onSnooze={onSnooze}
                 index={i}
               />
             );

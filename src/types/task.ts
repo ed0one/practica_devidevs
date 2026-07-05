@@ -3,6 +3,12 @@ export type Status = 'pending' | 'done'
 export type ViewMode = 'week' | 'day' | 'list' | 'board'
 export type Recurrence = 'none' | 'daily' | 'weekly'
 
+export interface Subtask {
+  id: string
+  title: string
+  done: boolean
+}
+
 export interface Task {
   id: string
   user_id: string
@@ -20,6 +26,11 @@ export interface Task {
   jira_issue_key?: string | null
   reminder_offset_min?: number | null
   reminder_sent_at?: string | null
+  description?: string | null
+  all_day?: boolean
+  location?: string | null
+  color?: string | null
+  subtasks?: Subtask[]
 }
 
 export interface UserPrefs {
