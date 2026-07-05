@@ -19,23 +19,33 @@ export async function GET(request: NextRequest) {
 
   let userId: string
   let db: Awaited<ReturnType<typeof createClient>> | ReturnType<typeof createAdminClient>
+  // Fusul userului: orele de perete ale task-urilor se ancorează în el la
+  // conversia în UTC, ca evenimentele să apară la ora corectă în calendar.
+  let tz = 'Europe/Bucharest'
 
   if (token) {
     const admin = createAdminClient()
     const { data: pref } = await admin
       .from('user_prefs')
-      .select('user_id')
+      .select('user_id, timezone')
       .eq('ics_token', token)
       .maybeSingle()
 
     if (!pref) return NextResponse.json({ error: 'Token invalid' }, { status: 401 })
     userId = pref.user_id as string
+    if (pref.timezone) tz = pref.timezone as string
     db = admin
   } else {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     userId = user.id
+    const { data: pref } = await supabase
+      .from('user_prefs')
+      .select('timezone')
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (pref?.timezone) tz = pref.timezone as string
     db = supabase
   }
 
@@ -49,7 +59,7 @@ export async function GET(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const ics = tasksToIcs((tasks ?? []) as Task[])
+  const ics = tasksToIcs((tasks ?? []) as Task[], new Date(), tz)
   return new NextResponse(ics, {
     status: 200,
     headers: {

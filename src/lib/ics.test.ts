@@ -37,13 +37,25 @@ describe('tasksToIcs', () => {
     expect(ics).toContain('\r\n')
   })
 
-  it('emits a timed event from scheduled_start/end', () => {
+  it('emits a timed event as UTC anchored in the given timezone', () => {
+    // 09:00 wall time în Europe/Bucharest (vara = UTC+3) → 06:00Z.
     const ics = tasksToIcs(
       [makeTask({ scheduled_start: '2026-07-06T09:00:00', scheduled_end: '2026-07-06T10:30:00' })],
-      NOW
+      NOW,
+      'Europe/Bucharest'
     )
-    expect(ics).toContain('DTSTART:20260706T090000')
-    expect(ics).toContain('DTEND:20260706T103000')
+    expect(ics).toContain('DTSTART:20260706T060000Z')
+    expect(ics).toContain('DTEND:20260706T073000Z')
+  })
+
+  it('respects a non-default timezone for timed events', () => {
+    // 09:00 wall time la New York (vara = UTC-4) → 13:00Z.
+    const ics = tasksToIcs(
+      [makeTask({ scheduled_start: '2026-07-06T09:00:00' })],
+      NOW,
+      'America/New_York'
+    )
+    expect(ics).toContain('DTSTART:20260706T130000Z')
   })
 
   it('emits an all-day event with an exclusive DTEND (next day)', () => {
