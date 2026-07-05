@@ -1,4 +1,5 @@
 import type { Task } from '@/types/task'
+import { zonedNaiveToEpoch } from './reminder-time'
 
 // Escape conform RFC 5545: virgulă, punct-virgulă, backslash și newline.
 function escapeIcs(s: string): string {
@@ -12,6 +13,15 @@ function escapeIcs(s: string): string {
 // "2026-07-04T09:00:00" → "20260704T090000" (fără Z: timp local, floating).
 function toIcsLocal(dt: string): string {
   return dt.replace(/[-:]/g, '').substring(0, 15)
+}
+
+// Oră de perete local-naivă + timezone IANA → instant UTC "20260704T060000Z".
+// De ce UTC și nu floating: Google Calendar interpretează orele fără `Z`/`TZID`
+// ca UTC, deci un task la 09:00 apărea decalat (+2/+3h vara). Ancorând în UTC,
+// orice client afișează ora corectă de perete indiferent de fusul lui.
+function toIcsUtc(naive: string, tz: string): string {
+  const d = new Date(zonedNaiveToEpoch(naive, tz))
+  return toIcsLocal(d.toISOString().replace(/\..*/, '')) + 'Z'
 }
 
 // "2026-07-04" → "20260704" (VALUE=DATE, pentru evenimente all-day).
@@ -40,7 +50,7 @@ function fold(line: string): string {
   return parts.join('\r\n')
 }
 
-function veventFor(task: Task, now: string): string[] {
+function veventFor(task: Task, now: string, tz: string): string[] {
   const lines: string[] = ['BEGIN:VEVENT', `UID:${task.id}@taskcapture.xyz`, `DTSTAMP:${now}`]
 
   if (task.all_day && (task.scheduled_date || task.deadline)) {
@@ -48,8 +58,8 @@ function veventFor(task: Task, now: string): string[] {
     lines.push(`DTSTART;VALUE=DATE:${toIcsDate(day)}`)
     lines.push(`DTEND;VALUE=DATE:${addDayIcsDate(day)}`) // DTEND e exclusiv
   } else if (task.scheduled_start) {
-    lines.push(`DTSTART:${toIcsLocal(task.scheduled_start)}`)
-    if (task.scheduled_end) lines.push(`DTEND:${toIcsLocal(task.scheduled_end)}`)
+    lines.push(`DTSTART:${toIcsUtc(task.scheduled_start, tz)}`)
+    if (task.scheduled_end) lines.push(`DTEND:${toIcsUtc(task.scheduled_end, tz)}`)
   } else if (task.deadline) {
     lines.push(`DTSTART;VALUE=DATE:${toIcsDate(task.deadline)}`)
   } else {
@@ -66,7 +76,11 @@ function veventFor(task: Task, now: string): string[] {
 
 // Serializează task-urile într-un calendar iCalendar (RFC 5545), abonabil în
 // Google/iOS Calendar. Pură și testabilă.
-export function tasksToIcs(tasks: Task[], now: Date = new Date()): string {
+export function tasksToIcs(
+  tasks: Task[],
+  now: Date = new Date(),
+  tz: string = 'Europe/Bucharest'
+): string {
   const stamp = toIcsLocal(now.toISOString().replace(/\..*/, '')) + 'Z'
   const head = [
     'BEGIN:VCALENDAR',
@@ -76,6 +90,6 @@ export function tasksToIcs(tasks: Task[], now: Date = new Date()): string {
     'METHOD:PUBLISH',
     'X-WR-CALNAME:TaskCapture',
   ]
-  const body = tasks.flatMap((t) => veventFor(t, stamp))
+  const body = tasks.flatMap((t) => veventFor(t, stamp, tz))
   return [...head, ...body, 'END:VCALENDAR'].join('\r\n')
 }
