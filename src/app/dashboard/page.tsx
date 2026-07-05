@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Task, Status } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
-import EditTaskModal from "@/components/EditTaskModal";
+import EditTaskModal, { type EditableTaskFields } from "@/components/EditTaskModal";
 import StatsHeader from "@/components/StatsHeader";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
@@ -133,10 +133,7 @@ export default function DashboardPage() {
     } catch { setTasks(prev); }
   };
 
-  const handleEdit = async (
-    id: string,
-    updates: Partial<Pick<Task, "title" | "priority" | "deadline" | "category" | "recurrence" | "reminder_offset_min" | "scheduled_start" | "scheduled_end">>
-  ) => {
+  const handleEdit = async (id: string, updates: EditableTaskFields) => {
     const prev = tasks;
     setTasks((t) => t.map((task) => task.id === id ? { ...task, ...updates } : task));
     const res = await fetch(`/api/tasks/${id}`, {
@@ -149,6 +146,43 @@ export default function DashboardPage() {
       throw new Error("Eroare la salvare");
     }
     toast.success("Task actualizat.");
+  };
+
+  const handleDuplicate = async (id: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${id}/duplicate`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const copy = await res.json();
+      setTasks((t) => [copy as Task, ...t]);
+      toast.success("Task duplicat.");
+    } catch {
+      toast.error("Nu s-a putut duplica task-ul.");
+    }
+  };
+
+  // Amână deadline-ul cu o zi. Fără deadline → pornim de la azi.
+  const handleSnooze = async (id: string) => {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+    const base = task.deadline?.substring(0, 10) ?? new Date().toISOString().substring(0, 10);
+    const d = new Date(`${base}T00:00:00`);
+    d.setDate(d.getDate() + 1);
+    const next = d.toISOString().substring(0, 10);
+
+    const prev = tasks;
+    setTasks((t) => t.map((x) => (x.id === id ? { ...x, deadline: next } : x)));
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deadline: next }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Amânat cu o zi.");
+    } catch {
+      setTasks(prev);
+      toast.error("Nu s-a putut amâna task-ul.");
+    }
   };
 
   const handleMoveTask = async (taskId: string, targetCol: string) => {
@@ -538,6 +572,8 @@ export default function DashboardPage() {
                   onDelete={handleDelete}
                   onSchedule={handleSchedule}
                   onEdit={setEditingTask}
+                  onDuplicate={handleDuplicate}
+                  onSnooze={handleSnooze}
                   onMoveTask={handleMoveTask}
                   onBulkDone={handleBulkDone}
                   onBulkDelete={handleBulkDelete}

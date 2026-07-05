@@ -85,6 +85,8 @@ interface CalendarViewProps {
   onDelete: (id: string) => void;
   onSchedule: (id: string) => void;
   onEdit?: (task: Task) => void;
+  onDuplicate?: (id: string) => void;
+  onSnooze?: (id: string) => void;
   onMoveTask?: (taskId: string, targetCol: string) => void;
   onBulkDone?: (ids: string[]) => void;
   onBulkDelete?: (ids: string[]) => void;
@@ -112,6 +114,8 @@ export default function CalendarView({
   onDelete,
   onSchedule,
   onEdit,
+  onDuplicate,
+  onSnooze,
   onMoveTask,
   onBulkDone,
   onBulkDelete,
@@ -502,6 +506,8 @@ export default function CalendarView({
               onDelete={onDelete}
               onSchedule={onSchedule}
               onEdit={onEdit}
+              onDuplicate={onDuplicate}
+              onSnooze={onSnooze}
               onBulkDone={onBulkDone}
               onBulkDelete={onBulkDelete}
             />
