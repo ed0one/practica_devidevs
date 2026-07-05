@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Priority, Status } from "@/types/task";
-import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, Tag, Trash2, Pencil, Repeat } from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertTriangle, Calendar, Tag, Trash2, Pencil, Repeat, MapPin, ListChecks, Copy, AlarmClockPlus, Sun } from "lucide-react";
 import { useTimeFormat, formatClock, type TimeFormat } from "@/lib/time-format";
 
 const RECURRENCE_LABEL: Record<string, string> = { daily: "Zilnic", weekly: "Săptămânal" };
@@ -36,15 +36,19 @@ interface TaskCardProps {
   onDelete?: (id: string) => void;
   onSchedule?: (id: string) => void;
   onEdit?: (task: Task) => void;
+  onDuplicate?: (id: string) => void;
+  onSnooze?: (id: string) => void;
   compact?: boolean;
   index?: number;
 }
 
-export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onEdit, compact = false, index = 0 }: TaskCardProps) {
+export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onEdit, onDuplicate, onSnooze, compact = false, index = 0 }: TaskCardProps) {
   const timeFmt = useTimeFormat();
   const overdue = task.status === "pending" && isOverdue(task.deadline);
   const cfg = priorityConfig[task.priority];
   const isDone = task.status === "done";
+  const subCount = task.subtasks?.length ?? 0;
+  const subDone = task.subtasks?.filter((s) => s.done).length ?? 0;
 
   if (compact) {
     return (
@@ -97,7 +101,8 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
       exit={{ opacity: 0, y: -8, scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 28, delay: index * 0.04 }}
       whileHover={{ y: -1 }}
-      className={`group relative bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/70 dark:border-white/10 border-l-4 ${cfg.border} shadow-sm hover:shadow-md transition-all ${isDone ? "opacity-55" : ""} ${overdue ? "border-red-300 dark:border-red-500/40 bg-red-50/30 dark:bg-red-500/10" : ""}`}
+      style={task.color ? { borderLeftColor: task.color } : undefined}
+      className={`group relative bg-white dark:bg-[#16161f] rounded-2xl border border-gray-200/70 dark:border-white/10 border-l-4 ${task.color ? "" : cfg.border} shadow-sm hover:shadow-md transition-all ${isDone ? "opacity-55" : ""} ${overdue ? "border-red-300 dark:border-red-500/40 bg-red-50/30 dark:bg-red-500/10" : ""}`}
     >
       <div className="p-4">
         <div className="flex items-start gap-3">
@@ -153,6 +158,24 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                   {RECURRENCE_LABEL[task.recurrence]}
                 </span>
               )}
+              {task.all_day && (
+                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400 px-2 py-0.5 text-[11px] font-medium">
+                  <Sun className="w-2.5 h-2.5" />
+                  Toată ziua
+                </span>
+              )}
+              {task.location && (
+                <span className="inline-flex items-center gap-1 rounded-lg bg-gray-50 text-gray-500 dark:bg-white/5 dark:text-gray-400 px-2 py-0.5 text-[11px] font-medium max-w-[140px] truncate">
+                  <MapPin className="w-2.5 h-2.5 shrink-0" />
+                  {task.location}
+                </span>
+              )}
+              {subCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-lg bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400 px-2 py-0.5 text-[11px] font-medium">
+                  <ListChecks className="w-2.5 h-2.5" />
+                  {subDone}/{subCount}
+                </span>
+              )}
             </div>
           </div>
 
@@ -177,6 +200,28 @@ export default function TaskCard({ task, onToggleDone, onDelete, onSchedule, onE
                 aria-label="Editează task-ul"
               >
                 <Pencil className="w-3.5 h-3.5" />
+              </motion.button>
+            )}
+            {onSnooze && !isDone && (
+              <motion.button
+                whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+                onClick={() => onSnooze(task.id)}
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-amber-50 text-gray-400 hover:text-amber-500 flex items-center justify-center transition-all lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                title="Amână cu o zi"
+                aria-label="Amână deadline-ul cu o zi"
+              >
+                <AlarmClockPlus className="w-3.5 h-3.5" />
+              </motion.button>
+            )}
+            {onDuplicate && (
+              <motion.button
+                whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
+                onClick={() => onDuplicate(task.id)}
+                className="w-7 h-7 rounded-lg bg-gray-50 dark:bg-white/5 hover:bg-sky-50 text-gray-400 hover:text-sky-500 flex items-center justify-center transition-all lg:opacity-0 lg:group-hover:opacity-100 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                title="Duplică"
+                aria-label="Duplică task-ul"
+              >
+                <Copy className="w-3.5 h-3.5" />
               </motion.button>
             )}
             {onDelete && (

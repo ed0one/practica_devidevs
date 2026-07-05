@@ -41,10 +41,24 @@ export const ParsedTasksResponseSchema = z.object({
 
 export type ParsedTaskInput = z.infer<typeof ParsedTaskSchema>
 
+// Un element de checklist. `title` obligatoriu, restul cu default-uri sănătoase.
+export const SubtaskSchema = z.object({
+  id: z.string().min(1).max(64),
+  title: z.string().trim().min(1).max(300),
+  done: z.boolean().default(false),
+})
+
+const COLOR_RE = /^#[0-9a-fA-F]{6}$/ // doar hex #rrggbb
+
 // ─── Validare pentru PATCH /api/tasks/[id] ───────────────────────────────────
 // Toate câmpurile opționale; se validează doar cele trimise.
 export const TaskUpdateSchema = z
   .object({
+    description: z.string().trim().max(5000).nullable(),
+    all_day: z.boolean(),
+    location: z.string().trim().max(300).nullable(),
+    color: z.string().regex(COLOR_RE, 'Culoare invalidă (#rrggbb)').nullable(),
+    subtasks: z.array(SubtaskSchema).max(50),
     title: z.string().trim().min(1, 'Titlul nu poate fi gol').max(500),
     status: z.enum(['pending', 'done']),
     priority: z.enum(['low', 'medium', 'high']),
