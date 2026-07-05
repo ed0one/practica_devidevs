@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   startOfWeek,
@@ -30,9 +30,9 @@ import {
 import BoardView from "./BoardView";
 import { useTimeFormat, formatClock, formatHourLabel } from "@/lib/time-format";
 
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 6);
-const DAY_START_MIN = 6 * 60; // 06:00
-const DAY_END_MIN = 22 * 60; // 22:00
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const DAY_START_MIN = 0; // 00:00
+const DAY_END_MIN = 24 * 60; // 24:00 (23:59)
 const HOUR_H = 56; // px per oră în day view
 
 // minute din zi pentru "YYYY-MM-DDTHH:MM:SS"
@@ -127,6 +127,20 @@ export default function CalendarView({
       ? DEFAULT_MOBILE_VIEW
       : "week"
   );
+
+  // Day-view timeline scroll: auto-scroll to current hour (or ~7am) so the
+  // full 00–24 timeline doesn't open on empty pre-dawn hours.
+  const dayScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (viewMode !== "day") return;
+    const el = dayScrollRef.current;
+    if (!el) return;
+    const anchorMin = isToday(currentDate)
+      ? new Date().getHours() * 60 + new Date().getMinutes()
+      : 8 * 60;
+    const top = Math.max(((anchorMin - DAY_START_MIN) / 60) * HOUR_H - HOUR_H, 0);
+    el.scrollTop = top;
+  }, [viewMode, currentDate]);
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) =>
@@ -378,7 +392,10 @@ export default function CalendarView({
               };
 
               return (
-                <div className="flex">
+                <div
+                  ref={dayScrollRef}
+                  className="flex max-h-[70vh] overflow-y-auto overscroll-contain"
+                >
                   {/* Coloana orelor */}
                   <div className="w-16 flex-shrink-0 border-r border-gray-100 dark:border-white/5">
                     {HOURS.map((hour) => (
