@@ -16,7 +16,7 @@ Fără poze cu pisici, fără liste de 40 de tehnologii pe care le-ai atins o da
 
 ## 2. Pin pe proiectul de practică
 
-Pe pagina de profil, `Customize your pins` si alegi repo-ul de practică. Ăsta e primul lucru pe care îl vede cineva. Dacă e într-un repo de echipă (nu al tău), pune un link către el în profile README.
+Pe pagina de profil, `Customize your pins` și alegi repo-ul de practică. Ăsta e primul lucru pe care îl vede cineva. Dacă e într-un repo de echipă (nu al tău), pune un link către el în profile README.
 
 ## 3. Ce face un repo să arate profesional
 
@@ -31,11 +31,11 @@ Un repo cu cod bun dar fără README arată abandonat. README-ul e prima impresi
 - Ce ai construit tu, dacă e proiect de echipă
 
 **Igiena repo-ului (critic pentru angajare):**
-- ZERO secrete în cod. Fără `.env`, fără chei API, fără token-uri, fără parole. Un repo public cu o cheie expusă te descalifică instant si e risc de securitate real. Verifici:
+- ZERO secrete în cod. Fără `.env`, fără chei API, fără token-uri, fără parole. Un repo public cu o cheie expusă te descalifică instant și e risc de securitate real. Verifici:
   ```bash
   git ls-files | grep -Ei "\.env|secret|key|token|credential"
   ```
-  Dacă apare ceva, îl scoți din tracking (`git rm --cached fisier`), îl pui în `.gitignore`, si **rotești cheia** la furnizor (o cheie pushuită public e compromisă chiar dacă o ștergi, rămâne în istoric).
+  Dacă apare ceva, îl scoți din tracking (`git rm --cached fisier`), îl pui în `.gitignore`, și **rotești cheia** la furnizor (o cheie pushuită public e compromisă chiar dacă o ștergi, rămâne în istoric).
 - `.gitignore` corect: `node_modules`, `.env`, build-uri, foldere de tooling local (`.claude`, `_bmad`).
 - Un `.env.example` cu numele variabilelor dar fără valori - arată ce config cere app-ul, fără să expună nimic.
 

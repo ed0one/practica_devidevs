@@ -1,6 +1,6 @@
 # CV de junior - template + ghid
 
-Un CV de junior are **o pagină**. Angajatorul îi dă 20-30 de secunde. Regula: proiectul livrat bate orice altceva. Ai un proiect real cu URL live si cod pe GitHub, deci pornești din avantaj. Îl pui în față.
+Un CV de junior are **o pagină**. Angajatorul îi dă 20-30 de secunde. Regula: proiectul livrat bate orice altceva. Ai un proiect real cu URL live și cod pe GitHub, deci pornești din avantaj. Îl pui în față.
 
 ## Principiul
 
@@ -17,8 +17,8 @@ GitHub: github.com/username · LinkedIn: linkedin.com/in/username
 ```
 
 ### 2. Un rând de positioning (sub antet)
-O frază care spune ce faci, concret. Nu "student pasionat si dornic să învețe".
-- Bun: `Construiesc aplicații web full-stack. Recent: o app de management de task-uri cu AI, live in producție.`
+O frază care spune ce faci, concret. Nu "student pasionat și dornic să învețe".
+- Bun: `Construiesc aplicații web full-stack. Recent: o app de management de task-uri cu AI, live în producție.`
 - Slab: `Persoană dinamică, orientată spre rezultat, cu spirit de echipă.`
 
 ### 3. Proiecte (secțiunea principală - aici stă valoarea)
@@ -34,13 +34,13 @@ TaskCapture - app de task management cu AI          [live] [cod]
   structurate, folosind un model LLM izolat anti prompt-injection
 - Am implementat sync de calendar prin abonare ICS cu token, cu
   ancorare UTC ca orele să nu se decaleze între fusuri
-- Stack: Next.js, Supabase, Vercel. Deployed in producție, folosit real
+- Stack: Next.js, Supabase, Vercel. Deployed în producție, folosit real
 ```
 
 Dacă e proiect de echipă, scrii clar **ce ai făcut tu** (`Rol: frontend + integrarea configuratorului 3D`). Onest, nu îți asumi tot.
 
 ### 4. Skills tehnice
-O linie, grupat pe categorii, doar ce chiar ai atins in proiect:
+O linie, grupat pe categorii, doar ce chiar ai atins în proiect:
 ```
 Limbaje: JavaScript/TypeScript, Python, C#
 Web: Next.js, React, Node, Tailwind
@@ -60,8 +60,8 @@ Scurt: facultatea, anul, eventual medie dacă e bună. Un rând.
 
 ## De la Markdown la PDF
 Scrii CV-ul în Markdown (simplu de versionat, îl ții pe GitHub). Îl exporți în PDF pentru trimis:
-- Cel mai simplu: îl scrii intr-un Google Doc / Word curat si exporți PDF.
+- Cel mai simplu: îl scrii intr-un Google Doc / Word curat și exporți PDF.
 - Sau, dacă vrei versionat pe git: Markdown + un export (VS Code cu extensie Markdown PDF, sau pandoc).
 - PDF-ul trebuie să arate curat pe o pagină, font lizibil, fără culori țipătoare.
 
-Ține CV-ul in repo-ul de profil (`cv.md` + `cv.pdf`). Așa e mereu la zi si linkabil.
+Ține CV-ul în repo-ul de profil (`cv.md` + `cv.pdf`). Așa e mereu la zi și linkabil.

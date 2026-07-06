@@ -1,6 +1,6 @@
 # LinkedIn de junior - ghid minim viabil
 
-LinkedIn e locul unde te găsesc recrutorii. Nu trebuie perfect, trebuie să existe si să arate că ai construit ceva. 30 de minute de setup acum îți aduc mesaje de recrutare peste luni. Pornești de la proiectul de practică.
+LinkedIn e locul unde te găsesc recrutorii. Nu trebuie perfect, trebuie să existe și să arate că ai construit ceva. 30 de minute de setup acum îți aduc mesaje de recrutare peste luni. Pornești de la proiectul de practică.
 
 ## 1. Headline (linia de sub nume - cea mai importantă)
 
@@ -9,7 +9,7 @@ Apare peste tot: în căutări, în comentarii, când dai connect. Nu o lăsa `S
 - Bun: `Automatică & Calculatoare @ UTCB | Web full-stack (Next.js, Supabase) | construiesc aplicații reale`
 - Slab: `Student` / `În căutarea unei oportunități`
 
-Spui ce faci si cu ce, nu doar unde ești.
+Spui ce faci și cu ce, nu doar unde ești.
 
 ## 2. About (rezumatul)
 
@@ -17,11 +17,12 @@ Spui ce faci si cu ce, nu doar unde ești.
 
 Exemplu:
 ```
-Student la Automatică si Calculatoare (UTCB). Construiesc aplicații web
-full-stack. In practica de vară la DeviDevs am construit [ClassMonitor],
-un dashboard de monitorizare energetică pentru săli, cu date în timp real
-si control prin MQTT. Lucrez cu Next.js, Supabase si integrare de modele AI.
-Caut un internship sau un rol junior de dezvoltator web.
+Student la Automatică și Calculatoare (UTCB). Construiesc aplicații web
+full-stack. În practica de vară la DeviDevs am construit [ClassMonitor],
+o platformă pentru sală inteligentă: control senzori, transcriere audio
+live și un asistent care răspunde din cursurile indexate (RAG). Lucrez cu
+Next.js, Supabase și integrare de modele AI. Caut un internship sau un rol
+junior de dezvoltator web.
 ```
 
 Fără "pasionat de tehnologie încă din copilărie". Concret: ce ai făcut, cu ce, ce vrei.
@@ -31,9 +32,9 @@ Fără "pasionat de tehnologie încă din copilărie". Concret: ce ai făcut, cu
 Adaugi practica DeviDevs ca experiență reală (Internship / Practică):
 ```
 Practicant Dezvoltare Software - DeviDevs (iunie-iulie 2026)
-- Am construit [numele proiectului], o aplicație [ce face], live in producție
+- Am construit [numele proiectului], o aplicație [ce face], live în producție
 - Stack: Next.js, Supabase, Vercel, integrare LLM
-- Am lucrat in echipă cu Git, board Jira, si agenți de cod AI
+- Am lucrat în echipă cu Git, board Jira, și agenți de cod AI
 - Link proiect: [URL]
 ```
 
@@ -46,13 +47,13 @@ Adaugi 8-10 skills reale (nu 50). Prioritizează cele din proiect: JavaScript, T
 ## 5. Detalii care contează
 - **Poză de profil** curată (fața, lumină bună, fundal neutru). Nu selfie de la petrecere, nu avatar gol.
 - **Banner** simplu (poate un screenshot din proiect, sau un fundal tehnic sobru).
-- **Link în profil** către GitHub si către proiectul live.
+- **Link în profil** către GitHub și către proiectul live.
 - **Open to work** activat (setarea discretă, doar pentru recrutori), cu rolurile: Software Engineer Intern / Junior Web Developer.
 
 ## Ce eviți
-- Clișeele AI si de LinkedIn: "excited to share", "humbled", "game-changer", "leveraging synergies". Sună fals.
-- Em dash-uri si limbaj pompos. Scrie cum vorbești.
-- Să ceri connect fără context la oameni random. Dacă dai connect unui recrutor, scrii un rând: cine ești si ce cauți.
+- Clișeele AI și de LinkedIn: "excited to share", "humbled", "game-changer", "leveraging synergies". Sună fals.
+- Em dash-uri și limbaj pompos. Scrie cum vorbești.
+- Să ceri connect fără context la oameni random. Dacă dai connect unui recrutor, scrii un rând: cine ești și ce cauți.
 - Profil gol cu headline "Student". Recrutorul trece mai departe.
 
 ## Checklist
