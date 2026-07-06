@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isDisposableEmail } from "@/lib/email-domains";
 import { Mail, Lock, Loader2, Eye, EyeOff, Sparkles, CheckCircle2, Calendar, Bell, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -41,6 +42,10 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
 
+    if (isDisposableEmail(email)) {
+      setError("Folosește un email real, nu unul temporar.");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Parolele nu coincid");
       return;
