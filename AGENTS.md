@@ -26,7 +26,7 @@ Next.js (App Router, TypeScript, Tailwind v4) app that extracts actionable tasks
 
 `id`, `user_id` (FK `auth.users`), `title`, `deadline` (date), `priority` (`low|medium|high`), `category`, `status` (`pending|done`), `raw_input`, `created_at`, `scheduled_date`, `scheduled_start`/`scheduled_end` (local-datetime strings, no `Z`), `recurrence` (`none|daily|weekly`), `jira_issue_key`, `reminder_offset_min`, `reminder_sent_at`. Calendar fields (migration 008): `description`, `all_day`, `location`, `color` (hex), `subtasks` (jsonb `[{id,title,done}]`).
 
-`public.user_prefs` (migration 005): `user_id`, `timezone`, `reminder_hour`, `email_daily`, `email_new_tasks`, `email_task_updates` (007), `last_daily_sent_on`. Own-row RLS.
+`public.user_prefs` (migration 005): `user_id`, `timezone`, `reminder_hour`, `email_daily`, `email_new_tasks`, `email_task_updates` (007), `ics_token` (009, uuid, unique — capability token for the calendar feed), `last_daily_sent_on`. Own-row RLS.
 
 ## API routes
 
@@ -34,7 +34,8 @@ Next.js (App Router, TypeScript, Tailwind v4) app that extracts actionable tasks
 - `GET /api/tasks` — current user's tasks (read limit)
 - `POST /api/tasks` — create task; honors `email_new_tasks` (write limit)
 - `GET /api/tasks/search` — search + filter (`q`, `status`, `priority`, `category`, `from`, `to`); `q` is `ilike`-escaped (read limit)
-- `GET /api/tasks/ics` — iCalendar (RFC 5545) feed, subscribable in Google/iOS Calendar (read limit)
+- `GET /api/tasks/ics` — iCalendar (RFC 5545) feed, subscribable in Google/iOS Calendar. `?token=<uuid>` → public feed authed by token via admin client (no session); no token → cookie-authed download (read limit)
+- `POST`/`DELETE /api/tasks/ics/token` — generate/rotate / revoke the `ics_token` (write limit)
 - `POST /api/tasks/bulk` — bulk `done`/`pending`/`delete` over `ids[]` (write limit)
 - `POST /api/tasks/[id]/duplicate` — copy a task (pending, subtasks reset, no reminder) (write limit)
 - `PATCH`/`DELETE /api/tasks/[id]` — update/delete (write limit)
@@ -57,7 +58,7 @@ src/
   lib/supabase/   client (browser) · server (SSR) · admin (service-role)
   lib/jira/       client + sync (used only by src/scripts/jira-sync.ts CLI)
   types/task.ts
-supabase/migrations/  001..008 — run in order in the SQL Editor
+supabase/migrations/  001..009 — run in order in the SQL Editor
 ```
 
 See CLAUDE.md for request-flow architecture, the three-Supabase-clients rule, notification logic, and the Vercel-Hobby daily-cron constraint.

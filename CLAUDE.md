@@ -53,6 +53,11 @@ RLS is on: outside the admin client, every query is automatically scoped to the 
 - Both degrade gracefully if migration 005 hasn't been applied.
 - **Driven by two cron sources** (endpoint is idempotent, so overlap is safe): Vercel daily (`vercel.json`, `0 6 * * *`) as a floor, and Supabase pg_cron **hourly** (migration 006) as the real per-timezone driver. See the Vercel-Hobby gotcha below.
 
+**Calendar sync (ICS feed, `GET /api/tasks/ics`):**
+- Two auth modes in one route. `?token=<uuid>` → **public** feed: calendar apps (Google/iOS) fetch it anonymously and periodically, so it can't depend on a session. The token resolves the user via the **admin client** (bypass RLS, filtered manually by `user_id`) — one of the few legit admin-client uses. No token → cookie-authed browser download.
+- The token lives in `user_prefs.ics_token` (migration 009), managed by `POST`/`DELETE /api/tasks/ics/token` (generate-or-rotate / revoke). It's a capability URL — anyone holding it sees the tasks; rotating invalidates the old link.
+- **Timed events are emitted as UTC (`...Z`), not floating.** Tasks store wall-clock local strings; Google reads a `DTSTART` with no `Z`/`TZID` as UTC and shifts the event (+2/3h). `src/lib/ics.ts` converts wall time → UTC DST-aware via `zonedNaiveToEpoch` using the user's `user_prefs.timezone`. All-day events stay `VALUE=DATE` (no shift).
+
 **Jira sync is a CLI script, not wired into the app.** `src/scripts/jira-sync.ts` (`tsx`) hits the running app's `/api/tasks` and pushes to Jira via `src/lib/jira/`. Credentials come from `JIRA_*` env vars. The Jira API token must never be committed — it lives only in `~/.claude/jira-config.json`.
 
 ## Gotchas & constraints
@@ -67,4 +72,4 @@ RLS is on: outside the admin client, every query is automatically scoped to the 
 
 Copy `.env.example` → `.env.local`. `.env.local` is gitignored and must never be committed. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NVIDIA_NIM_API_KEY`, `RESEND_API_KEY`, `REMINDER_CRON_SECRET`. Optional: `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` (rate limiting), `NEXT_PUBLIC_APP_URL`, `JIRA_*` (CLI sync only). Env vars set locally must also be added in the Vercel Dashboard, or production runs without them.
 
-DB: run `supabase/migrations/00{1..8}_*.sql` in order in the Supabase SQL Editor. 001 tasks + RLS, 002 scheduling + `jira_issue_key`, 003 RLS-authenticated, 004 recurrence, 005 `user_prefs` + reminder columns, 006 pg_cron hourly scheduler (needs `pg_cron`+`pg_net` extensions; edit `<CRON_SECRET>` first), 007 `email_task_updates` pref, 008 calendar fields (`description`, `all_day`, `location`, `color`, `subtasks`). Supabase Auth → Redirect URLs must include `<origin>/auth/callback`.
+DB: run `supabase/migrations/00{1..9}_*.sql` in order in the Supabase SQL Editor. 001 tasks + RLS, 002 scheduling + `jira_issue_key`, 003 RLS-authenticated, 004 recurrence, 005 `user_prefs` + reminder columns, 006 pg_cron hourly scheduler (needs `pg_cron`+`pg_net` extensions; edit `<CRON_SECRET>` first), 007 `email_task_updates` pref, 008 calendar fields (`description`, `all_day`, `location`, `color`, `subtasks`), 009 `ics_token` (calendar-feed capability token). Supabase Auth → Redirect URLs must include `<origin>/auth/callback`.
