@@ -10,6 +10,7 @@ export type EditableTaskFields = Partial<
   Pick<
     Task,
     | "title"
+    | "status"
     | "priority"
     | "deadline"
     | "category"
