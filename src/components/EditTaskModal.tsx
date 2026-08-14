@@ -190,12 +190,12 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
             role="dialog"
             aria-modal="true"
             aria-label="Editează task"
-            className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white dark:bg-[#16161f] shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col"
+            className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-[#141722] border border-white/10 shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col text-white"
           >
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between shrink-0">
-              <h2 className="font-bold text-gray-900 dark:text-gray-100">Editează task</h2>
-              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]" aria-label="Închide">
+            <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
+              <h2 className="font-bold text-white">Editează task</h2>
+              <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-[#94a3b8] hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400" aria-label="Închide">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -493,17 +493,17 @@ export default function EditTaskModal({ task, onClose, onSave }: EditTaskModalPr
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-100 dark:border-white/10 flex gap-3 shrink-0">
+            <div className="px-6 py-4 border-t border-white/[0.06] bg-black/30 flex gap-3 shrink-0">
               <button
                 onClick={onClose}
-                className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-white/10 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                className="flex-1 h-10 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors"
               >
                 Anulează
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !title.trim()}
-                className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-sm font-semibold text-white disabled:opacity-50 hover:from-[#ff6a3d] hover:to-[#3dd4a7] transition-all"
+                className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 disabled:opacity-50 transition-all cursor-pointer"
               >
                 {saving ? "Se salvează..." : "Salvează"}
               </button>

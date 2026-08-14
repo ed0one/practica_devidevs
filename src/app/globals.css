@@ -50,72 +50,86 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #0e1117;
+  --foreground: #f8fafc;
+  --card: #151821;
+  --card-foreground: #f8fafc;
+  --popover: #151821;
+  --popover-foreground: #f8fafc;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #1e222d;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e222d;
+  --muted-foreground: #94a3b8;
+  --accent: #232838;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #f97316;
+  --chart-1: #f97316;
+  --chart-2: #f59e0b;
+  --chart-3: #10b981;
+  --chart-4: #38bdf8;
+  --chart-5: #ef4444;
+  --radius: 0.75rem;
+  --sidebar: #0b0d13;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #171b26;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #f97316;
+
+  /* Obsidian & Amber theme tokens */
+  --ink: #0e1117;
+  --ink-2: #141721;
+  --ink-3: #1c202d;
+  --ink-elevated: #242938;
+  --amber-primary: #f97316;
+  --amber-glow: #ea580c;
+  --amber-soft: #fb923c;
+  --amber-gold: #f59e0b;
+  --mint: #10b981;
+  --jira-blue: #38bdf8;
+  --haze: #94a3b8;
+  --line: rgba(255, 255, 255, 0.08);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #0e1117;
+  --foreground: #f8fafc;
+  --card: #151821;
+  --card-foreground: #f8fafc;
+  --popover: #151821;
+  --popover-foreground: #f8fafc;
+  --primary: #f97316;
+  --primary-foreground: #ffffff;
+  --secondary: #1e222d;
+  --secondary-foreground: #f8fafc;
+  --muted: #1e222d;
+  --muted-foreground: #94a3b8;
+  --accent: #232838;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #f97316;
+  --chart-1: #f97316;
+  --chart-2: #f59e0b;
+  --chart-3: #10b981;
+  --chart-4: #38bdf8;
+  --chart-5: #ef4444;
+  --sidebar: #0b0d13;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #f97316;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #171b26;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #f97316;
 }
 
 @layer base {
@@ -124,9 +138,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: #0e1117;
+    color: #f8fafc;
   }
   html {
     @apply font-sans;
+    color-scheme: dark;
   }
 }
 
@@ -141,40 +158,44 @@
   .font-display {
     font-family: var(--font-bricolage), var(--font-inter), sans-serif;
   }
+  .bg-obsidian-main {
+    background-color: #0e1117;
+  }
+  .bg-obsidian-card {
+    background-color: #151821;
+  }
+  .bg-obsidian-elevated {
+    background-color: #1c202d;
+  }
+  .border-obsidian {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .glow-orange {
+    box-shadow: 0 0 20px -3px rgba(249, 115, 22, 0.25);
+  }
+  .glow-orange-sm {
+    box-shadow: 0 0 10px -2px rgba(249, 115, 22, 0.3);
+  }
 }
 
-/* ============================================================
-   "Capture" landing identity — nocturne precision instrument.
-   Warm persimmon = raw thought · cool mint = resolved task.
-   ============================================================ */
-:root {
-  --ink: #0a0b10;
-  --ink-2: #12141c;
-  --persimmon: #ff6a3d;
-  --persimmon-soft: #ff8a63;
-  --mint: #3dd4a7;
-  --haze: #8b8fa3;
-  --line: rgba(255, 255, 255, 0.08);
-}
-
-/* Ambient aurora that drifts behind the hero. */
+/* Ambient aurora that drifts behind the hero */
 @keyframes capture-aurora {
   0%   { transform: translate3d(-8%, -4%, 0) scale(1.05) rotate(0deg); }
   50%  { transform: translate3d(6%, 6%, 0) scale(1.15) rotate(8deg); }
   100% { transform: translate3d(-8%, -4%, 0) scale(1.05) rotate(0deg); }
 }
-/* Blinking caret for the typewriter capture bar. */
+/* Blinking caret for the typewriter capture bar */
 @keyframes capture-caret {
   0%, 45% { opacity: 1; }
   50%, 95% { opacity: 0; }
   100% { opacity: 1; }
 }
-/* Slow marquee for the ticker rail. */
+/* Slow marquee for the ticker rail */
 @keyframes capture-marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-/* Sheen sweep across the primary CTA. */
+/* Sheen sweep across the primary CTA */
 @keyframes capture-sheen {
   0%   { transform: translateX(-140%) skewX(-18deg); }
   60%, 100% { transform: translateX(320%) skewX(-18deg); }
@@ -185,13 +206,13 @@
 .capture-marquee { animation: capture-marquee 38s linear infinite; }
 .capture-sheen  { animation: capture-sheen 5.5s ease-in-out infinite; }
 
-/* Fine film grain — kills the flat-gradient "AI SaaS" tell. */
+/* Fine film grain — kills the flat-gradient look */
 .capture-grain::before {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.04;
+  opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   mix-blend-mode: overlay;
 }

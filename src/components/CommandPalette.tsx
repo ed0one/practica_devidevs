@@ -172,8 +172,8 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
   const itemCls = (active: boolean) =>
     `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-left transition-colors cursor-pointer ${
       active
-        ? "bg-orange-50 dark:bg-[#ff6a3d]/15 text-[#c2410c] dark:text-[#ff8a63]"
-        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
+        ? "bg-orange-500/15 text-orange-400 font-semibold border border-orange-500/30"
+        : "text-[#cbd5e1] hover:bg-white/5 border border-transparent"
     }`;
 
   let flatIndex = -1;
@@ -191,7 +191,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={close}
           />
 
@@ -203,7 +203,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
             role="dialog"
             aria-modal="true"
             aria-label="Paletă de comenzi"
-            className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-[#16161f] border border-gray-200/70 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[60dvh]"
+            className="relative w-full max-w-lg rounded-2xl bg-[#141722] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[60dvh] text-white"
           >
             {/* Input */}
             <div className="flex items-center gap-3 px-4 border-b border-gray-100 dark:border-white/10 shrink-0">

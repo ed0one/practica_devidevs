@@ -31,3 +31,8 @@ next-env.d.ts
 _bmad/
 graphify-out/
 .playwright-mcp/
+.impeccable/
+.opencode/
+.swarm/
+Icon?
+

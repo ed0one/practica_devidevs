@@ -29,11 +29,11 @@ export default async function Home() {
       {/* ── Nav ─────────────────────────────────────────────────── */}
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[var(--ink)]/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#ff6a3d] shadow-lg shadow-[#ff6a3d]/30">
-              <Sparkles className="h-4 w-4 text-black/80" />
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#f97316] to-[#ea580c] shadow-lg shadow-orange-500/30 border border-orange-400/30">
+              <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <span className="font-display text-lg font-bold tracking-tight">TaskCapture</span>
+            <span className="font-display text-lg font-bold tracking-tight text-white group-hover:text-orange-400 transition-colors">TaskCapture</span>
           </Link>
 
           <div className="flex items-center gap-2">

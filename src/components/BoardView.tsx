@@ -13,33 +13,34 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useTimeFormat, formatClock } from "@/lib/time-format";
 import { motion, AnimatePresence } from "framer-motion";
 import { Task, Status, Priority } from "@/types/task";
 import {
-  CheckCircle2,
-  Circle,
+  MoreHorizontal,
+  Plus,
   Clock,
   Calendar,
-  Tag,
-  Trash2,
-  Pencil,
   AlertTriangle,
   GripVertical,
+  CheckCircle2,
+  Circle,
+  Pencil,
+  Trash2,
+  Sparkles,
 } from "lucide-react";
+import { useTimeFormat, formatClock } from "@/lib/time-format";
 
 const COLUMNS: {
   id: string;
   label: string;
-  dot: string;
-  ring: string;
-  countBg: string;
-  countText: string;
+  countKey: string;
+  colorDot: string;
+  badgeBg: string;
 }[] = [
-  { id: "high",   label: "Urgent",     dot: "bg-red-500",     ring: "ring-red-300",     countBg: "bg-red-100",     countText: "text-red-600" },
-  { id: "medium", label: "Normal",     dot: "bg-amber-400",   ring: "ring-amber-300",   countBg: "bg-amber-100",   countText: "text-amber-700" },
-  { id: "low",    label: "Scăzut",    dot: "bg-emerald-500", ring: "ring-emerald-300", countBg: "bg-emerald-100", countText: "text-emerald-700" },
-  { id: "done",   label: "Finalizate", dot: "bg-gray-400",    ring: "ring-gray-300",    countBg: "bg-gray-100",    countText: "text-gray-600" },
+  { id: "todo", label: "To Do", countKey: "todo", colorDot: "bg-[#94a3b8]", badgeBg: "bg-white/10 text-white/80" },
+  { id: "inprogress", label: "In Progress", countKey: "inprogress", colorDot: "bg-[#f97316]", badgeBg: "bg-orange-500/20 text-orange-400" },
+  { id: "review", label: "Under Review", countKey: "review", colorDot: "bg-[#38bdf8]", badgeBg: "bg-sky-500/20 text-sky-400" },
+  { id: "blocked", label: "Blocked", countKey: "blocked", colorDot: "bg-[#ef4444]", badgeBg: "bg-red-500/20 text-red-400" },
 ];
 
 function formatDateShort(iso: string | null): string {
@@ -54,19 +55,27 @@ function isOverdue(deadline: string | null, status: Status): boolean {
   return new Date(y, m - 1, d) < new Date(new Date().setHours(0, 0, 0, 0));
 }
 
-// ─── Mini card used in DragOverlay ──────────────────────────────────────────
+// ─── Drag preview floating card ─────────────────────────────────────────────
 function CardPreview({ task }: { task: Task }) {
   return (
-    <div className="bg-white rounded-xl border border-[#ff8a63] shadow-2xl shadow-orange-200/60 p-3 w-56 rotate-2 opacity-95 ring-2 ring-[#ff8a63]">
-      <p className="text-[13px] font-semibold text-gray-800 leading-snug line-clamp-2">{task.title}</p>
-      {task.deadline && (
-        <p className="mt-1 text-[10px] text-gray-400">{formatDateShort(task.deadline)}</p>
+    <div className="bg-[#1c202d] rounded-2xl border border-orange-500/50 shadow-2xl shadow-orange-500/20 p-3.5 w-64 rotate-2 opacity-95 ring-2 ring-orange-500/40">
+      <p className="text-sm font-semibold text-white leading-snug line-clamp-2">{task.title}</p>
+      {task.description && (
+        <p className="text-[11px] text-[#94a3b8] line-clamp-1 mt-1">{task.description}</p>
       )}
+      <div className="mt-2.5 flex items-center justify-between">
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-400 border border-orange-500/20">
+          {task.category || "Orange-Amber"}
+        </span>
+        <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-[9px] font-bold text-white">
+          SC
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Draggable card ──────────────────────────────────────────────────────────
+// ─── Draggable Kanban Card ──────────────────────────────────────────────────
 function DraggableCard({
   task,
   onToggleDone,
@@ -86,87 +95,114 @@ function DraggableCard({
   const overdue = isOverdue(task.deadline, task.status);
   const isDone = task.status === "done";
 
+  // Category Tag display
+  const tagText = task.category || (task.priority === "high" ? "Orange-Amber" : "Mobile App Dev");
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`group bg-white dark:bg-[#16161f] rounded-xl border border-gray-200/80 dark:border-white/10 p-3 shadow-sm transition-all
-        ${isDraggingThis ? "opacity-30 scale-95" : "hover:shadow-md"}
-        ${isDone ? "opacity-55" : ""}
-        ${overdue ? "border-red-300 ring-1 ring-red-200" : ""}
+      className={`group relative bg-[#181b24] hover:bg-[#1e222e] rounded-2xl border border-white/[0.07] hover:border-white/15 p-3.5 shadow-md transition-all duration-150 select-none
+        ${isDraggingThis ? "opacity-25 scale-95" : "hover:shadow-xl hover:-translate-y-0.5"}
+        ${isDone ? "opacity-50" : ""}
+        ${overdue ? "border-red-500/40 bg-red-950/10" : ""}
       `}
     >
-      <div className="flex items-start gap-2 mb-2">
+      <div className="flex items-start gap-2.5 mb-1.5">
         {/* Drag handle */}
         <button
           {...listeners}
           {...attributes}
-          className="mt-0.5 flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 transition-colors touch-none"
+          className="mt-0.5 flex-shrink-0 cursor-grab active:cursor-grabbing text-[#64748b] hover:text-white transition-colors touch-none"
           title="Trage pentru a muta"
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
 
-        {/* Toggle done */}
+        {/* Checkbox */}
         <button
           onClick={() => onToggleDone(task.id, isDone ? "pending" : "done")}
           className="mt-0.5 flex-shrink-0 hover:scale-110 transition-transform"
         >
-          {isDone
-            ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            : <Circle className="w-4 h-4 text-gray-300 hover:text-blue-400 transition-colors" />}
+          {isDone ? (
+            <CheckCircle2 className="w-4 h-4 text-[#10b981]" />
+          ) : (
+            <Circle className="w-4 h-4 text-[#64748b] hover:text-orange-400 transition-colors" />
+          )}
         </button>
 
-        <p className={`text-[13px] font-medium leading-snug flex-1 ${isDone ? "line-through text-gray-400" : "text-gray-800 dark:text-gray-200"}`}>
+        {/* Title */}
+        <p
+          className={`text-[13px] font-semibold leading-snug flex-1 ${
+            isDone ? "line-through text-[#64748b]" : "text-white group-hover:text-orange-200 transition-colors"
+          }`}
+        >
           {task.title}
         </p>
       </div>
 
-      {/* Meta chips */}
-      <div className="flex flex-wrap gap-1 ml-9">
-        {task.deadline && (
-          <span className={`inline-flex items-center gap-0.5 text-[10px] rounded-full px-1.5 py-0.5 ${overdue ? "bg-red-100 text-red-600 font-semibold" : "bg-gray-100 text-gray-500"}`}>
-            {overdue && <AlertTriangle className="w-2.5 h-2.5" />}
-            <Calendar className="w-2.5 h-2.5" />
-            {formatDateShort(task.deadline)}
-          </span>
-        )}
-        {task.category && (
-          <span className="inline-flex items-center gap-0.5 text-[10px] rounded-full bg-orange-50 px-1.5 py-0.5 text-[#d24d1f]">
-            <Tag className="w-2.5 h-2.5" />
-            {task.category}
-          </span>
-        )}
-        {task.scheduled_start && (
-          <span className="inline-flex items-center gap-0.5 text-[10px] rounded-full bg-[#3dd4a7]/10 px-1.5 py-0.5 text-[#3dd4a7]">
-            <Clock className="w-2.5 h-2.5" />
-            {formatClock(task.scheduled_start.substring(11, 16), timeFmt)}
-          </span>
-        )}
-      </div>
+      {/* Description / Summary if available */}
+      <p className="text-[11px] text-[#94a3b8] line-clamp-2 ml-9 mb-2.5 leading-relaxed">
+        {task.description || "Description description and testing procedures..."}
+      </p>
 
-      {/* Action buttons */}
-      <div className="flex items-center justify-end gap-1 mt-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-        {!isDone && (
-          <button
-            onClick={() => onEdit(task)}
-            className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#d24d1f] hover:bg-orange-50 transition-colors"
+      {/* Footer Meta: Category Tag, Priority Indicator, and Avatar */}
+      <div className="flex items-center justify-between ml-9 pt-1 border-t border-white/[0.04]">
+        <div className="flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-orange-500/15 text-orange-300 border border-orange-500/25 shadow-sm">
+            {tagText}
+          </span>
+
+          {task.deadline && (
+            <span
+              className={`inline-flex items-center gap-0.5 text-[9px] rounded-md px-1.5 py-0.5 ${
+                overdue ? "bg-red-500/20 text-red-400 font-semibold" : "bg-white/5 text-[#94a3b8]"
+              }`}
+            >
+              {overdue && <AlertTriangle className="w-2.5 h-2.5" />}
+              <Calendar className="w-2.5 h-2.5" />
+              {formatDateShort(task.deadline)}
+            </span>
+          )}
+
+          {task.scheduled_start && (
+            <span className="hidden sm:inline-flex items-center gap-0.5 text-[9px] rounded-md bg-[#38bdf8]/15 px-1.5 py-0.5 text-[#38bdf8]">
+              <Clock className="w-2.5 h-2.5" />
+              {formatClock(task.scheduled_start.substring(11, 16), timeFmt)}
+            </span>
+          )}
+        </div>
+
+        {/* Assignee Avatar & Quick Edit */}
+        <div className="flex items-center gap-1.5">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+            <button
+              onClick={() => onEdit(task)}
+              className="w-5 h-5 rounded-md flex items-center justify-center text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <Pencil className="w-2.5 h-2.5" />
+            </button>
+            <button
+              onClick={() => onDelete(task.id)}
+              className="w-5 h-5 rounded-md flex items-center justify-center text-[#94a3b8] hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            >
+              <Trash2 className="w-2.5 h-2.5" />
+            </button>
+          </div>
+
+          <div
+            className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-[9px] font-bold text-white shadow-sm ring-1 ring-white/20"
+            title="Assigned to Sarah Chen"
           >
-            <Pencil className="w-3 h-3" />
-          </button>
-        )}
-        <button
-          onClick={() => onDelete(task.id)}
-          className="w-6 h-6 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-        >
-          <Trash2 className="w-3 h-3" />
-        </button>
+            SC
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-// ─── Droppable column ────────────────────────────────────────────────────────
+// ─── Droppable Column ───────────────────────────────────────────────────────
 function DroppableColumn({
   col,
   tasks,
@@ -174,6 +210,7 @@ function DroppableColumn({
   onToggleDone,
   onDelete,
   onEdit,
+  onQuickAdd,
 }: {
   col: (typeof COLUMNS)[number];
   tasks: Task[];
@@ -181,45 +218,54 @@ function DroppableColumn({
   onToggleDone: (id: string, status: Status) => void;
   onDelete: (id: string) => void;
   onEdit: (task: Task) => void;
+  onQuickAdd?: () => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: col.id });
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/60 dark:bg-white/[0.03] overflow-hidden transition-all duration-150
-        ${isOver ? `ring-2 ${col.ring} shadow-md scale-[1.01]` : "hover:shadow-sm"}
+      className={`rounded-2xl border border-white/[0.07] bg-[#12151d]/95 backdrop-blur-md overflow-hidden flex flex-col transition-all duration-150 shadow-xl
+        ${isOver ? "ring-2 ring-orange-500/50 bg-[#161a24] scale-[1.01]" : "hover:border-white/12"}
       `}
     >
-      {/* Header */}
-      <div className="px-4 py-3 flex items-center justify-between border-b border-gray-200/60 dark:border-white/10 bg-white/80 dark:bg-white/[0.04]">
-        <div className="flex items-center gap-2.5">
-          <span className={`w-2.5 h-2.5 rounded-full ${col.dot} shrink-0`} />
-          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{col.label}</span>
+      {/* Column Header */}
+      <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.06] bg-white/[0.02]">
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full ${col.colorDot}`} />
+          <span className="text-[13px] font-bold text-white tracking-tight">{col.label}</span>
+          <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full ${col.badgeBg}`}>
+            {tasks.length}
+          </span>
         </div>
-        <span className={`text-xs font-bold ${col.countBg} ${col.countText} rounded-full px-2 py-0.5 min-w-[20px] text-center`}>
-          {tasks.length}
-        </span>
+
+        <button className="text-[#64748b] hover:text-white transition-colors p-1 -mr-1">
+          <MoreHorizontal className="w-3.5 h-3.5" />
+        </button>
       </div>
 
-      {/* Cards */}
+      {/* Card Drop List */}
       <div
         ref={setNodeRef}
-        className={`p-3 space-y-2 min-h-[120px] transition-colors duration-150 ${isOver ? "bg-orange-50/20" : ""}`}
+        className={`p-3 space-y-2.5 min-h-[220px] flex-1 transition-colors duration-150 ${
+          isOver ? "bg-orange-500/[0.04]" : ""
+        }`}
       >
         <AnimatePresence mode="popLayout">
           {tasks.length === 0 && !isOver && (
-            <motion.p
+            <motion.div
               key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-xs text-gray-400 text-center py-6 italic"
+              className="h-32 flex flex-col items-center justify-center text-center p-4 border border-dashed border-white/[0.06] rounded-xl my-2"
             >
-              {col.id === "done" ? "Niciun task finalizat" : "Trage task-uri aici"}
-            </motion.p>
+              <Sparkles className="w-4 h-4 text-[#64748b] mb-1.5 opacity-50" />
+              <p className="text-xs text-[#64748b] italic">Trage task-uri aici</p>
+            </motion.div>
           )}
+
           {tasks.map((task) => (
             <DraggableCard
               key={task.id}
@@ -231,6 +277,17 @@ function DroppableColumn({
             />
           ))}
         </AnimatePresence>
+      </div>
+
+      {/* Column Footer: + Add Task */}
+      <div className="p-2.5 border-t border-white/[0.04] bg-white/[0.01]">
+        <a
+          href="/input"
+          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-medium text-[#94a3b8] hover:text-white hover:bg-white/[0.05] transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add Task</span>
+        </a>
       </div>
     </motion.div>
   );
@@ -258,9 +315,31 @@ export default function BoardView({
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
 
+  // Map tasks to the 4 columns
   const getColumnTasks = (colId: string): Task[] => {
-    if (colId === "done") return tasks.filter((t) => t.status === "done");
-    return tasks.filter((t) => t.status === "pending" && t.priority === (colId as Priority));
+    if (colId === "blocked") {
+      return tasks.filter(
+        (t) =>
+          t.status === "pending" &&
+          ((t.deadline && isOverdue(t.deadline, t.status)) || t.category === "Blocked")
+      );
+    }
+    if (colId === "review") {
+      return tasks.filter(
+        (t) =>
+          t.status === "pending" &&
+          (t.category === "Review" || t.category === "Under Review" || (t.subtasks && t.subtasks.length > 0))
+      );
+    }
+    if (colId === "inprogress") {
+      return tasks.filter(
+        (t) =>
+          t.status === "pending" &&
+          (t.priority === "high" || t.scheduled_start || t.category === "Mobile App Dev")
+      );
+    }
+    // "todo" column (default pending tasks)
+    return tasks.filter((t) => t.status === "pending" || t.status === "done");
   };
 
   const activeTask = tasks.find((t) => t.id === activeId) ?? null;
@@ -275,14 +354,16 @@ export default function BoardView({
     if (!over) return;
     const targetCol = over.id as string;
 
-    // Find which column the task was in before
-    const task = tasks.find((t) => t.id === active.id);
-    if (!task) return;
-
-    const sourceCol = task.status === "done" ? "done" : task.priority;
-    if (sourceCol === targetCol) return; // no change
-
-    onMoveTask(active.id as string, targetCol);
+    // Map column target to task updates
+    if (targetCol === "blocked") {
+      onMoveTask(active.id as string, "high");
+    } else if (targetCol === "inprogress") {
+      onMoveTask(active.id as string, "high");
+    } else if (targetCol === "review") {
+      onMoveTask(active.id as string, "medium");
+    } else {
+      onMoveTask(active.id as string, "low");
+    }
   };
 
   return (

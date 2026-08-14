@@ -220,7 +220,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0a0a0f] flex">
+    <div className="min-h-screen bg-[#0e1117] text-[#f8fafc] flex">
       <Sidebar userEmail={user?.email} />
 
       <div className="flex-1 flex flex-col min-w-0">

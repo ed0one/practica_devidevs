@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Task, Status } from "@/types/task";
+import { Task, Status, Priority } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
 import EditTaskModal, { type EditableTaskFields } from "@/components/EditTaskModal";
@@ -13,12 +13,24 @@ import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
 import ThemeToggle from "@/components/ThemeToggle";
 import CommandPalette from "@/components/CommandPalette";
-import { Plus, Sparkles, Search, Download, X, Tag, Command } from "lucide-react";
-import { Priority } from "@/types/task";
+import {
+  Plus,
+  Sparkles,
+  Search,
+  Download,
+  X,
+  Tag,
+  Command,
+  ChevronDown,
+  Filter,
+  CheckCircle2,
+  SlidersHorizontal,
+  FolderGit2,
+} from "lucide-react";
 import { tasksToCsv } from "@/lib/csv";
 
 function exportCSV(tasks: Task[]) {
-  const blob = new Blob(["﻿" + tasksToCsv(tasks)], { type: "text/csv;charset=utf-8" });
+  const blob = new Blob(["\uFEFF" + tasksToCsv(tasks)], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -37,11 +49,16 @@ export default function DashboardPage() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [projectTitle, setProjectTitle] = useState("Project Alpha");
+  const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
 
   const fetchTasks = useCallback(async () => {
     try {
       const res = await fetch("/api/tasks");
-      if (res.status === 401) { window.location.href = "/login"; return; }
+      if (res.status === 401) {
+        window.location.href = "/login";
+        return;
+      }
       if (!res.ok) throw new Error("Eroare la încărcarea task-urilor");
       const data = await res.json();
       setTasks(data.tasks);
@@ -53,14 +70,13 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Fetch inițial la mount — setState-ul se întâmplă în callback async, nu
-    // sincron în corpul effect-ului (fals pozitiv al regulii).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchTasks();
-    createClient().auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => setUserEmail(data.user?.email ?? null));
   }, [fetchTasks]);
 
-  // Curăță ștergerile în așteptare la demontare (evită setState după unmount).
+  // Clean pending deletions on unmount
   useEffect(() => {
     const map = pendingDeletes.current;
     return () => {
@@ -69,11 +85,8 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // Ștergeri în așteptare: id → timeout. DELETE-ul real se execută după 5s,
-  // lăsând timp pentru "Anulează".
   const pendingDeletes = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Reinserează un task șters la poziția lui originală (dacă nu e deja prezent).
   const restoreTask = useCallback((task: Task, index: number) => {
     setTasks((t) => {
       if (t.some((x) => x.id === task.id)) return t;
@@ -120,7 +133,7 @@ export default function DashboardPage() {
     const prev = tasks;
     const target = tasks.find((t) => t.id === id);
     const isRecurring = newStatus === "done" && target?.recurrence && target.recurrence !== "none";
-    setTasks((t) => t.map((task) => task.id === id ? { ...task, status: newStatus } : task));
+    setTasks((t) => t.map((task) => (task.id === id ? { ...task, status: newStatus } : task)));
     try {
       const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
@@ -128,14 +141,15 @@ export default function DashboardPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error();
-      // Task recurent finalizat → serverul a creat următoarea apariție; o aducem.
       if (isRecurring) fetchTasks();
-    } catch { setTasks(prev); }
+    } catch {
+      setTasks(prev);
+    }
   };
 
   const handleEdit = async (id: string, updates: EditableTaskFields) => {
     const prev = tasks;
-    setTasks((t) => t.map((task) => task.id === id ? { ...task, ...updates } : task));
+    setTasks((t) => t.map((task) => (task.id === id ? { ...task, ...updates } : task)));
     const res = await fetch(`/api/tasks/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -160,7 +174,6 @@ export default function DashboardPage() {
     }
   };
 
-  // Amână deadline-ul cu o zi. Fără deadline → pornim de la azi.
   const handleSnooze = async (id: string) => {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
@@ -199,7 +212,7 @@ export default function DashboardPage() {
     }
 
     const prev = tasks;
-    setTasks((t) => t.map((task) => task.id === taskId ? { ...task, ...updates } : task));
+    setTasks((t) => t.map((task) => (task.id === taskId ? { ...task, ...updates } : task)));
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
@@ -240,18 +253,14 @@ export default function DashboardPage() {
   const handleBulkDelete = (ids: string[]) => {
     if (ids.length === 0) return;
     const idSet = new Set(ids);
-    const removed = tasks
-      .map((t, index) => ({ task: t, index }))
-      .filter((x) => idSet.has(x.task.id));
+    const removed = tasks.map((t, index) => ({ task: t, index })).filter((x) => idSet.has(x.task.id));
 
     setTasks((t) => t.filter((task) => !idSet.has(task.id)));
 
     const timer = setTimeout(async () => {
       ids.forEach((id) => pendingDeletes.current.delete(id));
       try {
-        const results = await Promise.all(
-          ids.map((id) => fetch(`/api/tasks/${id}`, { method: "DELETE" }))
-        );
+        const results = await Promise.all(ids.map((id) => fetch(`/api/tasks/${id}`, { method: "DELETE" })));
         if (results.some((r) => !r.ok)) throw new Error();
       } catch {
         [...removed].sort((a, b) => a.index - b.index).forEach(({ task, index }) => restoreTask(task, index));
@@ -285,7 +294,7 @@ export default function DashboardPage() {
   }) => {
     if (!schedulingTaskId) return;
     const prev = tasks;
-    setTasks((t) => t.map((task) => task.id === schedulingTaskId ? { ...task, ...data } : task));
+    setTasks((t) => t.map((task) => (task.id === schedulingTaskId ? { ...task, ...data } : task)));
     try {
       const res = await fetch(`/api/tasks/${schedulingTaskId}`, {
         method: "PATCH",
@@ -293,22 +302,12 @@ export default function DashboardPage() {
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error();
-    } catch { setTasks(prev); }
+    } catch {
+      setTasks(prev);
+    }
     setSchedulingTaskId(null);
   };
 
-  const greeting = () => {
-    const h = new Date().getHours();
-    if (h < 12) return "Bună dimineața";
-    if (h < 18) return "Bună ziua";
-    return "Bună seara";
-  };
-
-  const todayStr = new Date().toLocaleDateString("ro-RO", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
-  });
-
-  // Categorii distincte pentru chips (max 6, alfabetic)
   const categories = useMemo(
     () =>
       [...new Set(tasks.map((t) => t.category).filter((c): c is string => !!c))]
@@ -320,7 +319,6 @@ export default function DashboardPage() {
   const filteredTasks = useMemo(() => {
     let result = tasks;
 
-    // filtru rapid
     if (filter === "active") result = result.filter((t) => t.status === "pending");
     else if (filter === "done") result = result.filter((t) => t.status === "done");
     else if (filter === "urgent") result = result.filter((t) => t.status === "pending" && t.priority === "high");
@@ -329,13 +327,13 @@ export default function DashboardPage() {
       result = result.filter((t) => t.category === cat);
     }
 
-    // căutare text
     const q = search.trim().toLowerCase();
     if (q) {
       result = result.filter(
         (t) =>
           t.title.toLowerCase().includes(q) ||
-          (t.category ?? "").toLowerCase().includes(q)
+          (t.category ?? "").toLowerCase().includes(q) ||
+          (t.description ?? "").toLowerCase().includes(q)
       );
     }
     return result;
@@ -343,35 +341,16 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0a0a0f] flex">
+      <div className="min-h-screen bg-[#0e1117] flex">
         <Sidebar userEmail={null} />
-        <div className="flex-1 flex flex-col min-w-0">
-          <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 max-w-5xl w-full mx-auto animate-pulse">
-            {/* Greeting skeleton */}
-            <div className="mb-6 space-y-2">
-              <div className="h-7 w-64 bg-gray-200/60 dark:bg-white/5 rounded-xl" />
-              <div className="h-4 w-40 bg-gray-200/60 dark:bg-white/5 rounded-xl" />
-            </div>
-            {/* Stat cards skeleton */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
-              ))}
-            </div>
-            {/* Wide cards skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-              <div className="h-28 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
-              <div className="h-28 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
-            </div>
-            {/* Toolbar skeleton */}
-            <div className="h-10 w-full max-w-sm bg-gray-200/60 dark:bg-white/5 rounded-xl mb-4" />
-            {/* Task list skeleton */}
-            <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-20 bg-gray-200/60 dark:bg-white/5 rounded-2xl" />
-              ))}
-            </div>
-          </main>
+        <div className="flex-1 flex flex-col min-w-0 p-6 lg:p-8 animate-pulse">
+          <div className="h-10 w-48 bg-white/5 rounded-xl mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="h-28 bg-white/5 rounded-2xl" />
+            <div className="h-28 bg-white/5 rounded-2xl" />
+            <div className="h-28 bg-white/5 rounded-2xl" />
+          </div>
+          <div className="h-64 bg-white/5 rounded-2xl" />
         </div>
       </div>
     );
@@ -379,11 +358,16 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] dark:bg-[#0a0a0f] p-4">
-        <div className="w-full max-w-sm rounded-2xl border border-red-100 dark:border-red-500/20 bg-white dark:bg-[#16161f] p-6 text-center shadow-xl">
-          <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-red-50 flex items-center justify-center text-2xl">⚠️</div>
-          <p className="text-red-600 font-semibold text-sm">{error}</p>
-          <button onClick={fetchTasks} className="mt-4 w-full h-10 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors">
+      <div className="flex min-h-screen items-center justify-center bg-[#0e1117] p-4">
+        <div className="w-full max-w-sm rounded-2xl border border-red-500/20 bg-[#161824] p-6 text-center shadow-2xl">
+          <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center text-2xl">
+            ⚠️
+          </div>
+          <p className="text-red-400 font-semibold text-sm">{error}</p>
+          <button
+            onClick={fetchTasks}
+            className="mt-4 w-full h-10 rounded-xl bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 transition-colors"
+          >
             Reîncearcă
           </button>
         </div>
@@ -394,193 +378,186 @@ export default function DashboardPage() {
   const schedulingTask = tasks.find((t) => t.id === schedulingTaskId);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] dark:bg-[#0a0a0f] flex">
+    <div className="min-h-screen bg-[#0e1117] text-[#f8fafc] flex selection:bg-orange-500 selection:text-white">
       <Sidebar userEmail={userEmail} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile top bar */}
-        <header className="lg:hidden sticky top-0 z-20 bg-[#0c0c14]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 flex items-center justify-between h-14">
+        {/* Mobile Top Header */}
+        <header className="lg:hidden sticky top-0 z-20 bg-[#0c0e14]/95 backdrop-blur-xl border-b border-white/[0.06] px-4 flex items-center justify-between h-14">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#ff6a3d] to-[#3dd4a7] flex items-center justify-center shadow-md shadow-[#ff6a3d]/20">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#f97316] to-[#ea580c] flex items-center justify-center shadow-md">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-white text-sm tracking-tight">TaskCapture</span>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle variant="sidebar" className="w-8 h-8" />
-            <a href="/input" className="flex items-center gap-1.5 h-8 px-3 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-white text-xs font-semibold shadow-md shadow-[#ff6a3d]/20">
+            <a
+              href="/input"
+              className="flex items-center gap-1 h-8 px-3 rounded-xl bg-[#f97316] text-white text-xs font-semibold shadow-md"
+            >
               <Plus className="w-3.5 h-3.5" /> Adaugă
             </a>
           </div>
         </header>
 
-        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 max-w-5xl w-full mx-auto">
-          {/* Greeting */}
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-            <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
-              {greeting()}{userEmail ? `, ${userEmail.split("@")[0]}` : ""}
-            </h2>
-            <p className="text-sm text-gray-400 mt-0.5 capitalize">{todayStr}</p>
-          </motion.div>
+        {/* Main Content Area */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 pb-24 lg:pb-8 max-w-7xl w-full mx-auto space-y-6">
+          {/* Top Project Bar (Matching Mockup Header) */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Left: Project Alpha Title + Jira Pill */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <FolderGit2 className="w-6 h-6 text-orange-400" />
+                <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  {projectTitle}
+                </h1>
+              </div>
 
-          {tasks.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center py-20 text-center"
-            >
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="w-20 h-20 rounded-3xl bg-gradient-to-br from-orange-100 to-[#3dd4a7]/20 flex items-center justify-center mb-5"
-              >
-                <Sparkles className="w-10 h-10 text-[#ff8a63]" />
-              </motion.div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Nu ai task-uri încă</h3>
-              <p className="text-gray-400 text-sm max-w-xs mb-6">
-                Scrie ce ai de făcut în limbaj natural și AI-ul extrage task-urile automat.
-              </p>
-              <motion.a
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#38bdf8]/15 border border-[#38bdf8]/30 text-[#38bdf8] text-xs font-medium font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-pulse" />
+                <span>Jira Sync Status Pill</span>
+                <ChevronDown className="w-3 h-3 opacity-70" />
+              </div>
+            </div>
+
+            {/* Right: + Create Task, Filter, Search, ⌘K */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <a
                 href="/input"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2 h-11 px-6 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-white text-sm font-semibold shadow-lg shadow-orange-200"
+                className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white text-xs font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:brightness-110 active:scale-95 transition-all"
               >
-                <Plus className="w-4 h-4" /> Adaugă primul task
-              </motion.a>
-            </motion.div>
-          ) : (
-            <>
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6">
-                <StatsHeader tasks={tasks} />
-              </motion.div>
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>Create Task</span>
+              </a>
 
-              {/* Search + export toolbar */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 }}
-                className="flex items-center gap-2 mb-4"
-              >
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    aria-label="Caută task-uri"
-                    placeholder="Caută task-uri..."
-                    className="w-full h-10 pl-9 pr-9 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] shadow-sm text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/15 focus:border-[#ff6a3d] transition-all"
-                  />
-                  <AnimatePresence>
-                    {search && (
-                      <motion.button
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        onClick={() => setSearch("")}
-                        aria-label="Șterge căutarea"
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
-                </div>
+              {/* Filter button dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setFilterDropdownOpen(!filterDropdownOpen)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-medium text-white transition-colors"
+                >
+                  <Filter className="w-3.5 h-3.5 text-[#94a3b8]" />
+                  <span>Filter</span>
+                  <ChevronDown className="w-3 h-3 text-[#64748b]" />
+                </button>
 
-                {search && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-xs text-gray-400"
+                {filterDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute right-0 mt-1.5 w-44 rounded-xl bg-[#161a26] border border-white/10 shadow-2xl p-1.5 z-30 space-y-1"
                   >
-                    {filteredTasks.length} rezultate
-                  </motion.span>
+                    {[
+                      ["all", "Toate task-urile"],
+                      ["active", "Active / Pending"],
+                      ["done", "Finalizate"],
+                      ["urgent", "Urgente"],
+                    ].map(([val, lbl]) => (
+                      <button
+                        key={val}
+                        onClick={() => {
+                          setFilter(val);
+                          setFilterDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                          filter === val ? "bg-orange-500/20 text-orange-400 font-bold" : "text-[#cbd5e1] hover:bg-white/5"
+                        }`}
+                      >
+                        {lbl}
+                      </button>
+                    ))}
+                  </motion.div>
                 )}
+              </div>
 
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
-                  className="ml-auto hidden sm:flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] text-xs font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                  title="Paletă de comenzi (⌘K)"
-                >
-                  <Command className="w-3.5 h-3.5" />
-                  <kbd className="text-[10px] font-bold">K</kbd>
-                </button>
-
-                <button
-                  onClick={() => { exportCSV(tasks); toast.success("CSV descărcat!"); }}
-                  className="ml-auto sm:ml-0 flex items-center gap-1.5 h-9 px-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#16161f] text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                  title="Exportă CSV"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Export CSV</span>
-                </button>
-              </motion.div>
-
-              {/* Filtre rapide */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1 mb-4"
-              >
-                {(
-                  [
-                    ["all", "Toate"],
-                    ["active", "Active"],
-                    ["done", "Finalizate"],
-                    ["urgent", "Urgente"],
-                  ] as [string, string][]
-                ).map(([value, label]) => (
+              {/* Search Pill */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748b] pointer-events-none" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search"
+                  className="h-9 pl-8 pr-7 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 w-32 sm:w-44 transition-all"
+                />
+                {search && (
                   <button
-                    key={value}
-                    onClick={() => setFilter(value)}
-                    aria-pressed={filter === value}
-                    className={`shrink-0 h-8 px-3.5 rounded-lg text-xs font-semibold transition-all ${
-                      filter === value
-                        ? "bg-[#ff6a3d] text-white shadow-sm"
-                        : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-[#ff8a63] hover:text-[#d24d1f]"
+                    onClick={() => setSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
+                className="hidden sm:flex items-center gap-1.5 h-9 px-2.5 rounded-xl border border-white/10 bg-white/[0.04] text-xs font-medium text-[#94a3b8] hover:text-white hover:bg-white/[0.08] transition-colors"
+                title="Paletă de comenzi (⌘K)"
+              >
+                <Command className="w-3.5 h-3.5 text-orange-400" />
+                <kbd className="text-[10px] font-mono">⌘K</kbd>
+              </button>
+
+              <button
+                onClick={() => {
+                  exportCSV(tasks);
+                  toast.success("CSV exportat!");
+                }}
+                className="flex items-center gap-1.5 h-9 px-3 rounded-xl border border-white/10 bg-white/[0.04] text-xs font-medium text-[#94a3b8] hover:text-white hover:bg-white/[0.08] transition-colors"
+                title="Export CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* 3-Widget Analytics Trio (Top Right in Mockup) */}
+          <StatsHeader tasks={tasks} />
+
+          {/* Main Views Area: Kanban Board & Project Timeline */}
+          <div id="calendar-section" className="pt-2">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-mono text-[#10b981] font-semibold">
+                  Jira Synced: 2 min ago
+                </span>
+              </div>
+
+              {/* Category Quick Chips */}
+              <div className="hidden sm:flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setFilter(filter === `cat:${cat}` ? "all" : `cat:${cat}`)}
+                    className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
+                      filter === `cat:${cat}`
+                        ? "bg-orange-500/20 text-orange-400 border-orange-500/40"
+                        : "bg-white/[0.03] text-[#94a3b8] border-white/[0.06] hover:text-white"
                     }`}
                   >
-                    {label}
+                    {cat}
                   </button>
                 ))}
-                {categories.map((cat) => {
-                  const value = `cat:${cat}`;
-                  return (
-                    <button
-                      key={value}
-                      onClick={() => setFilter(filter === value ? "all" : value)}
-                      aria-pressed={filter === value}
-                      className={`shrink-0 h-8 px-3.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
-                        filter === value
-                          ? "bg-[#ff6a3d] text-white shadow-sm"
-                          : "bg-white dark:bg-[#16161f] border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-[#ff8a63] hover:text-[#d24d1f]"
-                      }`}
-                    >
-                      <Tag className="w-3 h-3" />
-                      {cat}
-                    </button>
-                  );
-                })}
-              </motion.div>
+              </div>
+            </div>
 
-              <motion.div id="calendar-section" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-                <CalendarView
-                  tasks={filteredTasks}
-                  onToggleDone={handleToggleDone}
-                  onDelete={handleDelete}
-                  onSchedule={handleSchedule}
-                  onEdit={setEditingTask}
-                  onDuplicate={handleDuplicate}
-                  onSnooze={handleSnooze}
-                  onMoveTask={handleMoveTask}
-                  onBulkDone={handleBulkDone}
-                  onBulkDelete={handleBulkDelete}
-                />
-              </motion.div>
-            </>
-          )}
+            <CalendarView
+              tasks={filteredTasks}
+              onToggleDone={handleToggleDone}
+              onDelete={handleDelete}
+              onSchedule={handleSchedule}
+              onEdit={setEditingTask}
+              onDuplicate={handleDuplicate}
+              onSnooze={handleSnooze}
+              onMoveTask={handleMoveTask}
+              onBulkDone={handleBulkDone}
+              onBulkDelete={handleBulkDelete}
+              initialViewMode="board"
+            />
+          </div>
         </main>
       </div>
 
@@ -588,21 +565,23 @@ export default function DashboardPage() {
 
       <ScheduleModal
         isOpen={scheduleModalOpen}
-        onClose={() => { setScheduleModalOpen(false); setSchedulingTaskId(null); }}
+        onClose={() => {
+          setScheduleModalOpen(false);
+          setSchedulingTaskId(null);
+        }}
         onSave={handleScheduleSave}
         taskTitle={schedulingTask?.title}
       />
 
-      <EditTaskModal
-        task={editingTask}
-        onClose={() => setEditingTask(null)}
-        onSave={handleEdit}
-      />
+      <EditTaskModal task={editingTask} onClose={() => setEditingTask(null)} onSave={handleEdit} />
 
       <CommandPalette
         tasks={tasks}
         onEditTask={setEditingTask}
-        onExportCSV={() => { exportCSV(tasks); toast.success("CSV descărcat!"); }}
+        onExportCSV={() => {
+          exportCSV(tasks);
+          toast.success("CSV descărcat!");
+        }}
       />
     </div>
   );

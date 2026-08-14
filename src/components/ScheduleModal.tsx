@@ -115,12 +115,12 @@ export default function ScheduleModal({
   const tomorrow = localTodayStr(1);
 
   const inputCls =
-    "w-full rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:border-[#ff8a63] focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/15 focus:bg-white dark:focus:bg-white/10 transition-all";
+    "w-full rounded-xl border border-white/10 bg-[#161a26] px-3.5 py-2.5 text-sm text-white focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all";
   const chipCls = (active: boolean) =>
     `px-3 h-8 rounded-lg text-xs font-semibold border transition-all ${
       active
-        ? "border-[#ff6a3d] bg-[#ff6a3d] text-white shadow-sm"
-        : "border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-gray-600 dark:text-gray-300 hover:border-[#ff8a63] hover:text-[#d24d1f]"
+        ? "border-orange-500 bg-orange-500 text-white shadow-sm"
+        : "border-white/10 bg-white/5 text-[#94a3b8] hover:border-orange-400 hover:text-white"
     }`;
 
   return (
@@ -136,7 +136,7 @@ export default function ScheduleModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={onClose}
           />
 
@@ -148,19 +148,19 @@ export default function ScheduleModal({
             role="dialog"
             aria-modal="true"
             aria-label="Programează task-ul"
-            className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-white dark:bg-[#16161f] border border-gray-200/80 dark:border-white/10 shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col"
+            className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-[#141722] border border-white/10 shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col text-white"
           >
             {/* Header */}
-            <div className="px-5 sm:px-6 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between shrink-0">
+            <div className="px-5 sm:px-6 py-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
               <div className="min-w-0">
-                <h2 className="font-bold text-gray-900 dark:text-gray-100">Programează task-ul</h2>
+                <h2 className="font-bold text-white">Programează task-ul</h2>
                 {taskTitle && (
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">{taskTitle}</p>
+                  <p className="text-xs text-orange-400 mt-0.5 truncate">{taskTitle}</p>
                 )}
               </div>
               <button
                 onClick={onClose}
-                className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ff6a3d]"
+                className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center text-[#94a3b8] hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
                 aria-label="Închide"
               >
                 <X className="w-4 h-4" />
@@ -170,7 +170,7 @@ export default function ScheduleModal({
             <div className="p-5 sm:p-6 space-y-5 overflow-y-auto">
               {/* Data */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-2">
                   <Calendar className="w-3.5 h-3.5" /> Data
                 </label>
                 <div className="flex flex-wrap gap-2 mb-2">
@@ -192,22 +192,24 @@ export default function ScheduleModal({
               {/* Ora de start */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider">
                     <Clock className="w-3.5 h-3.5" /> Începe la
                   </label>
-                  <div className="flex items-center rounded-xl border border-gray-200 dark:border-white/10 p-0.5 shrink-0">
-                    {([
-                      ["24h", "24h"],
-                      ["12h", "AM/PM"],
-                    ] as [TimeFormat, string][]).map(([value, label]) => (
+                  <div className="flex items-center rounded-xl border border-white/10 p-0.5 shrink-0 bg-black/40">
+                    {(
+                      [
+                        ["24h", "24h"],
+                        ["12h", "AM/PM"],
+                      ] as [TimeFormat, string][]
+                    ).map(([fmt, label]) => (
                       <button
-                        key={value}
-                        onClick={() => setTimeFormat(value)}
-                        aria-pressed={timeFmt === value}
-                        className={`px-3 h-7 rounded-lg text-[10px] font-semibold transition-all ${
-                          timeFmt === value
-                            ? "bg-[#ff6a3d] text-white shadow-sm"
-                            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                        key={fmt}
+                        type="button"
+                        onClick={() => setTimeFormat(fmt)}
+                        className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold transition-all ${
+                          timeFmt === fmt
+                            ? "bg-orange-500 text-white"
+                            : "text-[#94a3b8] hover:text-white"
                         }`}
                       >
                         {label}
@@ -215,7 +217,7 @@ export default function ScheduleModal({
                     ))}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex flex-wrap gap-1.5 mb-2">
                   {START_PRESETS.map((p) => (
                     <button
                       key={p.time}
@@ -223,7 +225,7 @@ export default function ScheduleModal({
                       onClick={() => changeStart(p.time)}
                       className={chipCls(startTime === p.time)}
                     >
-                      {p.label} · {formatClock(p.time, timeFmt)}
+                      {p.label} ({formatClock(p.time, timeFmt)})
                     </button>
                   ))}
                 </div>
@@ -235,12 +237,12 @@ export default function ScheduleModal({
                 />
               </div>
 
-              {/* Durata */}
+              {/* Durată / Ora de sfârșit */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                  <ArrowRight className="w-3.5 h-3.5" /> Durata
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-2">
+                  <ArrowRight className="w-3.5 h-3.5" /> Durată & sfârșit
                 </label>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex flex-wrap gap-1.5 mb-2">
                   {DURATION_PRESETS.map((p) => (
                     <button
                       key={p.min}
@@ -257,35 +259,36 @@ export default function ScheduleModal({
                   value={endTime}
                   onChange={(e) => { setEndTime(e.target.value); setError(null); }}
                   className={inputCls}
-                  aria-label="Ora de sfârșit"
                 />
               </div>
 
               {error && (
-                <p className="text-sm text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-400 rounded-lg px-3 py-2">{error}</p>
+                <p className="text-xs text-red-400 font-medium bg-red-500/10 border border-red-500/20 p-2.5 rounded-xl">
+                  {error}
+                </p>
               )}
             </div>
 
-            {/* Sumar + acțiuni */}
-            <div className="px-5 sm:px-6 py-4 border-t border-gray-100 dark:border-white/10 bg-gray-50/60 dark:bg-white/[0.03] shrink-0 space-y-3">
-              <p className="text-sm text-gray-600 dark:text-gray-300 capitalize">
+            {/* Footer rezumat + CTA */}
+            <div className="px-5 sm:px-6 py-4 border-t border-white/[0.06] bg-black/30 shrink-0 space-y-3">
+              <p className="text-sm text-[#cbd5e1] capitalize">
                 <span className="font-semibold">{summaryDate}</span>
                 {" · "}
                 {formatClock(startTime, timeFmt)} – {formatClock(endTime, timeFmt)}
                 {durationLabel && (
-                  <span className="text-gray-400"> ({durationLabel})</span>
+                  <span className="text-orange-400"> ({durationLabel})</span>
                 )}
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+                  className="flex-1 h-10 rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-[#94a3b8] hover:text-white hover:bg-white/10 transition-colors"
                 >
                   Anulează
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#ff6a3d] to-[#3dd4a7] text-sm font-semibold text-white shadow-lg shadow-orange-200/40 dark:shadow-none hover:from-[#ff6a3d] hover:to-[#3dd4a7] transition-all"
+                  className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-sm font-bold text-white shadow-lg shadow-orange-500/25 hover:brightness-110 transition-all cursor-pointer"
                 >
                   Salvează
                 </button>

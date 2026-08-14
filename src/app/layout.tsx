@@ -34,15 +34,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="min-h-full flex flex-col bg-slate-50 dark:bg-[#0a0a0f]">
+      <body className="min-h-full flex flex-col bg-[#0e1117] text-[#f8fafc]">
         {children}
         <Toaster
           position="bottom-center"
           toastOptions={{
             classNames: {
-              toast: "rounded-xl border border-gray-200 shadow-lg font-medium",
-              success: "bg-emerald-50 border-emerald-200 text-emerald-800",
-              error: "bg-red-50 border-red-200 text-red-800",
+              toast: "rounded-xl border border-white/10 bg-[#161922] text-[#f8fafc] shadow-2xl font-medium",
+              success: "bg-[#10b981]/15 border-[#10b981]/30 text-[#34d399]",
+              error: "bg-[#ef4444]/15 border-[#ef4444]/30 text-[#f87171]",
             },
           }}
         />
