@@ -5,7 +5,7 @@ import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 // Neutralizează caracterele speciale ale PostgREST `.ilike` (`,`, `%`, `\`)
 // ca inputul userului să nu spargă filtrul sau să scaneze tot.
 function escapeIlike(s: string): string {
-  return s.replace(/[\\%,]/g, (c) => '\\' + c)
+  return s.replace(/[\\%,()]/g, (c) => '\\' + c)
 }
 
 const PRIORITIES = new Set(['low', 'medium', 'high'])

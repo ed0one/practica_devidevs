@@ -315,31 +315,43 @@ export default function BoardView({
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
 
-  // Map tasks to the 4 columns
+  // Map tasks cleanly to the 4 columns
   const getColumnTasks = (colId: string): Task[] => {
     if (colId === "blocked") {
       return tasks.filter(
         (t) =>
           t.status === "pending" &&
-          ((t.deadline && isOverdue(t.deadline, t.status)) || t.category === "Blocked")
+          (t.category === "Blocked" || (t.deadline && isOverdue(t.deadline, t.status)))
       );
     }
     if (colId === "review") {
       return tasks.filter(
         (t) =>
           t.status === "pending" &&
-          (t.category === "Review" || t.category === "Under Review" || (t.subtasks && t.subtasks.length > 0))
+          (t.category === "Review" || t.category === "Under Review")
       );
     }
     if (colId === "inprogress") {
       return tasks.filter(
         (t) =>
           t.status === "pending" &&
-          (t.priority === "high" || t.scheduled_start || t.category === "Mobile App Dev")
+          t.category !== "Blocked" &&
+          t.category !== "Review" &&
+          t.category !== "Under Review" &&
+          (t.category === "In Progress" || t.priority === "high" || Boolean(t.scheduled_start))
       );
     }
-    // "todo" column (default pending tasks)
-    return tasks.filter((t) => t.status === "pending" || t.status === "done");
+    // "todo" column (all remaining active tasks)
+    return tasks.filter(
+      (t) =>
+        t.category !== "Blocked" &&
+        t.category !== "Review" &&
+        t.category !== "Under Review" &&
+        t.category !== "In Progress" &&
+        t.priority !== "high" &&
+        !t.scheduled_start &&
+        !(t.deadline && isOverdue(t.deadline, t.status))
+    );
   };
 
   const activeTask = tasks.find((t) => t.id === activeId) ?? null;
@@ -353,17 +365,7 @@ export default function BoardView({
     setActiveId(null);
     if (!over) return;
     const targetCol = over.id as string;
-
-    // Map column target to task updates
-    if (targetCol === "blocked") {
-      onMoveTask(active.id as string, "high");
-    } else if (targetCol === "inprogress") {
-      onMoveTask(active.id as string, "high");
-    } else if (targetCol === "review") {
-      onMoveTask(active.id as string, "medium");
-    } else {
-      onMoveTask(active.id as string, "low");
-    }
+    onMoveTask(active.id as string, targetCol);
   };
 
   return (

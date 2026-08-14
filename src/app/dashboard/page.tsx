@@ -8,6 +8,7 @@ import { Task, Status, Priority } from "@/types/task";
 import CalendarView from "@/components/CalendarView";
 import ScheduleModal from "@/components/ScheduleModal";
 import EditTaskModal, { type EditableTaskFields } from "@/components/EditTaskModal";
+import CreateTaskModal from "@/components/CreateTaskModal";
 import StatsHeader from "@/components/StatsHeader";
 import MobileNav from "@/components/MobileNav";
 import Sidebar from "@/components/Sidebar";
@@ -46,6 +47,7 @@ export default function DashboardPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [schedulingTaskId, setSchedulingTaskId] = useState<string | null>(null);
+  const [createTaskModalOpen, setCreateTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
@@ -68,6 +70,36 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }, []);
+
+  const handleCreateTask = async (taskData: {
+    title: string;
+    description?: string;
+    priority: Priority;
+    category?: string;
+    deadline?: string;
+  }) => {
+    const res = await fetch("/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        task: {
+          title: taskData.title,
+          description: taskData.description,
+          priority: taskData.priority,
+          category: taskData.category,
+          deadline: taskData.deadline,
+        },
+      }),
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      throw new Error(d.error || "Eroare la creare task");
+    }
+    const data = await res.json();
+    const created = data.tasks || (Array.isArray(data) ? data : [data]);
+    setTasks((prev) => [...created, ...prev]);
+    toast.success("Task creat cu succes!");
+  };
 
   useEffect(() => {
     fetchTasks();
@@ -202,17 +234,28 @@ export default function DashboardPage() {
     const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
 
-    const updates: { status?: Status; priority?: Priority } = {};
-    if (targetCol === "done") {
-      if (task.status === "done") return;
-      updates.status = "done";
-    } else {
-      updates.priority = targetCol as Priority;
+    const updates: EditableTaskFields = {};
+    if (targetCol === "blocked") {
+      updates.category = "Blocked";
+      updates.priority = "high";
       if (task.status === "done") updates.status = "pending";
+    } else if (targetCol === "review") {
+      updates.category = "Under Review";
+      if (task.status === "done") updates.status = "pending";
+    } else if (targetCol === "inprogress") {
+      updates.category = "In Progress";
+      updates.priority = "high";
+      if (task.status === "done") updates.status = "pending";
+    } else if (targetCol === "todo") {
+      updates.category = "To Do";
+      updates.priority = "medium";
+      if (task.status === "done") updates.status = "pending";
+    } else if (targetCol === "done") {
+      updates.status = "done";
     }
 
     const prev = tasks;
-    setTasks((t) => t.map((task) => (task.id === taskId ? { ...task, ...updates } : task)));
+    setTasks((t) => t.map((x) => (x.id === taskId ? { ...x, ...updates } : x)));
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
         method: "PATCH",
@@ -233,16 +276,12 @@ export default function DashboardPage() {
     const prev = tasks;
     setTasks((t) => t.map((task) => (idSet.has(task.id) ? { ...task, status: "done" as Status } : task)));
     try {
-      const results = await Promise.all(
-        ids.map((id) =>
-          fetch(`/api/tasks/${id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "done" }),
-          })
-        )
-      );
-      if (results.some((r) => !r.ok)) throw new Error();
+      const res = await fetch("/api/tasks/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "done", ids }),
+      });
+      if (!res.ok) throw new Error();
       toast.success(`${ids.length} task-uri marcate ca finalizate.`);
     } catch {
       setTasks(prev);
@@ -260,8 +299,12 @@ export default function DashboardPage() {
     const timer = setTimeout(async () => {
       ids.forEach((id) => pendingDeletes.current.delete(id));
       try {
-        const results = await Promise.all(ids.map((id) => fetch(`/api/tasks/${id}`, { method: "DELETE" })));
-        if (results.some((r) => !r.ok)) throw new Error();
+        const res = await fetch("/api/tasks/bulk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "delete", ids }),
+        });
+        if (!res.ok) throw new Error();
       } catch {
         [...removed].sort((a, b) => a.index - b.index).forEach(({ task, index }) => restoreTask(task, index));
         toast.error("Unele task-uri nu au putut fi șterse.");
@@ -423,13 +466,13 @@ export default function DashboardPage() {
 
             {/* Right: + Create Task, Filter, Search, ⌘K */}
             <div className="flex items-center gap-2.5 flex-wrap">
-              <a
-                href="/input"
-                className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white text-xs font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:brightness-110 active:scale-95 transition-all"
+              <button
+                onClick={() => setCreateTaskModalOpen(true)}
+                className="group relative inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white text-xs font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:brightness-110 active:scale-95 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
                 <span>Create Task</span>
-              </a>
+              </button>
 
               {/* Filter button dropdown */}
               <div className="relative">
@@ -562,6 +605,12 @@ export default function DashboardPage() {
       </div>
 
       <MobileNav />
+
+      <CreateTaskModal
+        isOpen={createTaskModalOpen}
+        onClose={() => setCreateTaskModalOpen(false)}
+        onCreate={handleCreateTask}
+      />
 
       <ScheduleModal
         isOpen={scheduleModalOpen}

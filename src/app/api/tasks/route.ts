@@ -27,13 +27,16 @@ export async function GET() {
   return NextResponse.json({ tasks })
 }
 
-const CreateTasksSchema = z.object({
+const CreateTasksBatchSchema = z.object({
   tasks: z.array(ParsedTaskSchema).min(1).max(50),
   raw_input: z.string().max(5000).optional(),
 })
 
-// Inserează task-uri confirmate de user (după preview). Fiecare task e
-// re-validat cu ParsedTaskSchema — nu ne bazăm pe payload-ul clientului.
+const CreateSingleTaskWrapperSchema = z.object({
+  task: ParsedTaskSchema,
+  raw_input: z.string().max(5000).optional(),
+})
+
 export async function POST(request: NextRequest) {
   let body: unknown
   try {
@@ -42,12 +45,29 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Corp JSON invalid' }, { status: 400 })
   }
 
-  const parsed = CreateTasksSchema.safeParse(body)
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Date invalide' },
-      { status: 400 }
-    )
+  let tasksInput: z.infer<typeof ParsedTaskSchema>[] = []
+  let rawInput = ''
+
+  const batchParse = CreateTasksBatchSchema.safeParse(body)
+  if (batchParse.success) {
+    tasksInput = batchParse.data.tasks
+    rawInput = batchParse.data.raw_input ?? ''
+  } else {
+    const singleWrapperParse = CreateSingleTaskWrapperSchema.safeParse(body)
+    if (singleWrapperParse.success) {
+      tasksInput = [singleWrapperParse.data.task]
+      rawInput = singleWrapperParse.data.raw_input ?? ''
+    } else {
+      const directSingleParse = ParsedTaskSchema.safeParse(body)
+      if (directSingleParse.success) {
+        tasksInput = [directSingleParse.data]
+      } else {
+        return NextResponse.json(
+          { error: batchParse.error.issues[0]?.message ?? 'Date invalide' },
+          { status: 400 }
+        )
+      }
+    }
   }
 
   const supabase = await createClient()
@@ -66,8 +86,7 @@ export async function POST(request: NextRequest) {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  const rawInput = parsed.data.raw_input ?? ''
-  const rows = parsed.data.tasks.map((t) =>
+  const rows = tasksInput.map((t) =>
     buildTaskRow(t, user.id, rawInput, new Date(), prefs?.timezone)
   )
 

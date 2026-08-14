@@ -3,6 +3,7 @@ import { z } from 'zod'
 // Formate acceptate de la LLM
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/        // YYYY-MM-DD
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/  // HH:MM (24h)
+const COLOR_RE = /^#[0-9a-fA-F]{6}$/         // doar hex #rrggbb
 
 // Modelul poate greși formatul (ex: "vineri" în loc de dată). În loc să
 // aruncăm și să dăm 500, normalizăm valorile invalide la null — task-ul se
@@ -21,6 +22,13 @@ const timeField = z
   )
   .default(null)
 
+// Un element de checklist. `title` obligatoriu, restul cu default-uri sănătoase.
+export const SubtaskSchema = z.object({
+  id: z.string().min(1).max(64),
+  title: z.string().trim().min(1).max(300),
+  done: z.boolean().default(false),
+})
+
 export const ParsedTaskSchema = z.object({
   title: z.string().trim().min(1).max(500),
   deadline: dateField,
@@ -33,6 +41,13 @@ export const ParsedTaskSchema = z.object({
     .default(null),
   start_time: timeField, // "HH:MM", e.g. "09:00"
   end_time: timeField,   // "HH:MM", e.g. "15:00"
+  description: z.string().trim().max(5000).nullable().optional(),
+  all_day: z.boolean().optional(),
+  location: z.string().trim().max(300).nullable().optional(),
+  color: z.string().regex(COLOR_RE, 'Culoare invalidă (#rrggbb)').nullable().optional(),
+  subtasks: z.array(SubtaskSchema).max(50).optional(),
+  recurrence: z.enum(['none', 'daily', 'weekly']).optional(),
+  reminder_offset_min: z.number().int().min(0).max(10080).nullable().optional(),
 })
 
 export const ParsedTasksResponseSchema = z.object({
@@ -40,15 +55,6 @@ export const ParsedTasksResponseSchema = z.object({
 })
 
 export type ParsedTaskInput = z.infer<typeof ParsedTaskSchema>
-
-// Un element de checklist. `title` obligatoriu, restul cu default-uri sănătoase.
-export const SubtaskSchema = z.object({
-  id: z.string().min(1).max(64),
-  title: z.string().trim().min(1).max(300),
-  done: z.boolean().default(false),
-})
-
-const COLOR_RE = /^#[0-9a-fA-F]{6}$/ // doar hex #rrggbb
 
 // ─── Validare pentru PATCH /api/tasks/[id] ───────────────────────────────────
 // Toate câmpurile opționale; se validează doar cele trimise.

@@ -72,12 +72,12 @@ export default function StatsHeader({ tasks }: StatsHeaderProps) {
 
   // Bar chart data for Blocked / Priorities
   const barData = [
-    { label: "Urgent", count: highPriority || 7, color: "bg-[#f97316]" },
-    { label: "Mediu", count: mediumPriority || 12, color: "bg-[#f59e0b]" },
-    { label: "Scăzut", count: lowPriority || 5, color: "bg-[#38bdf8]" },
-    { label: "Blocate", count: overdue || 2, color: "bg-[#ef4444]" },
+    { label: "Urgent", count: total > 0 ? highPriority : 7, color: "bg-[#f97316]" },
+    { label: "Mediu", count: total > 0 ? mediumPriority : 12, color: "bg-[#f59e0b]" },
+    { label: "Scăzut", count: total > 0 ? lowPriority : 5, color: "bg-[#38bdf8]" },
+    { label: "Blocate", count: total > 0 ? overdue : 2, color: "bg-[#ef4444]" },
   ];
-  const maxBar = Math.max(...barData.map((b) => b.count), 15);
+  const maxBar = Math.max(...barData.map((b) => b.count), 5);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 select-none">
