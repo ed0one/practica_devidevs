@@ -4,6 +4,12 @@ import { TaskUpdateSchema } from '@/lib/schemas'
 import { nextOccurrence } from '@/lib/recurrence'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import { sendTaskUpdatedEmail } from '@/lib/resend'
+import {
+  isMissingColumnError,
+  stripOptionalColumns,
+  hasOptionalColumns,
+  MIGRATION_011_MESSAGE,
+} from '@/lib/supabase/optional-columns'
 import type { Task } from '@/types/task'
 
 export async function DELETE(
@@ -60,12 +66,35 @@ export async function PATCH(
   const rl = await checkRateLimit('write', user.id)
   if (!rl.success) return rateLimitResponse(rl)
 
-  const { data, error } = await supabase
+  // completed_at e gestionat de server: setat la finalizare, golit la reactivare.
+  const payload: Record<string, unknown> = { ...updates }
+  if (updates.status === 'done') payload.completed_at = new Date().toISOString()
+  else if (updates.status === 'pending') payload.completed_at = null
+
+  let { data, error } = await supabase
     .from('tasks')
-    .update(updates)
+    .update(payload)
     .eq('id', id)
     .eq('user_id', user.id)
     .select()
+
+  // Migrația 011 nerulată → reîncercăm fără coloanele opționale. Dacă nu mai
+  // rămâne nimic de actualizat (ex: doar board_column), spunem clar ce lipsește.
+  if (error && isMissingColumnError(error) && hasOptionalColumns(payload)) {
+    const fallback = stripOptionalColumns(payload)
+    if (Object.keys(fallback).length === 0) {
+      return NextResponse.json(
+        { error: MIGRATION_011_MESSAGE, code: 'MIGRATION_011_REQUIRED' },
+        { status: 409 }
+      )
+    }
+    ;({ data, error } = await supabase
+      .from('tasks')
+      .update(fallback)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select())
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   if (!data || data.length === 0) {

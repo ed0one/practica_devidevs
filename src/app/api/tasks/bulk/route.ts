@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { isMissingColumnError } from '@/lib/supabase/optional-columns'
 
 const BulkSchema = z.object({
   action: z.enum(['done', 'pending', 'delete']),
@@ -45,12 +46,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ deleted: ids.length })
   }
 
-  const { data, error } = await supabase
+  const completedAt = action === 'done' ? new Date().toISOString() : null
+  let { data, error } = await supabase
     .from('tasks')
-    .update({ status: action })
+    .update({ status: action, completed_at: completedAt })
     .eq('user_id', user.id)
     .in('id', ids)
     .select('id')
+  // Migrația 011 nerulată → actualizăm doar statusul.
+  if (error && isMissingColumnError(error)) {
+    ;({ data, error } = await supabase
+      .from('tasks')
+      .update({ status: action })
+      .eq('user_id', user.id)
+      .in('id', ids)
+      .select('id'))
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ updated: data?.length ?? 0 })

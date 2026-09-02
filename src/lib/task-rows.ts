@@ -21,6 +21,7 @@ export interface TaskRow {
   subtasks?: Array<{ id: string; title: string; done: boolean }>
   recurrence?: 'none' | 'daily' | 'weekly'
   reminder_offset_min?: number | null
+  board_column?: 'todo' | 'inprogress' | 'review' | 'blocked'
 }
 
 // Transformă un task extras de AI într-un rând pentru tabela `tasks`,
@@ -63,6 +64,7 @@ export function buildTaskRow(
   if (t.subtasks !== undefined) row.subtasks = t.subtasks
   if (t.recurrence !== undefined) row.recurrence = t.recurrence
   if (t.reminder_offset_min !== undefined) row.reminder_offset_min = t.reminder_offset_min
+  if (t.board_column !== undefined) row.board_column = t.board_column
 
   return row
 }

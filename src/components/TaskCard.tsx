@@ -16,7 +16,6 @@ import {
   ListChecks,
   Copy,
   AlarmClockPlus,
-  Sun,
 } from "lucide-react";
 import { useTimeFormat, formatClock, type TimeFormat } from "@/lib/time-format";
 
@@ -263,7 +262,7 @@ export default function TaskCard({
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0 self-start">
             {onSchedule && !isDone && (
               <button
                 onClick={() => onSchedule(task.id)}

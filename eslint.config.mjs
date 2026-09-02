@@ -12,6 +12,14 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Tooling local, nu face parte din aplicație.
+    ".claude/**",
+    ".opencode/**",
+    ".swarm/**",
+    "_bmad/**",
+    "_bmad-output/**",
+    "graphify-out/**",
+    "design-artifacts/**",
   ]),
 ]);
 

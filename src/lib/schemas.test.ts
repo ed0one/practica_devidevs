@@ -140,3 +140,12 @@ describe('TaskUpdateSchema', () => {
     expect(r.success).toBe(true)
   })
 })
+
+describe('board_column', () => {
+  it('accepts a valid column on create and update, rejects garbage', () => {
+    expect(ParsedTaskSchema.parse({ title: 'a', board_column: 'blocked' }).board_column).toBe('blocked')
+    expect(ParsedTaskSchema.safeParse({ title: 'a', board_column: 'done' }).success).toBe(false)
+    expect(TaskUpdateSchema.safeParse({ board_column: 'inprogress' }).success).toBe(true)
+    expect(TaskUpdateSchema.safeParse({ board_column: 'nope' }).success).toBe(false)
+  })
+})

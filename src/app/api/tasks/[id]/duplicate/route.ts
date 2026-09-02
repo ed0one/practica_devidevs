@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 import type { Task } from '@/types/task'
+import { isMissingColumnError, stripOptionalColumns } from '@/lib/supabase/optional-columns'
 
 // POST /api/tasks/[id]/duplicate — creează o copie a task-ului curent.
 // Copia pornește ca `pending`, fără reminder trimis, cu subtask-urile
@@ -50,9 +51,14 @@ export async function POST(
     location: src.location ?? null,
     color: src.color ?? null,
     subtasks,
+    board_column: src.board_column ?? 'todo',
   }
 
-  const { data, error } = await supabase.from('tasks').insert(copy).select().single()
+  let { data, error } = await supabase.from('tasks').insert(copy).select().single()
+  // Migrația 011 nerulată → copiem fără coloana Kanban.
+  if (error && isMissingColumnError(error)) {
+    ;({ data, error } = await supabase.from('tasks').insert(stripOptionalColumns(copy)).select().single())
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json(data, { status: 201 })

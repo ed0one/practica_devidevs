@@ -23,17 +23,11 @@ export const metadata: Metadata = {
   keywords: ["task management", "AI", "productivitate", "organizare"],
 };
 
-// Setează clasa `.dark` înainte de primul paint ca să evităm flash-ul de temă
-// (FOUC). Rulează sincron din <head>, citind preferința salvată sau setarea
-// sistemului.
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`;
-
+// Tema e exclusiv întunecată (Obsidian & Amber, vezi DESIGN.md); clasa `dark`
+// stă permanent pe <html> ca variantele `dark:` rămase să se aplice mereu.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ro" className={`${inter.variable} ${bricolage.variable} ${jetbrains.variable} font-sans h-full antialiased`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+    <html lang="ro" className={`dark ${inter.variable} ${bricolage.variable} ${jetbrains.variable} font-sans h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#0e1117] text-[#f8fafc]">
         {children}
         <Toaster

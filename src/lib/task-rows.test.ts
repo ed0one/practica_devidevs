@@ -81,3 +81,11 @@ describe('buildTaskRow', () => {
     expect(row.scheduled_date).toBe('2026-07-01')
   })
 })
+
+describe('buildTaskRow board_column', () => {
+  it('passes board_column through when given and omits it otherwise', () => {
+    const base = { title: 'x', deadline: null, priority: 'medium' as const, category: null, start_time: null, end_time: null }
+    expect(buildTaskRow({ ...base, board_column: 'review' }, 'u', '', new Date(2026, 8, 2))).toMatchObject({ board_column: 'review' })
+    expect('board_column' in buildTaskRow(base, 'u', '', new Date(2026, 8, 2))).toBe(false)
+  })
+})

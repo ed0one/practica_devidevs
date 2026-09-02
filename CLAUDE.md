@@ -33,6 +33,12 @@ Verification loop before committing non-trivial changes: `npx tsc --noEmit && np
 4. Each parsed task → `src/lib/task-rows.ts` `buildTaskRow()` (pure, tested) → INSERT into Supabase `public.tasks`.
 5. If the user's `email_new_tasks` pref is on, a confirmation email is sent via `src/lib/resend.ts`.
 
+**Dashboard views are URL-driven.** `/dashboard?view=` takes `overview` (default: Kanban + analytics trio + Gantt, the mockup layout) | `board` | `timeline` | `week` | `day` | `list` | `reports`. `ViewSwitcher` pills and the `Sidebar`/`MobileNav` links only change the query; `useSearchParams` is wrapped in `<Suspense>` in `dashboard/page.tsx` (required for static prerender). Analytics (`src/lib/analytics.ts`), Gantt geometry (`src/lib/gantt.ts`) and column grouping (`src/lib/board.ts`) are pure and tested.
+
+**Kanban = `tasks.board_column`** (`todo|inprogress|review|blocked`, migration 011). Drag & drop PATCHes **only** `board_column` — never derive the column from category/priority and never overwrite the user's category. `completed_at` is server-managed (set when status → `done`, cleared on `pending`) and feeds the velocity chart. If 011 is missing, the API retries without those columns (`src/lib/supabase/optional-columns.ts`) and a board-only PATCH returns 409 with a clear message.
+
+**Theme is dark-only** (`<html class="dark">` in `layout.tsx`, tokens in `globals.css`/DESIGN.md). Don't reintroduce a theme toggle; leftover `dark:` variants simply resolve to the dark values.
+
 **Three Supabase clients — pick the right one:**
 - `src/lib/supabase/client.ts` — browser (`createBrowserClient`), for Client Components
 - `src/lib/supabase/server.ts` — async server (`createServerClient` + cookies), for Server Components and Route Handlers
@@ -64,7 +70,7 @@ RLS is on: outside the admin client, every query is automatically scoped to the 
 
 - **Vercel Hobby allows only daily crons.** A schedule more frequent than daily (e.g. `0 * * * *`) makes Vercel reject *every* deployment, silently freezing production. `vercel.json` must stay at `0 6 * * *`. Per-timezone/per-task delivery is instead driven by **Supabase pg_cron hourly** (migration 006: `pg_cron` + `pg_net` POST to `/api/send-reminder`). The `<CRON_SECRET>` in 006 is a placeholder — never commit the real value; it lands in plaintext in `cron.job`, so rotate it if the schema is ever dumped.
 - **This is not the Next.js you know** (16.2.9) — see the top of AGENTS.md. Also: React 19.2, **Zod v4** (breaking vs v3), `openai` v6, `resend` v6 (`resend.emails.send()`), Tailwind **v4** (PostCSS plugin, no `tailwind.config.js`).
-- Scheduling timestamps are stored as local-datetime strings `"YYYY-MM-DDTHH:MM:SS"` (no UTC `Z`) and parsed by substring — do not run them through `new Date()` round-trips that would apply an offset.
+- Scheduling timestamps are stored as local-datetime strings `"YYYY-MM-DDTHH:MM:SS"` (no UTC `Z`) and parsed by substring — do not run them through `new Date()` round-trips that would apply an offset. For "today"/"+1 day" use `src/lib/dates.ts` (`localDateStr`, `addDaysStr`); `new Date().toISOString().slice(0,10)` is yesterday between 00:00 and 03:00 in Romania (this broke snooze once).
 - All singletons (`llm.ts`, `resend.ts`, `rate-limit.ts`) init lazily on first use, never at import, so a missing key doesn't break `next build`.
 - User-facing copy is Romanian; keep it Romanian.
 
@@ -72,4 +78,4 @@ RLS is on: outside the admin client, every query is automatically scoped to the 
 
 Copy `.env.example` → `.env.local`. `.env.local` is gitignored and must never be committed. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NVIDIA_NIM_API_KEY`, `RESEND_API_KEY`, `REMINDER_CRON_SECRET`. Optional: `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN` (rate limiting), `NEXT_PUBLIC_APP_URL`, `JIRA_*` (CLI sync only). Env vars set locally must also be added in the Vercel Dashboard, or production runs without them.
 
-DB: run `supabase/migrations/00{1..9}_*.sql` in order in the Supabase SQL Editor. 001 tasks + RLS, 002 scheduling + `jira_issue_key`, 003 RLS-authenticated, 004 recurrence, 005 `user_prefs` + reminder columns, 006 pg_cron hourly scheduler (needs `pg_cron`+`pg_net` extensions; edit `<CRON_SECRET>` first), 007 `email_task_updates` pref, 008 calendar fields (`description`, `all_day`, `location`, `color`, `subtasks`), 009 `ics_token` (calendar-feed capability token). Supabase Auth → Redirect URLs must include `<origin>/auth/callback`.
+DB: run `supabase/migrations/0{01..11}_*.sql` in order in the Supabase SQL Editor. 001 tasks + RLS, 002 scheduling + `jira_issue_key`, 003 RLS-authenticated, 004 recurrence, 005 `user_prefs` + reminder columns, 006 pg_cron hourly scheduler (needs `pg_cron`+`pg_net` extensions; edit `<CRON_SECRET>` first), 007 `email_task_updates` pref, 008 calendar fields (`description`, `all_day`, `location`, `color`, `subtasks`), 009 `ics_token` (calendar-feed capability token), 010 disposable-email auth hook (enable it in Authentication → Hooks afterwards), 011 `board_column` + `completed_at` (Kanban + velocity). All eleven are applied on the production project as of 3 Sep 2026. Supabase Auth → Redirect URLs must include `<origin>/auth/callback`.

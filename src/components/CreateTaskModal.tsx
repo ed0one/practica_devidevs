@@ -2,27 +2,34 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Type, AlignLeft, Calendar, Flag, Tag, Plus, Loader2 } from "lucide-react";
-import { Priority, Task } from "@/types/task";
+import { X, Type, AlignLeft, Calendar, Flag, Tag, Plus, Loader2, Columns3 } from "lucide-react";
+import type { Priority, BoardColumn } from "@/types/task";
+import { BOARD_COLUMNS } from "@/lib/board";
+import { localDateStr } from "@/lib/dates";
+
+export interface NewTaskData {
+  title: string;
+  description?: string;
+  priority: Priority;
+  category?: string;
+  deadline?: string;
+  board_column: BoardColumn;
+}
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (taskData: {
-    title: string;
-    description?: string;
-    priority: Priority;
-    category?: string;
-    deadline?: string;
-  }) => Promise<void>;
+  onCreate: (taskData: NewTaskData) => Promise<void>;
   defaultCategory?: string;
   defaultPriority?: Priority;
+  /** Coloana Kanban preselectată (ex: „Adaugă task" din josul unei coloane). */
+  defaultBoardColumn?: BoardColumn;
 }
 
 const PRIORITY_OPTIONS: { value: Priority; label: string; color: string }[] = [
-  { value: "high", label: "Ridicată / Urgent", color: "bg-red-500 text-white" },
-  { value: "medium", label: "Medie", color: "bg-amber-500 text-white" },
-  { value: "low", label: "Scăzută", color: "bg-emerald-500 text-white" },
+  { value: "high", label: "Urgent", color: "bg-red-500 text-white" },
+  { value: "medium", label: "Mediu", color: "bg-amber-500 text-white" },
+  { value: "low", label: "Scăzut", color: "bg-emerald-500 text-white" },
 ];
 
 export default function CreateTaskModal({
@@ -31,25 +38,33 @@ export default function CreateTaskModal({
   onCreate,
   defaultCategory = "",
   defaultPriority = "medium",
+  defaultBoardColumn = "todo",
 }: CreateTaskModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>(defaultPriority);
   const [category, setCategory] = useState(defaultCategory);
   const [deadline, setDeadline] = useState("");
+  const [column, setColumn] = useState<BoardColumn>(defaultBoardColumn);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Resetăm formularul la fiecare deschidere. Se face în timpul randării
+  // (pattern-ul „adjust state when a prop changes"), nu într-un effect.
+  const [wasOpen, setWasOpen] = useState(false);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) {
       setTitle("");
       setDescription("");
       setPriority(defaultPriority);
       setCategory(defaultCategory);
-      setDeadline(new Date().toISOString().substring(0, 10));
+      setDeadline(localDateStr());
+      setColumn(defaultBoardColumn);
       setError(null);
+      setSaving(false);
     }
-  }, [isOpen, defaultCategory, defaultPriority]);
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -75,6 +90,7 @@ export default function CreateTaskModal({
         priority,
         category: category.trim() || undefined,
         deadline: deadline || undefined,
+        board_column: column,
       });
       onClose();
     } catch (err) {
@@ -83,6 +99,10 @@ export default function CreateTaskModal({
       setSaving(false);
     }
   };
+
+  const inputCls =
+    "w-full rounded-xl border border-white/10 bg-[#161a26] px-3.5 py-2.5 text-sm text-white placeholder-[#64748b] focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all";
+  const labelCls = "flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5";
 
   return (
     <AnimatePresence>
@@ -111,7 +131,6 @@ export default function CreateTaskModal({
             aria-label="Creează task nou"
             className="relative w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl bg-[#141722] border border-white/10 shadow-2xl overflow-hidden max-h-[92dvh] flex flex-col text-white"
           >
-            {/* Header */}
             <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#f97316] to-[#ea580c] flex items-center justify-center shadow-md">
@@ -120,6 +139,7 @@ export default function CreateTaskModal({
                 <h2 className="font-bold text-white text-base">Creează task nou</h2>
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-[#94a3b8] hover:bg-white/10 transition-colors"
                 aria-label="Închide"
@@ -128,47 +148,72 @@ export default function CreateTaskModal({
               </button>
             </div>
 
-            {/* Form body */}
             <form onSubmit={handleSave} className="p-6 space-y-4 overflow-y-auto">
-              {/* Titlu */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">
+                <label htmlFor="ct-title" className={labelCls}>
                   <Type className="w-3.5 h-3.5" /> Titlu task *
                 </label>
                 <input
+                  id="ct-title"
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="ex: Implementează modulul de autentificare..."
+                  placeholder="ex: Implementează modulul de autentificare"
                   autoFocus
-                  className="w-full rounded-xl border border-white/10 bg-[#161a26] px-3.5 py-2.5 text-sm text-white placeholder-[#64748b] focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+                  className={inputCls}
                 />
               </div>
 
-              {/* Notițe / Descriere */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">
-                  <AlignLeft className="w-3.5 h-3.5" /> Descriere / Notițe
+                <label htmlFor="ct-desc" className={labelCls}>
+                  <AlignLeft className="w-3.5 h-3.5" /> Descriere / notițe
                 </label>
                 <textarea
+                  id="ct-desc"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
-                  placeholder="Detalii suplimentare sau cerințe..."
-                  className="w-full rounded-xl border border-white/10 bg-[#161a26] px-3.5 py-2.5 text-sm text-white placeholder-[#64748b] focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 resize-none transition-all"
+                  placeholder="Detalii suplimentare sau cerințe"
+                  className={`${inputCls} resize-none`}
                 />
               </div>
 
-              {/* Prioritate */}
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">
+                <span className={labelCls}>
+                  <Columns3 className="w-3.5 h-3.5" /> Coloană Kanban
+                </span>
+                <div className="grid grid-cols-4 gap-1.5" role="radiogroup" aria-label="Coloană Kanban">
+                  {BOARD_COLUMNS.map((col) => (
+                    <button
+                      key={col.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={column === col.id}
+                      onClick={() => setColumn(col.id)}
+                      className={`h-9 rounded-xl text-[11px] font-semibold border transition-all flex items-center justify-center gap-1.5 ${
+                        column === col.id
+                          ? "border-orange-500/50 bg-orange-500/15 text-orange-300 shadow-md"
+                          : "border-white/10 bg-white/5 text-[#94a3b8] hover:text-white"
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${col.dot}`} />
+                      {col.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className={labelCls}>
                   <Flag className="w-3.5 h-3.5" /> Prioritate
-                </label>
-                <div className="grid grid-cols-3 gap-2">
+                </span>
+                <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Prioritate">
                   {PRIORITY_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
+                      role="radio"
+                      aria-checked={priority === opt.value}
                       onClick={() => setPriority(opt.value)}
                       className={`h-9 rounded-xl text-xs font-semibold border transition-all ${
                         priority === opt.value
@@ -182,41 +227,40 @@ export default function CreateTaskModal({
                 </div>
               </div>
 
-              {/* Categorie & Deadline */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">
+                  <label htmlFor="ct-cat" className={labelCls}>
                     <Tag className="w-3.5 h-3.5" /> Categorie
                   </label>
                   <input
+                    id="ct-cat"
                     type="text"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    placeholder="ex: Mobile App Dev"
-                    className="w-full rounded-xl border border-white/10 bg-[#161a26] px-3 py-2 text-xs text-white placeholder-[#64748b] focus:outline-none focus:border-orange-500"
+                    placeholder="ex: muncă, personal"
+                    className={`${inputCls} px-3 py-2 text-xs`}
                   />
                 </div>
-
                 <div>
-                  <label className="flex items-center gap-1.5 text-xs font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">
+                  <label htmlFor="ct-deadline" className={labelCls}>
                     <Calendar className="w-3.5 h-3.5" /> Deadline
                   </label>
                   <input
+                    id="ct-deadline"
                     type="date"
                     value={deadline}
                     onChange={(e) => setDeadline(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#161a26] px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                    className={`${inputCls} px-3 py-2 text-xs`}
                   />
                 </div>
               </div>
 
               {error && (
-                <p className="text-xs text-red-400 font-medium bg-red-500/10 border border-red-500/20 p-2.5 rounded-xl">
+                <p role="alert" className="text-xs text-red-400 font-medium bg-red-500/10 border border-red-500/20 p-2.5 rounded-xl">
                   {error}
                 </p>
               )}
 
-              {/* Footer CTA */}
               <div className="pt-3 flex gap-3">
                 <button
                   type="button"
@@ -232,11 +276,11 @@ export default function CreateTaskModal({
                 >
                   {saving ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Se creează...
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Se creează
                     </>
                   ) : (
                     <>
-                      <Plus className="w-3.5 h-3.5 stroke-[3]" /> Creează Task
+                      <Plus className="w-3.5 h-3.5 stroke-[3]" /> Creează task
                     </>
                   )}
                 </button>
