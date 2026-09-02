@@ -1,6 +1,8 @@
 export type Priority = 'low' | 'medium' | 'high'
 export type Status = 'pending' | 'done'
-export type ViewMode = 'timeline' | 'board' | 'week' | 'day' | 'list'
+export type ViewMode = 'overview' | 'board' | 'timeline' | 'week' | 'day' | 'list' | 'reports'
+// Coloana Kanban (migrația 011). Lipsește pe rândurile vechi → 'todo'.
+export type BoardColumn = 'todo' | 'inprogress' | 'review' | 'blocked'
 export type Recurrence = 'none' | 'daily' | 'weekly'
 
 export interface Subtask {
@@ -31,6 +33,8 @@ export interface Task {
   location?: string | null
   color?: string | null
   subtasks?: Subtask[]
+  board_column?: BoardColumn | null
+  completed_at?: string | null
 }
 
 export interface UserPrefs {

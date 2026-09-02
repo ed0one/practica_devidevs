@@ -10,7 +10,7 @@ import {
   LayoutDashboard,
   UserCircle,
   Download,
-  Moon,
+  BarChart2,
   LogOut,
   CheckCircle2,
   Circle,
@@ -29,22 +29,12 @@ interface CommandPaletteProps {
   tasks: Task[];
   onEditTask: (task: Task) => void;
   onExportCSV: () => void;
+  onCreateTask?: () => void;
 }
 
 const OPEN_EVENT = "open-command-palette";
 
-function toggleTheme() {
-  const isDark = document.documentElement.classList.contains("dark");
-  const next = isDark ? "light" : "dark";
-  document.documentElement.classList.toggle("dark", next === "dark");
-  try {
-    localStorage.setItem("theme", next);
-  } catch {
-    /* ignore */
-  }
-}
-
-export default function CommandPalette({ tasks, onEditTask, onExportCSV }: CommandPaletteProps) {
+export default function CommandPalette({ tasks, onEditTask, onExportCSV, onCreateTask }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -91,11 +81,14 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
 
   const commands: Command[] = useMemo(
     () => [
-      { id: "add", label: "Adaugă task-uri", icon: Plus, action: () => { window.location.href = "/input"; } },
+      ...(onCreateTask
+        ? [{ id: "create", label: "Creează task rapid", hint: "formular", icon: Plus, action: onCreateTask }]
+        : []),
+      { id: "add", label: "Capturează task-uri cu AI", hint: "/input", icon: Plus, action: () => { window.location.href = "/input"; } },
       { id: "dashboard", label: "Mergi la Dashboard", icon: LayoutDashboard, action: () => { window.location.href = "/dashboard"; } },
-      { id: "profile", label: "Profil", icon: UserCircle, action: () => { window.location.href = "/profile"; } },
+      { id: "reports", label: "Rapoarte", icon: BarChart2, action: () => { window.location.href = "/dashboard?view=reports"; } },
+      { id: "profile", label: "Profil & setări", icon: UserCircle, action: () => { window.location.href = "/profile"; } },
       { id: "export", label: "Exportă CSV", icon: Download, action: onExportCSV },
-      { id: "theme", label: "Comută tema", icon: Moon, action: toggleTheme },
       {
         id: "logout",
         label: "Deconectare",
@@ -107,7 +100,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
         },
       },
     ],
-    [onExportCSV]
+    [onExportCSV, onCreateTask]
   );
 
   const q = query.trim().toLowerCase();
@@ -206,8 +199,8 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
             className="relative w-full max-w-lg rounded-2xl bg-[#141722] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[60dvh] text-white"
           >
             {/* Input */}
-            <div className="flex items-center gap-3 px-4 border-b border-gray-100 dark:border-white/10 shrink-0">
-              <Search className="w-4 h-4 text-gray-400 shrink-0" />
+            <div className="flex items-center gap-3 px-4 border-b border-white/10 shrink-0">
+              <Search className="w-4 h-4 text-[#64748b] shrink-0" />
               <input
                 ref={inputRef}
                 value={query}
@@ -218,9 +211,9 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
                 onKeyDown={onInputKeyDown}
                 placeholder="Caută task-uri sau comenzi..."
                 aria-label="Caută task-uri sau comenzi"
-                className="flex-1 h-12 bg-transparent text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
+                className="flex-1 h-12 bg-transparent text-sm text-white placeholder-[#64748b] focus:outline-none"
               />
-              <kbd className="hidden sm:block text-[10px] font-semibold text-gray-400 bg-gray-100 dark:bg-white/10 rounded px-1.5 py-0.5">
+              <kbd className="hidden sm:block text-[10px] font-semibold text-[#94a3b8] bg-white/10 rounded px-1.5 py-0.5">
                 esc
               </kbd>
             </div>
@@ -229,7 +222,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
             <div ref={listRef} className="overflow-y-auto p-2 space-y-3">
               {filteredCommands.length > 0 && (
                 <div>
-                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
                     Comenzi
                   </p>
                   <div className="space-y-0.5">
@@ -247,7 +240,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
                           <c.icon className="w-4 h-4 shrink-0 opacity-70" />
                           <span className="flex-1 truncate">{c.label}</span>
                           {c.hint && (
-                            <span className="text-[10px] text-gray-400">{c.hint}</span>
+                            <span className="text-[10px] text-[#64748b] font-mono">{c.hint}</span>
                           )}
                         </button>
                       );
@@ -258,7 +251,7 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
 
               {filteredTasks.length > 0 && (
                 <div>
-                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold text-[#64748b] uppercase tracking-wider">
                     Task-uri
                   </p>
                   <div className="space-y-0.5">
@@ -277,13 +270,13 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
                           {isDone ? (
                             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
                           ) : (
-                            <Circle className="w-4 h-4 shrink-0 text-gray-300 dark:text-gray-600" />
+                            <Circle className="w-4 h-4 shrink-0 text-[#64748b]" />
                           )}
-                          <span className={`flex-1 truncate ${isDone ? "line-through text-gray-400" : ""}`}>
+                          <span className={`flex-1 truncate ${isDone ? "line-through text-[#64748b]" : ""}`}>
                             {t.title}
                           </span>
                           {t.category && (
-                            <span className="text-[10px] text-[#d24d1f] dark:text-[#ff8a63] bg-orange-50 dark:bg-[#ff6a3d]/15 rounded px-1.5 py-0.5 shrink-0">
+                            <span className="text-[10px] text-orange-300 bg-orange-500/15 border border-orange-500/25 rounded px-1.5 py-0.5 shrink-0">
                               {t.category}
                             </span>
                           )}
@@ -295,15 +288,15 @@ export default function CommandPalette({ tasks, onEditTask, onExportCSV }: Comma
               )}
 
               {flatItems.length === 0 && (
-                <p className="px-3 py-8 text-sm text-gray-400 text-center">
+                <p className="px-3 py-8 text-sm text-[#94a3b8] text-center">
                   Niciun rezultat pentru „{query}&rdquo;
                 </p>
               )}
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 border-t border-gray-100 dark:border-white/10 shrink-0">
-              <p className="text-[10px] text-gray-400">
+            <div className="px-4 py-2.5 border-t border-white/10 shrink-0">
+              <p className="text-[10px] text-[#64748b]">
                 ↑↓ navighează · ↵ selectează · esc închide
               </p>
             </div>

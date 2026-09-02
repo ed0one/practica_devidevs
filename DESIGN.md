@@ -36,17 +36,19 @@ A high-craft, precision dark workspace designed for deep focus and immediate cog
 
 ## Layout & Components
 
-1. **Top Project Bar**:
-   - Project title ("Project Alpha") with status badge (`🟢 Jira Synced: 2 min ago`).
-   - Action controls: `+ Create Task` prominent button with glow, `Filter ∨`, and quick `Search` pill.
-2. **Analytics Trio**:
-   - **Sprint Velocity**: SVG smooth spline curve with glowing vertex nodes and area gradient.
-   - **Task Completion Donut Gauge**: 74% circular progress ring with amber-orange stroke.
-   - **Blocked / Priority Bar Graph**: Vertical bars highlighting Urgent, Normal, Low, and Blocked task volumes.
-3. **Workspace Views**:
-   - **Kanban Board (`BoardView.tsx`)**: 4-column layout (`To Do`, `In Progress`, `Under Review`, `Blocked`), category badges, assignee avatars, and drag-and-drop elevation.
-   - **Project Timeline (`CalendarView.tsx`)**: Gantt-style schedule with date range picker ("Oct 18 – Nov 12"), duration gradient bars, milestone markers, and dependency connectors.
-   - **Week & Day Timelines**: Full 00–24h schedule with time blocks and quick-scheduling overlays.
+1. **Top Project Bar** (copy is Romanian, layout follows the mockup):
+   - Title = current filter context ("Toate task-urile" or the selected category) + Jira pill showing how many tasks carry a `jira_issue_key`.
+   - Action controls: `+ Creează task` prominent button with glow, `Filtru ∨`, quick `Caută` pill, ⌘K, CSV export.
+2. **Analytics Trio** (`StatsHeader.tsx`, all values computed from real tasks — zero when empty):
+   - **Viteză sprint**: tasks completed per day over the last 7 days (`completed_at`), SVG spline with glowing nodes and area gradient; axis ticks derived from the data.
+   - **Task-uri finalizate**: donut gauge with the real completion ratio.
+   - **Priorități / Blocate**: vertical bars for active Urgent / Medium / Low tasks and the Blocked column, plus an overdue caption.
+3. **Workspace Views** (`/dashboard?view=…`):
+   - **Panou** (default): Kanban left, analytics trio + Gantt right — the mockup layout.
+   - **Kanban (`BoardView.tsx`)**: 4 columns from `board_column` (`De făcut`, `În lucru`, `În verificare`, `Blocate`), category/priority chips, owner initials avatar, drag-and-drop by handle with pointer-based drop detection; done cards stay in their column, faded.
+   - **Cronologie (`GanttView.tsx`)**: 4-week window from the current Monday, navigable; bars from `scheduled_date`/creation to `deadline`, milestone chips for single-day items, today line, interval progress.
+   - **Săptămână / Zi (`CalendarView.tsx`)**: week grid and 00–24h day timeline with overlapping blocks laid side by side and a now-line.
+   - **Listă / Rapoarte**: sortable list with bulk actions; reports from `computeStats` (tiles, categories, priorities).
 4. **Natural Language Capture (`/input`)**:
    - Deep obsidian focus workspace with live typewriter demonstration and interactive task verification cards.
 

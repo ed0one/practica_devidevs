@@ -55,27 +55,27 @@ export default function ResetPasswordPage() {
   };
 
   const inputCls =
-    "w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff6a3d] focus:bg-white transition-all";
+    "w-full h-11 pl-9 pr-11 rounded-xl border border-white/10 bg-[#161a26] text-white text-sm placeholder-[#64748b] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-[#1a1f2c] transition-all";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f5f5f7] p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#0e1117] p-6">
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm"
       >
         <div className="flex items-center gap-2 mb-6 justify-center">
-          <div className="w-8 h-8 rounded-lg bg-[#ff6a3d] flex items-center justify-center shadow-lg shadow-[#ff6a3d]/30">
-            <Sparkles className="w-4 h-4 text-black/80" />
+          <div className="w-8 h-8 rounded-lg bg-[#f97316] flex items-center justify-center shadow-lg shadow-[#f97316]/30">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <span className="font-display text-lg font-bold text-gray-900">TaskCapture</span>
+          <span className="font-display text-lg font-bold text-white">TaskCapture</span>
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm p-8">
+        <div className="bg-[#141721] rounded-2xl border border-white/[0.08] shadow-2xl p-8">
           {state === "checking" && (
             <div className="flex flex-col items-center py-8 gap-3">
-              <Loader2 className="w-6 h-6 text-[#d24d1f] animate-spin" />
-              <p className="text-sm text-gray-400">Se verifică linkul...</p>
+              <Loader2 className="w-6 h-6 text-orange-400 animate-spin" />
+              <p className="text-sm text-[#94a3b8]">Se verifică linkul...</p>
             </div>
           )}
 
@@ -84,13 +84,13 @@ export default function ResetPasswordPage() {
               <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-amber-500" />
               </div>
-              <h1 className="font-display text-lg font-bold text-gray-900 mb-2">Link expirat sau invalid</h1>
-              <p className="text-sm text-gray-400 mb-6">
+              <h1 className="font-display text-lg font-bold text-white mb-2">Link expirat sau invalid</h1>
+              <p className="text-sm text-[#94a3b8] mb-6">
                 Linkul de resetare a expirat. Cere unul nou din pagina de login.
               </p>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold hover:bg-[#ff5a28] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-[#f97316] text-black text-sm font-semibold hover:brightness-110 hover:-translate-y-0.5 transition-all"
               >
                 Înapoi la login
               </Link>
@@ -103,17 +103,17 @@ export default function ResetPasswordPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", stiffness: 300 }}
-                className="mx-auto mb-4 w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center"
+                className="mx-auto mb-4 w-12 h-12 rounded-full bg-emerald-500/15 flex items-center justify-center"
               >
                 <CheckCircle2 className="w-6 h-6 text-emerald-500" />
               </motion.div>
-              <h1 className="font-display text-lg font-bold text-gray-900 mb-2">Parolă schimbată!</h1>
-              <p className="text-sm text-gray-400 mb-6">
+              <h1 className="font-display text-lg font-bold text-white mb-2">Parolă schimbată!</h1>
+              <p className="text-sm text-[#94a3b8] mb-6">
                 Poți folosi noua parolă de acum înainte.
               </p>
               <Link
                 href="/dashboard"
-                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold hover:bg-[#ff5a28] hover:-translate-y-0.5 transition-all"
+                className="inline-flex items-center justify-center h-10 px-5 rounded-xl bg-[#f97316] text-black text-sm font-semibold hover:brightness-110 hover:-translate-y-0.5 transition-all"
               >
                 Mergi la dashboard
               </Link>
@@ -123,23 +123,23 @@ export default function ResetPasswordPage() {
           {state === "ready" && (
             <>
               <div className="mb-6">
-                <h1 className="font-display text-xl font-bold text-gray-900 tracking-tight">Setează parola nouă</h1>
-                <p className="mt-1 text-sm text-gray-400">Minim 8 caractere</p>
+                <h1 className="font-display text-xl font-bold text-white tracking-tight">Setează parola nouă</h1>
+                <p className="mt-1 text-sm text-[#94a3b8]">Minim 8 caractere</p>
               </div>
 
               {error && (
-                <div className="mb-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                <div className="mb-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                   {error}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block font-mono text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">
                     Parolă nouă
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
                     <input
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
@@ -153,7 +153,7 @@ export default function ResetPasswordPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-white transition-colors"
                       aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -162,11 +162,11 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <div>
-                  <label className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
+                  <label className="block font-mono text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">
                     Confirmă parola
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
                     <input
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
@@ -183,7 +183,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="submit"
                   disabled={saving || !password || !confirm}
-                  className="w-full h-11 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold shadow-lg shadow-orange-200/60 hover:bg-[#ff5a28] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+                  className="w-full h-11 rounded-xl bg-[#f97316] text-black text-sm font-semibold shadow-lg shadow-orange-200/60 hover:brightness-110 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
                 >
                   {saving ? (
                     <>

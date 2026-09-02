@@ -78,13 +78,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left panel — nocturne "Capture" */}
       <div className="hidden lg:flex lg:w-[45%] bg-[var(--ink)] flex-col justify-between p-10 relative overflow-hidden capture-grain">
-        <div className="capture-aurora absolute -top-40 -left-40 w-[400px] h-[400px] rounded-full bg-[#ff6a3d] opacity-[0.16] blur-[120px] pointer-events-none" />
-        <div className="capture-aurora absolute -bottom-32 -right-32 w-[320px] h-[320px] rounded-full bg-[#3dd4a7] opacity-[0.12] blur-[100px] pointer-events-none" style={{ animationDelay: "-8s" }} />
+        <div className="capture-aurora absolute -top-40 -left-40 w-[400px] h-[400px] rounded-full bg-[#f97316] opacity-[0.16] blur-[120px] pointer-events-none" />
+        <div className="capture-aurora absolute -bottom-32 -right-32 w-[320px] h-[320px] rounded-full bg-[#10b981] opacity-[0.12] blur-[100px] pointer-events-none" style={{ animationDelay: "-8s" }} />
 
         <div className="relative z-10">
           <Link href="/" className="inline-flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-[#ff6a3d] flex items-center justify-center shadow-lg shadow-[#ff6a3d]/30">
-              <Sparkles className="w-5 h-5 text-black/80" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#f97316] to-[#ea580c] flex items-center justify-center shadow-lg shadow-orange-500/30 border border-orange-400/30">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="font-display text-xl font-bold text-white tracking-tight">TaskCapture</span>
           </Link>
@@ -93,7 +93,7 @@ export default function LoginPage() {
         <div className="relative z-10">
           <h2 className="font-display text-4xl font-extrabold text-white leading-[1.05] mb-3">
             Bun venit<br />
-            <span className="text-[#3dd4a7]">înapoi.</span>
+            <span className="text-orange-400">înapoi.</span>
           </h2>
           <p className="text-[var(--haze)] text-sm leading-relaxed mb-8 max-w-xs">
             Continuă să îți organizezi ziua din câteva cuvinte.
@@ -102,7 +102,7 @@ export default function LoginPage() {
             {features.map((f, i) => (
               <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 + i * 0.1 }} className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center shrink-0">
-                  <f.icon className="w-3.5 h-3.5 text-[#3dd4a7]" />
+                  <f.icon className="w-3.5 h-3.5 text-orange-400" />
                 </div>
                 <span className="text-sm text-white/55">{f.text}</span>
               </motion.div>
@@ -113,26 +113,26 @@ export default function LoginPage() {
         <div className="relative z-10">
           <div className="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-4">
             <p className="text-sm text-white/55 leading-relaxed">
-              <span className="text-[#ff8a63]">›</span> Trebuie să sun la doctor mâine, să trimit raportul până vineri și să cumpăr pâine azi seară
+              <span className="text-orange-400">›</span> Trebuie să sun la doctor mâine, să trimit raportul până vineri și să cumpăr pâine azi seară
             </p>
-            <p className="font-mono text-xs text-[#3dd4a7] mt-2.5">→ 3 task-uri extrase automat</p>
+            <p className="font-mono text-xs text-orange-400 mt-2.5">→ 3 task-uri extrase automat</p>
           </div>
         </div>
       </div>
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-[#f5f5f7]">
+      <div className="flex-1 flex items-center justify-center p-6 bg-[#0e1117]">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="w-full max-w-sm">
-          <Link href="/" className="lg:hidden inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-6">
+          <Link href="/" className="lg:hidden inline-flex items-center gap-1.5 text-sm text-[#94a3b8] hover:text-white transition-colors mb-6">
             <ArrowLeft className="w-4 h-4" /> Acasă
           </Link>
 
-          <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm p-8">
+          <div className="bg-[#141721] rounded-2xl border border-white/[0.08] shadow-2xl p-8">
             <div className="mb-7">
-              <h1 className="font-display text-2xl font-bold text-gray-900 tracking-tight">
+              <h1 className="font-display text-2xl font-bold text-white tracking-tight">
                 {forgotMode ? "Resetează parola" : "Intră în cont"}
               </h1>
-              <p className="mt-1.5 text-sm text-gray-400">
+              <p className="mt-1.5 text-sm text-[#94a3b8]">
                 {forgotMode
                   ? "Îți trimitem un link de resetare pe email"
                   : "Bun venit înapoi la TaskCapture"}
@@ -140,7 +140,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="mb-5 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              <div className="mb-5 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                 {error}
               </div>
             )}
@@ -149,34 +149,34 @@ export default function LoginPage() {
               <>
                 <div className="grid grid-cols-2 gap-2.5 mb-5">
                   <button type="button" onClick={() => handleOAuth("github")} disabled={loading}
-                    className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                    className="flex items-center justify-center gap-2 h-10 rounded-xl border border-white/10 bg-white/[0.04] text-sm font-medium text-[#cbd5e1] hover:bg-white/[0.08] transition-colors disabled:opacity-50">
                     {GITHUB_SVG} GitHub
                   </button>
                   <button type="button" onClick={() => handleOAuth("google")} disabled={loading}
-                    className="flex items-center justify-center gap-2 h-10 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50">
+                    className="flex items-center justify-center gap-2 h-10 rounded-xl border border-white/10 bg-white/[0.04] text-sm font-medium text-[#cbd5e1] hover:bg-white/[0.08] transition-colors disabled:opacity-50">
                     {GOOGLE_SVG} Google
                   </button>
                 </div>
 
                 <div className="relative mb-5">
-                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100" /></div>
-                  <div className="relative flex justify-center"><span className="px-3 bg-white text-xs text-gray-400">sau cu email</span></div>
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
+                  <div className="relative flex justify-center"><span className="px-3 bg-[#141721] text-xs text-[#64748b]">sau cu email</span></div>
                 </div>
               </>
             )}
 
             {forgotMode && resetSent ? (
               <div className="text-center py-4">
-                <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center">
+                <div className="mx-auto mb-4 w-12 h-12 rounded-full bg-emerald-500/15 flex items-center justify-center">
                   <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                 </div>
-                <p className="text-sm font-semibold text-gray-900 mb-1">Email trimis!</p>
-                <p className="text-sm text-gray-400 mb-5">
-                  Verifică inbox-ul la <span className="font-medium text-gray-600">{email}</span> și urmează linkul de resetare.
+                <p className="text-sm font-semibold text-white mb-1">Email trimis!</p>
+                <p className="text-sm text-[#94a3b8] mb-5">
+                  Verifică inbox-ul la <span className="font-medium text-[#cbd5e1]">{email}</span> și urmează linkul de resetare.
                 </p>
                 <button
                   onClick={() => { setForgotMode(false); setResetSent(false); setError(null); }}
-                  className="text-sm text-[#d24d1f] font-semibold hover:underline"
+                  className="text-sm text-orange-400 font-semibold hover:underline"
                 >
                   Înapoi la login
                 </button>
@@ -184,41 +184,41 @@ export default function LoginPage() {
             ) : (
               <form onSubmit={forgotMode ? handleForgot : handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+                  <label className="block font-mono text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider mb-1.5">Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
                     <input id="email" type="email" autoComplete="email" required value={email} onChange={e => setEmail(e.target.value)}
-                      className="w-full h-11 pl-9 pr-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff6a3d] focus:bg-white transition-all"
+                      className="w-full h-11 pl-9 pr-4 rounded-xl border border-white/10 bg-[#161a26] text-white text-sm placeholder-[#64748b] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-[#1a1f2c] transition-all"
                       placeholder="tu@email.com" disabled={loading} />
                   </div>
                 </div>
                 {!forgotMode && (
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="block font-mono text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Parolă</label>
+                      <label className="block font-mono text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider">Parolă</label>
                       <button
                         type="button"
                         onClick={() => { setForgotMode(true); setError(null); }}
-                        className="text-xs text-[#d24d1f] font-semibold hover:underline"
+                        className="text-xs text-orange-400 font-semibold hover:underline"
                       >
                         Ai uitat parola?
                       </button>
                     </div>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" />
                       <input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" required
                         value={password} onChange={e => setPassword(e.target.value)}
-                        className="w-full h-11 pl-9 pr-11 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ff6a3d]/20 focus:border-[#ff6a3d] focus:bg-white transition-all"
+                        className="w-full h-11 pl-9 pr-11 rounded-xl border border-white/10 bg-[#161a26] text-white text-sm placeholder-[#64748b] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 focus:bg-[#1a1f2c] transition-all"
                         placeholder="••••••••" disabled={loading} />
                       <button type="button" onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94a3b8] hover:text-white transition-colors">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
                 )}
                 <button type="submit" disabled={loading || !email || (!forgotMode && !password)}
-                  className="w-full h-11 rounded-xl bg-[#ff6a3d] text-black text-sm font-semibold shadow-lg shadow-[#ff6a3d]/25 hover:bg-[#ff5a28] hover:-translate-y-0.5 disabled:opacity-50 disabled:translate-y-0 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all mt-1">
+                  className="w-full h-11 rounded-xl bg-gradient-to-r from-[#f97316] to-[#ea580c] text-white text-sm font-semibold shadow-lg shadow-orange-500/25 hover:brightness-110 hover:-translate-y-0.5 disabled:opacity-50 disabled:translate-y-0 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all mt-1">
                   {loading
                     ? <><Loader2 className="w-4 h-4 animate-spin" /> {forgotMode ? "Se trimite..." : "Se conectează..."}</>
                     : forgotMode ? "Trimite link de resetare" : "Intră în cont"}
@@ -227,7 +227,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => { setForgotMode(false); setError(null); }}
-                    className="w-full text-center text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                    className="w-full text-center text-sm text-[#94a3b8] hover:text-white transition-colors"
                   >
                     Înapoi la login
                   </button>
@@ -236,9 +236,9 @@ export default function LoginPage() {
             )}
 
             {!forgotMode && (
-              <p className="mt-5 text-center text-sm text-gray-500">
+              <p className="mt-5 text-center text-sm text-[#94a3b8]">
                 Nu ai cont?{" "}
-                <Link href="/register" className="text-[#d24d1f] font-semibold hover:underline">Creează unul gratuit</Link>
+                <Link href="/register" className="text-orange-400 font-semibold hover:underline">Creează unul gratuit</Link>
               </p>
             )}
           </div>

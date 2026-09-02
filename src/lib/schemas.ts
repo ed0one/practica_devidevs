@@ -4,6 +4,7 @@ import { z } from 'zod'
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/        // YYYY-MM-DD
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/  // HH:MM (24h)
 const COLOR_RE = /^#[0-9a-fA-F]{6}$/         // doar hex #rrggbb
+const BOARD_COLUMN_VALUES = ['todo', 'inprogress', 'review', 'blocked'] as const
 
 // Modelul poate greși formatul (ex: "vineri" în loc de dată). În loc să
 // aruncăm și să dăm 500, normalizăm valorile invalide la null — task-ul se
@@ -48,6 +49,7 @@ export const ParsedTaskSchema = z.object({
   subtasks: z.array(SubtaskSchema).max(50).optional(),
   recurrence: z.enum(['none', 'daily', 'weekly']).optional(),
   reminder_offset_min: z.number().int().min(0).max(10080).nullable().optional(),
+  board_column: z.enum(BOARD_COLUMN_VALUES).optional(),
 })
 
 export const ParsedTasksResponseSchema = z.object({
@@ -75,6 +77,7 @@ export const TaskUpdateSchema = z
     scheduled_end: z.string().datetime({ offset: true }).or(z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/)).nullable(),
     recurrence: z.enum(['none', 'daily', 'weekly']),
     reminder_offset_min: z.number().int().min(0).max(10080).nullable(),
+    board_column: z.enum(BOARD_COLUMN_VALUES),
   })
   .partial()
   .strict()

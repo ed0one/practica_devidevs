@@ -5,6 +5,7 @@ import { ParsedTaskSchema } from '@/lib/schemas'
 import { buildTaskRow } from '@/lib/task-rows'
 import { sendNewTasksEmail } from '@/lib/resend'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { isMissingColumnError, stripOptionalColumns, hasOptionalColumns } from '@/lib/supabase/optional-columns'
 import type { Task } from '@/types/task'
 
 export async function GET() {
@@ -90,7 +91,11 @@ export async function POST(request: NextRequest) {
     buildTaskRow(t, user.id, rawInput, new Date(), prefs?.timezone)
   )
 
-  const { data, error } = await supabase.from('tasks').insert(rows).select()
+  let { data, error } = await supabase.from('tasks').insert(rows).select()
+  // Migrația 011 nerulată → reîncercăm fără coloanele opționale (board_column).
+  if (error && isMissingColumnError(error) && rows.some(hasOptionalColumns)) {
+    ;({ data, error } = await supabase.from('tasks').insert(rows.map(stripOptionalColumns)).select())
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   if (user.email && data && data.length > 0 && prefs?.email_new_tasks !== false) {
